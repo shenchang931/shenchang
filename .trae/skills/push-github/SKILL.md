@@ -43,16 +43,26 @@ description: 将当前项目 git commit 并 push 到 GitHub 仓库。当用户�
 
 ## Push 流程
 
-1. 推送 GitHub：`git push github HEAD:main`（若当前分支不是 main，先 `git branch --show-current` 取实际分支名替换）
-2. 推送成功后，向用户汇报：
+本仓库的既有推送约定（2026-10-26 已验证可用）：
+
+- **GitHub 推送分支为 `github-clean`**，映射到远端 `master`：`git push github github-clean:master`
+- 本地 `master-old` 分支是含 WorkBuddy 大文件（>100MB）的旧历史备份，**严禁推送到 GitHub**（会被 GH001 拒收）
+- `.gitignore` 已排除 `WorkBuddy/`，新增提交不会再次引入大文件
+
+1. 确认当前在 `github-clean` 分支上提交：`git branch --show-current`；若在其他分支，先切换到 `github-clean` 再提交。
+2. 推送 GitHub：`git push github github-clean:master`
+3. 推送成功后，向用户汇报：
    - commit 哈希前 7 位
    - 推送目标 remote 与分支
    - GitHub 仓库地址 `https://github.com/shenchang931/shenchang`
-3. 若 `github` remote 尚未推送过（空仓首次推送），使用 `git push -u github HEAD:main` 设置 upstream。
+4. 日常增量推送直接 `git push github github-clean:master` 即可（upstream 已设置）。
 
 ## 约束
 
 - 不执行 `git push --force`，除非用户明确要求
 - 不删除或改写现有 Gitee `origin` remote
+- 不改动本地分支结构（`master`/`master-old` 保留原样），只从 `github-clean` 推送
+- 不重写 git 历史（`filter-branch`、`--orphan` 等已被安全策略限制，且无必要——干净历史已在 `github-clean`）
+- SSH 必须使用系统 OpenSSH（仓库级 `git config core.sshCommand C:/Windows/System32/OpenSSH/ssh.exe`），Git 自带 ssh 会把 github.com 解析到 127.0.0.1 且不读用户 config；`~/.ssh/config` 已将 github.com 映射到 ssh.github.com:443（22 端口被封）
 - 若 commit 失败（如 pre-commit hook 报错），先停止并向用户报告原因，不得使用 `--no-verify` 绕过
 - push 失败时，先检查是网络/SSH/权限/远程拒绝中的哪一种，再给出对应修复建议
