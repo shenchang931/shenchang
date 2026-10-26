@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>12-1 CSS 变量 · 沈畅</title>
+    <style>
+        :root {
+            --shen_bg: #0f172a;
+            --shen_card: rgba(30, 41, 59, 0.85);
+            --shen_text: #f1f5f9;
+            --shen_accent: #818cf8;
+            --shen_accent2: #f472b6;
+            --shen_radius: 20px;
+            --shen_gap: 24px;
+            --shen_font_size: 16px;
+            --shen_shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            --shen_gradient: linear-gradient(135deg, #818cf8, #f472b6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: var(--shen_bg);
+            color: var(--shen_text);
+            min-height: 100vh;
+            font-size: var(--shen_font_size);
+            line-height: 1.7;
+            transition: background 0.3s ease;
+        }
+
+        .shen_container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        .shen_header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .shen_header h1 {
+            font-size: 42px;
+            font-weight: 800;
+            background: var(--shen_gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .shen_header p {
+            color: #94a3b8;
+            font-size: 15px;
+        }
+
+        .shen_badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 999px;
+            background: rgba(129, 140, 248, 0.15);
+            border: 1px solid rgba(129, 140, 248, 0.3);
+            color: var(--shen_accent);
+            font-size: 13px;
+            margin-bottom: 14px;
+        }
+
+        .shen_grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--shen_gap);
+        }
+
+        .shen_card {
+            background: var(--shen_card);
+            border-radius: var(--shen_radius);
+            padding: 28px;
+            box-shadow: var(--shen_shadow);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .shen_card h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: var(--shen_accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .shen_control {
+            margin-bottom: 20px;
+        }
+
+        .shen_control label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        .shen_control label span {
+            color: var(--shen_text);
+            font-family: Consolas, monospace;
+        }
+
+        .shen_control input[type="range"] {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+
+        .shen_control input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--shen_accent);
+            cursor: pointer;
+            border: 3px solid var(--shen_bg);
+            box-shadow: 0 0 10px rgba(129, 140, 248, 0.5);
+        }
+
+        .shen_color-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .shen_color-item {
+            flex: 1;
+            min-width: 80px;
+        }
+
+        .shen_color-item label {
+            display: block;
+            font-size: 11px;
+            color: #64748b;
+            margin-bottom: 6px;
+            text-align: center;
+        }
+
+        .shen_color-item input[type="color"] {
+            width: 100%;
+            height: 44px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            cursor: pointer;
+            background: transparent;
+            padding: 2px;
+        }
+
+        .shen_preview {
+            grid-column: 1 / -1;
+            min-height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shen_preview-box {
+            text-align: center;
+            padding: 40px 60px;
+            border-radius: var(--shen_radius);
+            background: var(--shen_gradient);
+            box-shadow: var(--shen_shadow);
+            transition: all 0.3s ease;
+        }
+
+        .shen_preview-box h3 {
+            font-size: 36px;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            margin-bottom: 6px;
+        }
+
+        .shen_preview-box p {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 14px;
+        }
+
+        .shen_code {
+            grid-column: 1 / -1;
+        }
+
+        .shen_code pre {
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 12px;
+            padding: 20px 24px;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            color: #a5b4fc;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            white-space: pre;
+        }
+
+        .shen_code .shen-prop {
+            color: #f472b6;
+        }
+
+        .shen_code .shen-val {
+            color: #34d399;
+        }
+
+        .shen_footer {
+            text-align: center;
+            margin-top: 36px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .shen_footer a {
+            color: var(--shen_accent);
+            text-decoration: none;
+        }
+
+        @media (max-width: 680px) {
+            .shen_grid {
+                grid-template-columns: 1fr;
+            }
+            .shen_header h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="shen_container">
+        <div class="shen_header">
+            <div class="shen_badge">CSS Custom Properties</div>
+            <h1>CSS 变量演示</h1>
+            <p>931 沈畅 · 计算机 24009 · 《高级网页设计》第 12 章练习</p>
+        </div>
+
+        <div class="shen_grid">
+            <div class="shen_card">
+                <h2>尺寸变量</h2>
+                <div class="shen_control">
+                    <label>圆角 --shen_radius <span id="shen_radius_val">20px</span></label>
+                    <input type="range" id="shen_radius" min="0" max="40" value="20">
+                </div>
+                <div class="shen_control">
+                    <label>间距 --shen_gap <span id="shen_gap_val">24px</span></label>
+                    <input type="range" id="shen_gap" min="8" max="48" value="24">
+                </div>
+                <div class="shen_control">
+                    <label>字号 --shen_font_size <span id="shen_font_val">16px</span></label>
+                    <input type="range" id="shen_font_size" min="12" max="22" value="16">
+                </div>
+            </div>
+
+            <div class="shen_card">
+                <h2>颜色变量</h2>
+                <div class="shen_color-row">
+                    <div class="shen_color-item">
+                        <label>主色 --shen_accent</label>
+                        <input type="color" id="shen_accent" value="#818cf8">
+                    </div>
+                    <div class="shen_color-item">
+                        <label>辅色 --shen_accent2</label>
+                        <input type="color" id="shen_accent2" value="#f472b6">
+                    </div>
+                    <div class="shen_color-item">
+                        <label>背景 --shen_bg</label>
+                        <input type="color" id="shen_bg" value="#0f172a">
+                    </div>
+                </div>
+            </div>
+
+            <div class="shen_card shen_preview">
+                <div class="shen_preview-box">
+                    <h3>沈畅</h3>
+                    <p>变量实时预览 · 拖动滑块或切换颜色</p>
+                </div>
+            </div>
+
+            <div class="shen_card shen_code">
+                <h2>当前变量值</h2>
+                <pre id="shen_output">:root {
+  --shen_radius: 20px;
+  --shen_gap: 24px;
+  --shen_font_size: 16px;
+  --shen_accent: #818cf8;
+  --shen_accent2: #f472b6;
+  --shen_bg: #0f172a;
+}</pre>
+            </div>
+        </div>
+
+        <div class="shen_footer">
+            <p>使用 var(--shen_xxx) 在 CSS 中引用 · JS 动态修改 :root 变量</p>
+            <p style="margin-top:6px"><a href="index.html">← 返回作品集导航</a></p>
+        </div>
+    </div>
+
+    <script>
+        var shen_root = document.documentElement;
+
+        function shen_updateVar(name, value) {
+            shen_root.style.setProperty('--' + name, value);
+            shen_updateOutput();
+        }
+
+        function shen_updateOutput() {
+            var props = ['shen_radius', 'shen_gap', 'shen_font_size', 'shen_accent', 'shen_accent2', 'shen_bg'];
+            var text = ':root {\n';
+            props.forEach(function (p) {
+                var v = getComputedStyle(shen_root).getPropertyValue('--' + p).trim();
+                text += '  --' + p + ': ' + v + ';\n';
+            });
+            text += '}';
+            document.getElementById('shen_output').textContent = text;
+        }
+
+        var shen_radius = document.getElementById('shen_radius');
+        var shen_gap = document.getElementById('shen_gap');
+        var shen_font_size = document.getElementById('shen_font_size');
+        var shen_accent = document.getElementById('shen_accent');
+        var shen_accent2 = document.getElementById('shen_accent2');
+        var shen_bg = document.getElementById('shen_bg');
+
+        shen_radius.addEventListener('input', function () {
+            document.getElementById('shen_radius_val').textContent = this.value + 'px';
+            shen_updateVar('shen_radius', this.value + 'px');
+        });
+
+        shen_gap.addEventListener('input', function () {
+            document.getElementById('shen_gap_val').textContent = this.value + 'px';
+            shen_updateVar('shen_gap', this.value + 'px');
+        });
+
+        shen_font_size.addEventListener('input', function () {
+            document.getElementById('shen_font_val').textContent = this.value + 'px';
+            shen_updateVar('shen_font_size', this.value + 'px');
+        });
+
+        shen_accent.addEventListener('input', function () {
+            shen_updateVar('shen_accent', this.value);
+        });
+
+        shen_accent2.addEventListener('input', function () {
+            shen_updateVar('shen_accent2', this.value);
+            var grad = 'linear-gradient(135deg, ' + shen_accent.value + ', ' + this.value + ')';
+            shen_root.style.setProperty('--shen_gradient', grad);
+        });
+
+        shen_bg.addEventListener('input', function () {
+            shen_updateVar('shen_bg', this.value);
+        });
+
+        shen_updateOutput();
+    </script>
+</body>
+</html>

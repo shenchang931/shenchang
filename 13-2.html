@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>13-2 Lucide SVG 图标 · 沈畅</title>
+    <style>
+        :root {
+            --shen_bg: #0b1020;
+            --shen_card: rgba(30, 41, 59, 0.82);
+            --shen_text: #f1f5f9;
+            --shen_muted: #94a3b8;
+            --shen_accent: #38bdf8;
+            --shen_accent2: #a855f7;
+            --shen_radius: 20px;
+            --shen_gap: 22px;
+            --shen_gradient: linear-gradient(135deg, #38bdf8, #a855f7);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+            background: var(--shen_bg);
+            color: var(--shen_text);
+            min-height: 100vh;
+            line-height: 1.7;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background:
+                radial-gradient(52vw 52vw at 12% 0%, rgba(56, 189, 248, 0.22), transparent 62%),
+                radial-gradient(52vw 52vw at 90% 10%, rgba(168, 85, 247, 0.20), transparent 62%),
+                radial-gradient(60vw 60vw at 50% 110%, rgba(56, 189, 248, 0.14), transparent 62%);
+        }
+
+        .shen_container {
+            max-width: 1040px;
+            margin: 0 auto;
+            padding: 48px 24px;
+        }
+
+        .shen_header {
+            text-align: center;
+            margin-bottom: 44px;
+        }
+
+        .shen_badge {
+            display: inline-block;
+            padding: 6px 18px;
+            border-radius: 999px;
+            background: rgba(56, 189, 248, 0.14);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            color: var(--shen_accent);
+            font-size: 13px;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .shen_header h1 {
+            font-size: 44px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            background: var(--shen_gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 12px;
+        }
+
+        .shen_header p {
+            color: var(--shen_muted);
+            font-size: 15px;
+        }
+
+        .shen_section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            letter-spacing: 2px;
+            color: #cbd5e1;
+            margin: 36px 0 18px;
+        }
+
+        .shen_section-title .shen_line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.2), transparent);
+        }
+
+        .shen_note {
+            background: rgba(168, 85, 247, 0.08);
+            border: 1px solid rgba(168, 85, 247, 0.28);
+            border-radius: 14px;
+            padding: 16px 20px;
+            color: #ddd6fe;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .shen_note code,
+        .shen_code code {
+            font-family: Consolas, "Courier New", monospace;
+            color: var(--shen_accent);
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 5px;
+            padding: 1px 7px;
+        }
+
+        .shen_grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+            gap: var(--shen_gap);
+        }
+
+        .shen_tile {
+            background: var(--shen_card);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--shen_radius);
+            padding: 26px 12px 20px;
+            text-align: center;
+            transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+        }
+
+        .shen_tile:hover {
+            transform: translateY(-6px);
+            border-color: rgba(56, 189, 248, 0.6);
+            background: rgba(56, 189, 248, 0.08);
+        }
+
+        .shen_tile .lucide {
+            width: 30px;
+            height: 30px;
+            color: var(--shen_accent);
+            margin-bottom: 14px;
+            transition: transform 0.3s ease;
+        }
+
+        .shen_tile:hover .lucide {
+            transform: scale(1.18) rotate(-6deg);
+        }
+
+        .shen_tile span {
+            display: block;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 11px;
+            color: var(--shen_muted);
+            word-break: break-all;
+        }
+
+        .shen_size-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 34px;
+            flex-wrap: wrap;
+            background: var(--shen_card);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--shen_radius);
+            padding: 34px 20px;
+        }
+
+        .shen_size-item {
+            text-align: center;
+        }
+
+        .shen_size-item .lucide {
+            color: var(--shen_accent2);
+            margin-bottom: 10px;
+        }
+
+        .shen_size-item span {
+            display: block;
+            font-size: 12px;
+            color: var(--shen_muted);
+            font-family: Consolas, monospace;
+        }
+
+        .shen_color-row {
+            display: flex;
+            justify-content: center;
+            gap: 22px;
+            flex-wrap: wrap;
+            background: var(--shen_card);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--shen_radius);
+            padding: 30px 20px;
+        }
+
+        .shen_color-row .lucide {
+            width: 34px;
+            height: 34px;
+            transition: transform 0.3s ease;
+        }
+
+        .shen_color-row .lucide:hover {
+            transform: translateY(-5px);
+        }
+
+        .shen_code {
+            background: rgba(2, 6, 23, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--shen_radius);
+            padding: 22px 26px;
+            overflow-x: auto;
+        }
+
+        .shen_code pre {
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 13px;
+            line-height: 1.9;
+            color: #a5b4fc;
+            white-space: pre;
+        }
+
+        .shen_code .shen-tag {
+            color: #7dd3fc;
+        }
+
+        .shen_code .shen-attr {
+            color: #fbbf24;
+        }
+
+        .shen_footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 26px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .shen_footer a {
+            color: var(--shen_accent);
+            text-decoration: none;
+        }
+
+        @media (max-width: 680px) {
+            .shen_header h1 {
+                font-size: 30px;
+            }
+            .shen_grid {
+                grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="shen_container">
+        <div class="shen_header">
+            <div class="shen_badge">Lucide · Inline SVG Icons</div>
+            <h1>Lucide SVG 图标</h1>
+            <p>931 沈畅 · 计算机 24009 · 《高级网页设计》第 13 章练习</p>
+        </div>
+
+        <div class="shen_note">
+            <strong>SVG 图标原理：</strong>Lucide 每个图标都是独立的矢量路径。使用 <code>&lt;i data-lucide="home"&gt;&lt;/i&gt;</code> 占位，
+            引入 <code>lucide.min.js</code> 后调用 <code>lucide.createIcons()</code>，脚本会扫描页面中的 <code>data-lucide</code> 属性，
+            把占位元素替换为真正的 <code>&lt;svg&gt;</code> 内联节点，因此它本质上是「矢量图形」，可用 CSS 精确控制描边粗细与颜色。
+        </div>
+
+        <div class="shen_section-title">
+            <span>常用图标 ICONS</span>
+            <span class="shen_line"></span>
+        </div>
+        <div class="shen_grid">
+            <div class="shen_tile"><i data-lucide="home"></i><span>home</span></div>
+            <div class="shen_tile"><i data-lucide="search"></i><span>search</span></div>
+            <div class="shen_tile"><i data-lucide="heart"></i><span>heart</span></div>
+            <div class="shen_tile"><i data-lucide="star"></i><span>star</span></div>
+            <div class="shen_tile"><i data-lucide="user"></i><span>user</span></div>
+            <div class="shen_tile"><i data-lucide="mail"></i><span>mail</span></div>
+            <div class="shen_tile"><i data-lucide="phone"></i><span>phone</span></div>
+            <div class="shen_tile"><i data-lucide="camera"></i><span>camera</span></div>
+            <div class="shen_tile"><i data-lucide="music"></i><span>music</span></div>
+            <div class="shen_tile"><i data-lucide="flame"></i><span>flame</span></div>
+            <div class="shen_tile"><i data-lucide="rocket"></i><span>rocket</span></div>
+            <div class="shen_tile"><i data-lucide="sun"></i><span>sun</span></div>
+            <div class="shen_tile"><i data-lucide="moon"></i><span>moon</span></div>
+            <div class="shen_tile"><i data-lucide="cloud"></i><span>cloud</span></div>
+            <div class="shen_tile"><i data-lucide="shield"></i><span>shield</span></div>
+            <div class="shen_tile"><i data-lucide="zap"></i><span>zap</span></div>
+            <div class="shen_tile"><i data-lucide="bookmark"></i><span>bookmark</span></div>
+            <div class="shen_tile"><i data-lucide="calendar"></i><span>calendar</span></div>
+            <div class="shen_tile"><i data-lucide="clock"></i><span>clock</span></div>
+            <div class="shen_tile"><i data-lucide="settings"></i><span>settings</span></div>
+            <div class="shen_tile"><i data-lucide="trash-2"></i><span>trash-2</span></div>
+            <div class="shen_tile"><i data-lucide="pencil"></i><span>pencil</span></div>
+            <div class="shen_tile"><i data-lucide="download"></i><span>download</span></div>
+            <div class="shen_tile"><i data-lucide="share-2"></i><span>share-2</span></div>
+            <div class="shen_tile"><i data-lucide="thumbs-up"></i><span>thumbs-up</span></div>
+            <div class="shen_tile"><i data-lucide="flag"></i><span>flag</span></div>
+            <div class="shen_tile"><i data-lucide="bell"></i><span>bell</span></div>
+            <div class="shen_tile"><i data-lucide="lock"></i><span>lock</span></div>
+            <div class="shen_tile"><i data-lucide="gift"></i><span>gift</span></div>
+        </div>
+
+        <div class="shen_section-title">
+            <span>矢量缩放 WIDTH / HEIGHT</span>
+            <span class="shen_line"></span>
+        </div>
+        <div class="shen_size-row">
+            <div class="shen_size-item"><i data-lucide="heart" width="16" height="16"></i><span>16px</span></div>
+            <div class="shen_size-item"><i data-lucide="heart" width="24" height="24"></i><span>24px</span></div>
+            <div class="shen_size-item"><i data-lucide="heart" width="36" height="36"></i><span>36px</span></div>
+            <div class="shen_size-item"><i data-lucide="heart" width="52" height="52"></i><span>52px</span></div>
+            <div class="shen_size-item"><i data-lucide="heart" width="72" height="72"></i><span>72px</span></div>
+        </div>
+
+        <div class="shen_section-title">
+            <span>描边与上色 COLOR / STROKE</span>
+            <span class="shen_line"></span>
+        </div>
+        <div class="shen_color-row">
+            <i data-lucide="star" style="color:#ef4444"></i>
+            <i data-lucide="star" style="color:#f59e0b"></i>
+            <i data-lucide="star" style="color:#22c55e"></i>
+            <i data-lucide="star" style="color:#3b82f6"></i>
+            <i data-lucide="star" style="color:#a855f7"></i>
+            <i data-lucide="star" style="color:#ec4899"></i>
+        </div>
+
+        <div class="shen_section-title">
+            <span>用法示例 CODE</span>
+            <span class="shen_line"></span>
+        </div>
+        <div class="shen_code">
+<pre><span class="shen-tag">&lt;script</span> <span class="shen-attr">src</span>=<span class="shen-attr">"cdn/lucide/lucide.min.js"</span><span class="shen-tag">&gt;&lt;/script&gt;</span>
+
+<span class="shen-tag">&lt;i</span> <span class="shen-attr">data-lucide</span>=<span class="shen-attr">"home"</span><span class="shen-tag">&gt;&lt;/i&gt;</span>            <span style="color:#64748b">&lt;!-- 基础图标 --&gt;</span>
+<span class="shen-tag">&lt;i</span> <span class="shen-attr">data-lucide</span>=<span class="shen-attr">"heart"</span> <span class="shen-attr">width</span>=<span class="shen-attr">"48"</span> <span class="shen-attr">height</span>=<span class="shen-attr">"48"</span><span class="shen-tag">&gt;&lt;/i&gt;</span> <span style="color:#64748b">&lt;!-- 指定尺寸 --&gt;</span>
+
+<span class="shen-tag">&lt;script&gt;</span>
+  lucide.createIcons();   <span style="color:#64748b">// 扫描 data-lucide 并替换为 &lt;svg&gt;</span>
+<span class="shen-tag">&lt;/script&gt;</span></pre>
+        </div>
+
+        <div class="shen_footer">
+            <p>SVG 图标（Vector Icon）· 脚本已下载至 <code style="color:#38bdf8">cdn/lucide/</code>，可离线使用</p>
+            <p style="margin-top:6px"><a href="13-1.html">← 上一节：Font Awesome 字体图标</a> · <a href="index.html">返回作品集导航</a></p>
+        </div>
+    </div>
+
+    <script src="cdn/lucide/lucide.min.js"></script>
+    <script>
+        var shen_lucide = window.lucide;
+        if (shen_lucide) {
+            shen_lucide.createIcons();
+        }
+    </script>
+</body>
+</html>

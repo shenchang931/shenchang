@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<!-- 姓名：沈畅，日期：2026-10-26，功能名称：100个盒子按7的规则显示 -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>15-1 一百个盒子 · 7 的规则</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            background: linear-gradient(160deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 40px 16px 60px;
+        }
+
+        .sc_header { text-align: center; margin-bottom: 30px; }
+        .sc_header h1 {
+            font-size: 32px;
+            background: linear-gradient(90deg, #a78bfa, #38bdf8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 8px;
+        }
+        .sc_header p { color: #94a3b8; font-size: 14px; letter-spacing: 1px; }
+        .sc_header .sc_name { color: #fbbf24; font-weight: bold; }
+
+        .sc_rules {
+            max-width: 720px;
+            margin: 0 auto 26px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 16px 20px;
+            font-size: 14px;
+            line-height: 1.9;
+            color: #cbd5e1;
+        }
+        .sc_rules h2 { font-size: 16px; color: #a78bfa; margin-bottom: 8px; }
+        .sc_rules code {
+            font-family: Consolas, Monaco, monospace;
+            background: #0b1220;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            padding: 1px 7px;
+            color: #7dd3fc;
+            margin: 0 2px;
+        }
+        .sc_rules .sc_hit { color: #f87171; font-weight: bold; }
+        .sc_rules .sc_miss { color: #34d399; font-weight: bold; }
+
+        .sc_grid {
+            max-width: 780px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 6px;
+        }
+
+        .sc_box {
+            aspect-ratio: 1 / 1;
+            border: 2px solid #334155;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 16px;
+            font-weight: bold;
+            color: #38bdf8;
+            background: #0b1220;
+            transition: transform .2s, border-color .2s, background .2s;
+            cursor: default;
+        }
+
+        /* 命中 7 规则的盒子 —— 空盒子，视觉上明显不同 */
+        .sc_box.sc_hit {
+            background: linear-gradient(135deg, #f87171, #ef4444);
+            border-color: #fecaca;
+            border-style: dashed;
+            color: transparent;   /* 隐藏内部数字 */
+            box-shadow: inset 0 0 14px rgba(255, 255, 255, .08);
+        }
+
+        .sc_box:hover { transform: scale(1.08); border-color: #a78bfa; }
+        .sc_box.sc_hit:hover { border-color: #fff; }
+
+        .sc_legend {
+            max-width: 780px;
+            margin: 22px auto 0;
+            display: flex;
+            justify-content: center;
+            gap: 28px;
+            flex-wrap: wrap;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        .sc_legend_item { display: flex; align-items: center; gap: 8px; }
+        .sc_legend_box {
+            width: 22px; height: 22px;
+            border-radius: 5px;
+            border: 2px solid #334155;
+            background: #0b1220;
+            display: inline-block;
+        }
+        .sc_legend_box.sc_hit {
+            background: linear-gradient(135deg, #f87171, #ef4444);
+            border-color: #fecaca;
+            border-style: dashed;
+        }
+    </style>
+</head>
+<body>
+    <header class="sc_header">
+        <h1>一百个盒子 · 7 的规则</h1>
+        <p>姓名：<span class="sc_name">沈畅</span> · 数字 1–100，命中规则显示为空盒子，未命中显示数字</p>
+    </header>
+
+    <section class="sc_rules">
+        <h2>命中规则（满足任一即命中 → 空盒子）</h2>
+        <p>① 是 7 的倍数 <code>sc_i % 7 === 0</code>　如 7、14、21、28 ……</p>
+        <p>② 个位数字是 7 <code>sc_i % 10 === 7</code>　如 7、17、27、37 ……</p>
+        <p>其中 <span class="sc_hit">7</span> 同时命中两条规则。满足 → <span class="sc_hit">空盒子</span>；不满足 → <span class="sc_miss">盒子内显示数字</span>。</p>
+    </section>
+
+    <main id="sc_grid" class="sc_grid"></main>
+
+    <div class="sc_legend">
+        <span class="sc_legend_item">
+            <span class="sc_legend_box"></span>未命中（显示数字）
+        </span>
+        <span class="sc_legend_item">
+            <span class="sc_legend_box sc_hit"></span>命中规则（空盒子）
+        </span>
+    </div>
+
+    <script>
+        var sc_total = 100;
+        var sc_boxes_html = '';
+
+        for (var sc_i = 1; sc_i <= sc_total; sc_i++) {
+            // 命中规则：7 的倍数 或 个位是 7
+            var sc_is_hit = (sc_i % 7 === 0) || (sc_i % 10 === 7);
+
+            if (sc_is_hit) {
+                // 空盒子
+                sc_boxes_html += '<div class="sc_box sc_hit" title="' + sc_i + '（命中规则）"></div>';
+            } else {
+                // 盒子内显示数字
+                sc_boxes_html += '<div class="sc_box" title="' + sc_i + '">' + sc_i + '</div>';
+            }
+        }
+
+        document.getElementById('sc_grid').innerHTML = sc_boxes_html;
+    </script>
+</body>
+</html>

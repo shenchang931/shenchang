@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11-2 · CSS3 3D 动画 · 沈畅</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+            background: #0a0e1a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 40px 20px;
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        .shen_container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #f472b6, #a78bfa, #60a5fa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .shen_subtitle {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.95rem;
+            margin-bottom: 48px;
+        }
+
+        .shen_section {
+            margin-bottom: 56px;
+        }
+
+        .shen_section h2 {
+            font-size: 1.3rem;
+            color: #a78bfa;
+            margin-bottom: 8px;
+            padding-left: 12px;
+            border-left: 4px solid #a78bfa;
+        }
+
+        .shen_section .shen_desc {
+            color: #64748b;
+            font-size: 0.88rem;
+            margin-bottom: 24px;
+            padding-left: 16px;
+        }
+
+        .shen_grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .shen_card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 28px 20px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .shen_card:hover {
+            border-color: rgba(167, 139, 250, 0.4);
+            box-shadow: 0 8px 32px rgba(167, 139, 250, 0.12);
+        }
+
+        .shen_card .shen_card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            letter-spacing: 1px;
+        }
+
+        .shen_card .shen_card-info {
+            font-size: 0.78rem;
+            color: #64748b;
+            text-align: center;
+        }
+
+        .shen_perspective {
+            perspective: 600px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
+        }
+
+        .shen_scene {
+            transform-style: preserve-3d;
+        }
+
+        @keyframes shen_rotate_cube {
+            from { transform: rotateX(-20deg) rotateY(0deg); }
+            to { transform: rotateX(-20deg) rotateY(360deg); }
+        }
+
+        .shen_cube {
+            width: 80px;
+            height: 80px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: shen_rotate_cube 6s linear infinite;
+        }
+
+        .shen_cube .shen_face {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #fff;
+            backface-visibility: visible;
+        }
+
+        .shen_cube .shen_front  { background: rgba(236, 72, 153, 0.7); transform: translateZ(40px); }
+        .shen_cube .shen_back   { background: rgba(139, 92, 246, 0.7); transform: rotateY(180deg) translateZ(40px); }
+        .shen_cube .shen_right  { background: rgba(96, 165, 250, 0.7); transform: rotateY(90deg) translateZ(40px); }
+        .shen_cube .shen_left   { background: rgba(52, 211, 153, 0.7); transform: rotateY(-90deg) translateZ(40px); }
+        .shen_cube .shen_top    { background: rgba(251, 191, 36, 0.7); transform: rotateX(90deg) translateZ(40px); }
+        .shen_cube .shen_bottom { background: rgba(248, 113, 113, 0.7); transform: rotateX(-90deg) translateZ(40px); }
+
+        @keyframes shen_flip {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+
+        .shen_flip-box {
+            width: 140px;
+            height: 90px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: shen_flip 4s ease-in-out infinite;
+        }
+
+        .shen_flip-box .shen_flip-face {
+            position: absolute;
+            width: 140px;
+            height: 90px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            backface-visibility: hidden;
+        }
+
+        .shen_flip-box .shen_flip-front {
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+        }
+
+        .shen_flip-box .shen_flip-back {
+            background: linear-gradient(135deg, #06b6d4, #3b82f6);
+            transform: rotateY(180deg);
+        }
+
+        @keyframes shen_card_tilt {
+            0%, 100% { transform: rotateX(0deg) rotateY(0deg); }
+            25% { transform: rotateX(15deg) rotateY(15deg); }
+            50% { transform: rotateX(0deg) rotateY(0deg); }
+            75% { transform: rotateX(-15deg) rotateY(-15deg); }
+        }
+
+        .shen_tilt-card {
+            width: 160px;
+            height: 100px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transform-style: preserve-3d;
+            animation: shen_card_tilt 4s ease-in-out infinite;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .shen_tilt-card .shen_tilt-icon {
+            font-size: 1.8rem;
+        }
+
+        .shen_tilt-card .shen_tilt-text {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            letter-spacing: 1px;
+        }
+
+        @keyframes shen_ring {
+            from { transform: rotateX(70deg) rotateZ(0deg); }
+            to { transform: rotateX(70deg) rotateZ(360deg); }
+        }
+
+        .shen_ring-scene {
+            perspective: 500px;
+            width: 160px;
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .shen_ring {
+            width: 120px;
+            height: 120px;
+            border: 3px solid;
+            border-radius: 50%;
+            border-color: #f472b6 transparent #a78bfa transparent;
+            animation: shen_ring 3s linear infinite;
+            transform-style: preserve-3d;
+        }
+
+        .shen_ring2 {
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            border: 3px solid;
+            border-radius: 50%;
+            border-color: transparent #60a5fa transparent #34d399;
+            animation: shen_ring 2s linear infinite reverse;
+        }
+
+        @keyframes shen_z_float {
+            0%, 100% { transform: translateZ(0px); }
+            50% { transform: translateZ(60px); }
+        }
+
+        .shen_z-scene {
+            perspective: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .shen_z-box {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f97316, #ef4444);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            animation: shen_z_float 2.5s ease-in-out infinite;
+            box-shadow: 0 0 30px rgba(249, 115, 22, 0.4);
+        }
+
+        .shen_z-box:nth-child(2) {
+            background: linear-gradient(135deg, #06b6d4, #3b82f6);
+            animation-delay: 0.4s;
+            box-shadow: 0 0 30px rgba(6, 182, 212, 0.4);
+        }
+
+        .shen_z-box:nth-child(3) {
+            background: linear-gradient(135deg, #10b981, #059669);
+            animation-delay: 0.8s;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+        }
+
+        .shen_z-row {
+            display: flex;
+            gap: 30px;
+        }
+
+        @keyframes shen_spin_y {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+
+        .shen_perspective .shen_text-3d {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #a78bfa;
+            text-shadow:
+                1px 1px 0 #7c3aed,
+                2px 2px 0 #6d28d9,
+                3px 3px 0 #5b21b6,
+                4px 4px 0 #4c1d95,
+                5px 5px 10px rgba(0, 0, 0, 0.5);
+            animation: shen_spin_y 5s linear infinite;
+            transform-style: preserve-3d;
+        }
+
+        @keyframes shen_scale_z {
+            0%, 100% { transform: scaleZ(1) rotateY(0deg); }
+            50% { transform: scaleZ(3) rotateY(180deg); }
+        }
+
+        .shen_diamond {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #ec4899, #f43f5e);
+            transform: rotateX(60deg) rotateZ(45deg);
+            border-radius: 8px;
+            animation: shen_scale_z 3s ease-in-out infinite;
+        }
+
+        @keyframes shen_orbit {
+            from { transform: rotateY(0deg) translateZ(80px) rotateY(0deg); }
+            to { transform: rotateY(360deg) translateZ(80px) rotateY(-360deg); }
+        }
+
+        .shen_orbit-scene {
+            perspective: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .shen_orbit-wrapper {
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        .shen_orbit-center {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #fbbf24, #d97706);
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+        }
+
+        .shen_orbit-item {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #60a5fa;
+            box-shadow: 0 0 12px rgba(96, 165, 250, 0.6);
+            animation: shen_orbit 4s linear infinite;
+        }
+
+        .shen_orbit-item:nth-child(2) { animation-delay: -1s; background: #f472b6; box-shadow: 0 0 12px rgba(244, 114, 182, 0.6); }
+        .shen_orbit-item:nth-child(3) { animation-delay: -2s; background: #34d399; box-shadow: 0 0 12px rgba(52, 211, 153, 0.6); }
+        .shen_orbit-item:nth-child(4) { animation-delay: -3s; background: #a78bfa; box-shadow: 0 0 12px rgba(167, 139, 250, 0.6); }
+
+        .shen_perspective .shen_preserve-demo {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            transform: rotateX(30deg) rotateY(-20deg);
+            transform-style: preserve-3d;
+        }
+
+        .shen_pixel {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            animation: shen_z_float 2s ease-in-out infinite;
+        }
+
+        .shen_pixel:nth-child(1) { background: #ef4444; animation-delay: 0s; }
+        .shen_pixel:nth-child(2) { background: #f97316; animation-delay: 0.1s; }
+        .shen_pixel:nth-child(3) { background: #eab308; animation-delay: 0.2s; }
+        .shen_pixel:nth-child(4) { background: #22c55e; animation-delay: 0.3s; }
+        .shen_pixel:nth-child(5) { background: #06b6d4; animation-delay: 0.4s; }
+        .shen_pixel:nth-child(6) { background: #3b82f6; animation-delay: 0.5s; }
+        .shen_pixel:nth-child(7) { background: #8b5cf6; animation-delay: 0.6s; }
+        .shen_pixel:nth-child(8) { background: #ec4899; animation-delay: 0.7s; }
+        .shen_pixel:nth-child(9) { background: #f43f5e; animation-delay: 0.8s; }
+
+        footer {
+            text-align: center;
+            margin-top: 56px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 640px) {
+            h1 { font-size: 1.6rem; }
+            .shen_grid { grid-template-columns: 1fr; }
+            .shen_z-row { gap: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="shen_container">
+        <h1>CSS3 3D 动画</h1>
+        <p class="shen_subtitle">沈畅 · 高级网页设计 · CSS3 3D Transforms &amp; Animations</p>
+
+        <div class="shen_section">
+            <h2>旋转立方体</h2>
+            <p class="shen_desc">六个面组成 3D 立方体，绕 Y 轴持续旋转，perspective 营造景深</p>
+            <div class="shen_grid">
+                <div class="shen_card">
+                    <div class="shen_card-title">3D Cube</div>
+                    <div class="shen_perspective">
+                        <div class="shen_cube">
+                            <div class="shen_face shen_front">前</div>
+                            <div class="shen_face shen_back">后</div>
+                            <div class="shen_face shen_right">右</div>
+                            <div class="shen_face shen_left">左</div>
+                            <div class="shen_face shen_top">顶</div>
+                            <div class="shen_face shen_bottom">底</div>
+                        </div>
+                    </div>
+                    <div class="shen_card-info">rotateX + rotateY · preserve-3d</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="shen_section">
+            <h2>翻转与倾斜</h2>
+            <p class="shen_desc">利用 rotateY 实现卡片翻转，结合 perspective 产生 3D 倾斜效果</p>
+            <div class="shen_grid">
+                <div class="shen_card">
+                    <div class="shen_card-title">Y 轴翻转</div>
+                    <div class="shen_perspective">
+                        <div class="shen_flip-box">
+                            <div class="shen_flip-face shen_flip-front">正面</div>
+                            <div class="shen_flip-face shen_flip-back">背面</div>
+                        </div>
+                    </div>
+                    <div class="shen_card-info">rotateY 360° · backface-visibility</div>
+                </div>
+
+                <div class="shen_card">
+                    <div class="shen_card-title">3D 倾斜</div>
+                    <div class="shen_perspective">
+                        <div class="shen_tilt-card">
+                            <span class="shen_tilt-icon">✦</span>
+                            <span class="shen_tilt-text">TILT</span>
+                        </div>
+                    </div>
+                    <div class="shen_card-info">rotateX + rotateY 往复摆动</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="shen_section">
+            <h2>景深位移</h2>
+            <p class="shen_desc">translateZ 控制元素在 Z 轴上的前后位移，配合透视产生空间感</p>
+            <div class="shen_grid">
+                <div class="shen_card">
+                    <div class="shen_card-title">Z 轴浮动</div>
+                    <div class="shen_perspective">
+                        <div class="shen_z-row">
+                            <div class="shen_z-box">1</div>
+                            <div class="shen_z-box">2</div>
+                            <div class="shen_z-box">3</div>
+                        </div>
+                    </div>
+                    <div class="shen_card-info">translateZ 0 → 60px 循环</div>
+                </div>
+
+                <div class="shen_card">
+                    <div class="shen_card-title">3D 文字</div>
+                    <div class="shen_perspective">
+                        <div class="shen_text-3d">3D</div>
+                    </div>
+                    <div class="shen_card-info">text-shadow 模拟厚度 + rotateY</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="shen_section">
+            <h2>轨道与环</h2>
+            <p class="shen_desc">多个元素沿 Z 轴轨道绕中心旋转，利用相位差形成环绕效果</p>
+            <div class="shen_grid">
+                <div class="shen_card">
+                    <div class="shen_card-title">卫星轨道</div>
+                    <div class="shen_perspective">
+                        <div class="shen_orbit-scene">
+                            <div class="shen_orbit-wrapper">
+                                <div class="shen_orbit-center"></div>
+                                <div class="shen_orbit-item"></div>
+                                <div class="shen_orbit-item"></div>
+                                <div class="shen_orbit-item"></div>
+                                <div class="shen_orbit-item"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="shen_card-info">rotateY + translateZ(80px)</div>
+                </div>
+
+                <div class="shen_card">
+                    <div class="shen_card-title">双环旋转</div>
+                    <div class="shen_ring-scene">
+                        <div class="shen_ring"></div>
+                        <div class="shen_ring2"></div>
+                    </div>
+                    <div class="shen_card-info">rotateX(70deg) + rotateZ 双向</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="shen_section">
+            <h2>空间矩阵</h2>
+            <p class="shen_desc">preserve-3d 嵌套场景，9 个色块在 3D 空间中交替浮动</p>
+            <div class="shen_grid">
+                <div class="shen_card" style="grid-column: 1 / -1;">
+                    <div class="shen_card-title">3D Pixel Grid</div>
+                    <div class="shen_perspective">
+                        <div class="shen_preserve-demo">
+                            <div class="shen_pixel"></div>
+                            <div class="shen_pixel"></div>
+                            <div class="shen_pixel"></div>
+                            <div class="shen_pixel"></div>
+                            <div class="shen_pixel"></div>
+                            <div class="shen_pixel"></div>
+                            <div class="shen_pixel"></div>
+                            <div class="shen_pixel"></div>
+                            <div class="shen_pixel"></div>
+                        </div>
+                    </div>
+                    <div class="shen_card_info">rotateX(30deg) rotateY(-20deg) · translateZ 波浪</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            931 沈畅 · 计算机 24009 · 《高级网页设计》课堂实践
+        </footer>
+    </div>
+</body>
+</html>

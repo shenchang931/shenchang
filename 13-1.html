@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>13-1 Font Awesome 字体图标 · 沈畅</title>
+    <link rel="stylesheet" href="cdn/font-awesome/css/all.min.css">
+    <style>
+        :root {
+            --shen_bg: #0b1020;
+            --shen_card: rgba(30, 41, 59, 0.82);
+            --shen_text: #f1f5f9;
+            --shen_muted: #94a3b8;
+            --shen_accent: #fbbf24;
+            --shen_accent2: #38bdf8;
+            --shen_radius: 20px;
+            --shen_gap: 22px;
+            --shen_gradient: linear-gradient(135deg, #fbbf24, #f97316);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+            background: var(--shen_bg);
+            color: var(--shen_text);
+            min-height: 100vh;
+            line-height: 1.7;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background:
+                radial-gradient(52vw 52vw at 12% 0%, rgba(251, 191, 36, 0.22), transparent 62%),
+                radial-gradient(52vw 52vw at 90% 10%, rgba(56, 189, 248, 0.20), transparent 62%),
+                radial-gradient(60vw 60vw at 50% 110%, rgba(249, 115, 22, 0.16), transparent 62%);
+        }
+
+        .shen_container {
+            max-width: 1040px;
+            margin: 0 auto;
+            padding: 48px 24px;
+        }
+
+        .shen_header {
+            text-align: center;
+            margin-bottom: 44px;
+        }
+
+        .shen_badge {
+            display: inline-block;
+            padding: 6px 18px;
+            border-radius: 999px;
+            background: rgba(251, 191, 36, 0.14);
+            border: 1px solid rgba(251, 191, 36, 0.35);
+            color: var(--shen_accent);
+            font-size: 13px;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .shen_header h1 {
+            font-size: 44px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            background: var(--shen_gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 12px;
+        }
+
+        .shen_header p {
+            color: var(--shen_muted);
+            font-size: 15px;
+        }
+
+        .shen_section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            letter-spacing: 2px;
+            color: #cbd5e1;
+            margin: 36px 0 18px;
+        }
+
+        .shen_section-title .shen_line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.2), transparent);
+        }
+
+        .shen_note {
+            background: rgba(56, 189, 248, 0.08);
+            border: 1px solid rgba(56, 189, 248, 0.28);
+            border-radius: 14px;
+            padding: 16px 20px;
+            color: #bae6fd;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .shen_note code,
+        .shen_code code {
+            font-family: Consolas, "Courier New", monospace;
+            color: var(--shen_accent);
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 5px;
+            padding: 1px 7px;
+        }
+
+        .shen_grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+            gap: var(--shen_gap);
+        }
+
+        .shen_tile {
+            background: var(--shen_card);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--shen_radius);
+            padding: 26px 12px 20px;
+            text-align: center;
+            transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+        }
+
+        .shen_tile:hover {
+            transform: translateY(-6px);
+            border-color: rgba(251, 191, 36, 0.6);
+            background: rgba(251, 191, 36, 0.08);
+        }
+
+        .shen_tile i {
+            font-size: 30px;
+            color: var(--shen_accent);
+            display: block;
+            margin-bottom: 14px;
+            transition: transform 0.3s ease;
+        }
+
+        .shen_tile:hover i {
+            transform: scale(1.18) rotate(-6deg);
+        }
+
+        .shen_tile span {
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 11px;
+            color: var(--shen_muted);
+            word-break: break-all;
+        }
+
+        .shen_size-row {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 36px;
+            flex-wrap: wrap;
+            background: var(--shen_card);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--shen_radius);
+            padding: 34px 20px;
+        }
+
+        .shen_size-item {
+            text-align: center;
+        }
+
+        .shen_size-item i {
+            display: block;
+            color: var(--shen_accent2);
+            margin-bottom: 10px;
+        }
+
+        .shen_size-item span {
+            font-size: 12px;
+            color: var(--shen_muted);
+            font-family: Consolas, monospace;
+        }
+
+        .shen_color-row {
+            display: flex;
+            justify-content: center;
+            gap: 22px;
+            flex-wrap: wrap;
+            background: var(--shen_card);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--shen_radius);
+            padding: 30px 20px;
+        }
+
+        .shen_color-row i {
+            font-size: 34px;
+            transition: transform 0.3s ease;
+        }
+
+        .shen_color-row i:hover {
+            transform: translateY(-5px);
+        }
+
+        .shen_code {
+            background: rgba(2, 6, 23, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--shen_radius);
+            padding: 22px 26px;
+            overflow-x: auto;
+        }
+
+        .shen_code pre {
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 13px;
+            line-height: 1.9;
+            color: #a5b4fc;
+            white-space: pre;
+        }
+
+        .shen_code .shen-tag {
+            color: #7dd3fc;
+        }
+
+        .shen_code .shen-attr {
+            color: #fbbf24;
+        }
+
+        .shen_footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 26px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .shen_footer a {
+            color: var(--shen_accent);
+            text-decoration: none;
+        }
+
+        @media (max-width: 680px) {
+            .shen_header h1 {
+                font-size: 30px;
+            }
+            .shen_grid {
+                grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="shen_container">
+        <div class="shen_header">
+            <div class="shen_badge">Font Awesome · Font Icons</div>
+            <h1>Font Awesome 字体图标</h1>
+            <p>931 沈畅 · 计算机 24009 · 《高级网页设计》第 13 章练习</p>
+        </div>
+
+        <div class="shen_note">
+            <strong>字体图标原理：</strong>Font Awesome 将每个图标编码为字体文件（<code>.woff2</code> / <code>.ttf</code>）中的私有字符，
+            页面通过 <code>&lt;i class="fa-solid fa-house"&gt;</code> 加载字体，再由 CSS 的 <code>:before</code> 伪元素输出对应的 <code>content</code> 字符，
+            因此它本质上是「文字」，可用 <code>font-size</code> 与 <code>color</code> 直接缩放和上色。
+        </div>
+
+        <div class="shen_section-title">
+            <span>实心图标 SOLID</span>
+            <span class="shen_line"></span>
+        </div>
+        <div class="shen_grid">
+            <div class="shen_tile"><i class="fa-solid fa-house"></i><span>fa-house</span></div>
+            <div class="shen_tile"><i class="fa-solid fa-magnifying-glass"></i><span>fa-magnifying-glass</span></div>
+            <div class="shen_tile"><i class="fa-solid fa-heart"></i><span>fa-heart</span></div>
+            <div class="shen_tile"><i class="fa-solid fa-star"></i><span>fa-star</span></div>
+            <div class="shen_tile"><i class="fa-solid fa-user"></i><span>fa-user</span></div>
+            <div class="shen_tile"><i class="fa-solid fa-envelope"></i><span>fa-envelope</span></div>
+            <div class="shen_tile"><i class="fa-solid fa-phone"></i><span>fa-phone</span></div>
+            <div class="shen_tile"><i class="fa-solid fa-camera"></i><span>fa-camera</span></div>
+            <div class="shen_tile"><i class="fa-solid fa-music"></i><span>fa-music</span></div>
+            <div class="shen_tile"><i class="fa-solid fa-fire"></i><span>fa-fire</span></div>
+            <div class="shen_tile"><i class="fa-solid fa-rocket"></i><span>fa-rocket</span></div>
+            <div class="shen_tile"><i class="fa-solid fa-sun"></i><span>fa-sun</span></div>
+            <div class="shen_tile"><i class="fa-solid fa-moon"></i><span>fa-moon</span></div>
+            <div class="shen_tile"><i class="fa-solid fa-cloud"></i><span>fa-cloud</span></div>
+            <div class="shen_tile"><i class="fa-solid fa-shield-halved"></i><span>fa-shield-halved</span></div>
+            <div class="shen_tile"><i class="fa-solid fa-bolt"></i><span>fa-bolt</span></div>
+            <div class="shen_tile"><i class="fa-solid fa-bookmark"></i><span>fa-bookmark</span></div>
+            <div class="shen_tile"><i class="fa-solid fa-calendar-days"></i><span>fa-calendar-days</span></div>
+            <div class="shen_tile"><i class="fa-solid fa-clock"></i><span>fa-clock</span></div>
+            <div class="shen_tile"><i class="fa-solid fa-gear"></i><span>fa-gear</span></div>
+            <div class="shen_tile"><i class="fa-solid fa-trash-can"></i><span>fa-trash-can</span></div>
+            <div class="shen_tile"><i class="fa-solid fa-pencil"></i><span>fa-pencil</span></div>
+            <div class="shen_tile"><i class="fa-solid fa-download"></i><span>fa-download</span></div>
+            <div class="shen_tile"><i class="fa-solid fa-share-nodes"></i><span>fa-share-nodes</span></div>
+        </div>
+
+        <div class="shen_section-title">
+            <span>品牌图标 BRANDS</span>
+            <span class="shen_line"></span>
+        </div>
+        <div class="shen_grid">
+            <div class="shen_tile"><i class="fa-brands fa-github"></i><span>fa-github</span></div>
+            <div class="shen_tile"><i class="fa-brands fa-weixin"></i><span>fa-weixin</span></div>
+            <div class="shen_tile"><i class="fa-brands fa-qq"></i><span>fa-qq</span></div>
+            <div class="shen_tile"><i class="fa-brands fa-weibo"></i><span>fa-weibo</span></div>
+            <div class="shen_tile"><i class="fa-brands fa-bilibili"></i><span>fa-bilibili</span></div>
+            <div class="shen_tile"><i class="fa-brands fa-zhihu"></i><span>fa-zhihu</span></div>
+            <div class="shen_tile"><i class="fa-brands fa-alipay"></i><span>fa-alipay</span></div>
+            <div class="shen_tile"><i class="fa-brands fa-tiktok"></i><span>fa-tiktok</span></div>
+            <div class="shen_tile"><i class="fa-brands fa-tencent-weibo"></i><span>fa-tencent-weibo</span></div>
+            <div class="shen_tile"><i class="fa-brands fa-youtube"></i><span>fa-youtube</span></div>
+            <div class="shen_tile"><i class="fa-brands fa-google"></i><span>fa-google</span></div>
+            <div class="shen_tile"><i class="fa-brands fa-android"></i><span>fa-android</span></div>
+        </div>
+
+        <div class="shen_section-title">
+            <span>字体缩放 FONT-SIZE</span>
+            <span class="shen_line"></span>
+        </div>
+        <div class="shen_size-row">
+            <div class="shen_size-item"><i class="fa-solid fa-heart fa-1x"></i><span>fa-1x</span></div>
+            <div class="shen_size-item"><i class="fa-solid fa-heart fa-2x"></i><span>fa-2x</span></div>
+            <div class="shen_size-item"><i class="fa-solid fa-heart fa-3x"></i><span>fa-3x</span></div>
+            <div class="shen_size-item"><i class="fa-solid fa-heart fa-4x"></i><span>fa-4x</span></div>
+            <div class="shen_size-item"><i class="fa-solid fa-heart fa-5x"></i><span>fa-5x</span></div>
+        </div>
+
+        <div class="shen_section-title">
+            <span>字体上色 COLOR</span>
+            <span class="shen_line"></span>
+        </div>
+        <div class="shen_color-row">
+            <i class="fa-solid fa-star" style="color:#ef4444"></i>
+            <i class="fa-solid fa-star" style="color:#f59e0b"></i>
+            <i class="fa-solid fa-star" style="color:#22c55e"></i>
+            <i class="fa-solid fa-star" style="color:#3b82f6"></i>
+            <i class="fa-solid fa-star" style="color:#a855f7"></i>
+            <i class="fa-solid fa-star" style="color:#ec4899"></i>
+        </div>
+
+        <div class="shen_section-title">
+            <span>用法示例 CODE</span>
+            <span class="shen_line"></span>
+        </div>
+        <div class="shen_code">
+<pre><span class="shen-tag">&lt;link</span> <span class="shen-attr">rel</span>=<span class="shen-attr">"stylesheet"</span> <span class="shen-attr">href</span>=<span class="shen-attr">"cdn/font-awesome/css/all.min.css"</span><span class="shen-tag">&gt;</span>
+
+<span class="shen-tag">&lt;i</span> <span class="shen-attr">class</span>=<span class="shen-attr">"fa-solid fa-house"</span><span class="shen-tag">&gt;&lt;/i&gt;</span>   <span style="color:#64748b">&lt;!-- 实心图标 --&gt;</span>
+<span class="shen-tag">&lt;i</span> <span class="shen-attr">class</span>=<span class="shen-attr">"fa-brands fa-github"</span><span class="shen-tag">&gt;&lt;/i&gt;</span>  <span style="color:#64748b">&lt;!-- 品牌图标 --&gt;</span>
+<span class="shen-tag">&lt;i</span> <span class="shen-attr">class</span>=<span class="shen-attr">"fa-solid fa-heart fa-3x"</span> <span class="shen-attr">style</span>=<span class="shen-attr">"color:#ef4444"</span><span class="shen-tag">&gt;&lt;/i&gt;</span></pre>
+        </div>
+
+        <div class="shen_footer">
+            <p>字体图标（Font Icon）· 字体文件已下载至 <code style="color:#fbbf24">cdn/font-awesome/</code>，可离线使用</p>
+            <p style="margin-top:6px"><a href="13-2.html">下一节：Lucide SVG 图标 →</a> · <a href="index.html">← 返回作品集导航</a></p>
+        </div>
+    </div>
+</body>
+</html>

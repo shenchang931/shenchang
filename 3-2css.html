@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>931s沈畅</title>
+    <style>
+        h3{
+            color: red;
+        }
+        p{
+            color: blue;
+        }
+        #box{
+            width: 500px;
+            height: 500px;
+            background-color: #ccc;
+        }
+        .n1{
+            color: green;
+        }
+        /* 扩展1：h2黑底白字 */
+        h2{
+            background-color: black;
+            color: white;
+        }
+        /* 扩展3：选择器三个字白色 */
+        .sel{
+            color: white;
+        }
+        /* 扩展4：新盒子学号样式 */
+        #stuBox{
+            width: 300px;
+            height: 80px;
+            background-color: #99ccff;
+            margin-top:10px;
+        }
+    </style>
+</head>
+<body>
+    <h2>层叠样式表CSS</h2>
+    <div id="box">
+        <!-- 扩展3：选择器三个字白色 -->
+        <h3><span class="sel">选择器</span></h3>
+        <!-- 扩展2：每个字不同颜色，同一行，用span包裹每个字 -->
+        <p>
+            <span style="color:green">沈</span>
+            <span style="color:orange">畅</span>
+        </p>
+        <p>CSS属性</p>
+
+        <!-- 扩展4：新加盒子，学号 -->
+        <div id="stuBox">
+            学号：24001010931
+        </div>
+
+    </div>
+</body>
+</html>

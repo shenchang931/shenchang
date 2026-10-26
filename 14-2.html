@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<!-- 姓名：沈畅，日期：2026-10-22，功能名称：JavaScript六种基础数据类型演示 -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>14-2 JavaScript 六种基础数据类型</title>
+    <style>
+        :root {
+            --sc_bg: #0f172a;
+            --sc_card: #1e293b;
+            --sc_border: #334155;
+            --sc_text: #e2e8f0;
+            --sc_muted: #94a3b8;
+            --sc_accent: #a78bfa;
+            --sc_accent2: #38bdf8;
+            --sc_code_bg: #0b1220;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            background: radial-gradient(1200px 600px at 50% -10%, #1e2a4a, var(--sc_bg));
+            color: var(--sc_text);
+            min-height: 100vh;
+            padding: 40px 16px 60px;
+        }
+
+        .sc_header { text-align: center; margin-bottom: 36px; }
+        .sc_header h1 {
+            font-size: 34px;
+            background: linear-gradient(90deg, var(--sc_accent), var(--sc_accent2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+        }
+        .sc_header p { color: var(--sc_muted); font-size: 14px; letter-spacing: 1px; }
+
+        .sc_container { max-width: 1100px; margin: 0 auto; }
+
+        .sc_type_grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 18px;
+            margin-bottom: 40px;
+        }
+
+        .sc_card {
+            background: var(--sc_card);
+            border: 1px solid var(--sc_border);
+            border-radius: 14px;
+            padding: 20px;
+            transition: transform .25s, border-color .25s, box-shadow .25s;
+        }
+        .sc_card:hover {
+            transform: translateY(-4px);
+            border-color: var(--sc_accent);
+            box-shadow: 0 12px 30px rgba(167, 139, 250, .15);
+        }
+
+        .sc_card_top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .sc_card_title { font-size: 19px; font-weight: bold; }
+        .sc_card_title small { color: var(--sc_muted); font-size: 13px; margin-left: 6px; }
+        .sc_badge {
+            font-family: Consolas, Monaco, monospace;
+            font-size: 12px;
+            color: var(--sc_accent2);
+            background: rgba(56, 189, 248, .12);
+            border: 1px solid rgba(56, 189, 248, .35);
+            border-radius: 999px;
+            padding: 3px 10px;
+        }
+
+        .sc_desc { font-size: 13.5px; line-height: 1.7; color: var(--sc_muted); margin-bottom: 12px; }
+
+        .sc_code {
+            background: var(--sc_code_bg);
+            border: 1px solid var(--sc_border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            color: #7dd3fc;
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        .sc_tester {
+            background: var(--sc_card);
+            border: 1px solid var(--sc_border);
+            border-radius: 14px;
+            padding: 24px;
+        }
+        .sc_tester h2 { font-size: 20px; margin-bottom: 6px; }
+        .sc_tester > p { color: var(--sc_muted); font-size: 13px; margin-bottom: 14px; }
+
+        .sc_presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+        .sc_preset {
+            font-family: Consolas, Monaco, monospace;
+            font-size: 12.5px;
+            color: var(--sc_text);
+            background: var(--sc_code_bg);
+            border: 1px solid var(--sc_border);
+            border-radius: 999px;
+            padding: 5px 12px;
+            cursor: pointer;
+            transition: border-color .2s, color .2s;
+        }
+        .sc_preset:hover { border-color: var(--sc_accent); color: var(--sc_accent); }
+
+        .sc_tester_row { display: flex; gap: 10px; flex-wrap: wrap; }
+        .sc_input {
+            flex: 1;
+            min-width: 240px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 14px;
+            color: var(--sc_text);
+            background: var(--sc_code_bg);
+            border: 1px solid var(--sc_border);
+            border-radius: 10px;
+            padding: 11px 14px;
+            outline: none;
+        }
+        .sc_input:focus { border-color: var(--sc_accent); }
+        .sc_btn {
+            font-size: 14px;
+            font-weight: bold;
+            color: #fff;
+            background: linear-gradient(90deg, var(--sc_accent), var(--sc_accent2));
+            border: none;
+            border-radius: 10px;
+            padding: 11px 26px;
+            cursor: pointer;
+            transition: opacity .2s, transform .2s;
+        }
+        .sc_btn:hover { opacity: .88; }
+        .sc_btn:active { transform: scale(.97); }
+
+        .sc_result {
+            margin-top: 16px;
+            font-size: 14px;
+            line-height: 1.9;
+            background: var(--sc_code_bg);
+            border: 1px dashed var(--sc_border);
+            border-radius: 10px;
+            padding: 14px 16px;
+            min-height: 52px;
+        }
+        .sc_result code {
+            font-family: Consolas, Monaco, monospace;
+            color: var(--sc_accent2);
+        }
+        .sc_tip { color: var(--sc_muted); }
+        .sc_err { color: #f87171; }
+        .sc_ok { color: #34d399; }
+        .sc_warn { color: #fbbf24; }
+
+        .sc_footer_note {
+            margin-top: 26px;
+            text-align: center;
+            color: var(--sc_muted);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <header class="sc_header">
+        <h1>JavaScript 六种基础数据类型</h1>
+        <p>沈畅 · Undefined / Null / Boolean / Number / String / Symbol · 使用 typeof 检测类型</p>
+    </header>
+
+    <main class="sc_container">
+        <section id="sc_type_grid" class="sc_type_grid"></section>
+
+        <section class="sc_tester">
+            <h2>交互式类型检测器</h2>
+            <p>输入一个 JavaScript 字面量（字符串需带引号），或点击下方预设值，检测其 typeof 结果。</p>
+            <div id="sc_presets" class="sc_presets"></div>
+            <div class="sc_tester_row">
+                <input id="sc_input" class="sc_input" type="text" placeholder='例如："沈畅"、2026、true、null、undefined、Symbol("id")' />
+                <button id="sc_btn" class="sc_btn">检测类型</button>
+            </div>
+            <div id="sc_result" class="sc_result"><span class="sc_tip">检测结果将显示在这里。</span></div>
+        </section>
+
+        <p class="sc_footer_note">
+            除以上六种基础（原始）数据类型外，JavaScript 还有引用类型 Object（对象、数组、函数等）。<br>
+            注意：typeof null 返回 "object" 是历史遗留问题，null 本身仍属于基础数据类型。
+        </p>
+    </main>
+
+    <script>
+        // 六种基础数据类型定义
+        var sc_types = [
+            {
+                sc_en: 'String',
+                sc_cn: '字符串',
+                sc_desc: '由零或多个字符组成的文本序列，可用单引号、双引号或反引号（模板字符串）表示。',
+                sc_badge: 'typeof → string',
+                sc_code: 'let sc_str = "沈畅，你好";\ntypeof sc_str   // "string"'
+            },
+            {
+                sc_en: 'Number',
+                sc_cn: '数字',
+                sc_desc: '表示整数和浮点数，特殊值包括 NaN（非数字）和 Infinity（无穷大）。',
+                sc_badge: 'typeof → number',
+                sc_code: 'let sc_num = 3.14;\nlet sc_nan = NaN;      // 非数字也属于 number\ntypeof sc_num   // "number"'
+            },
+            {
+                sc_en: 'Boolean',
+                sc_cn: '布尔',
+                sc_desc: '只有 true 和 false 两个取值，常用于逻辑判断和条件控制。',
+                sc_badge: 'typeof → boolean',
+                sc_code: 'let sc_flag = true;\ntypeof sc_flag  // "boolean"'
+            },
+            {
+                sc_en: 'Undefined',
+                sc_cn: '未定义',
+                sc_desc: '变量声明后尚未赋值时的默认值，该类型只有 undefined 一个值。',
+                sc_badge: 'typeof → undefined',
+                sc_code: 'let sc_undef;          // 声明后未赋值\ntypeof sc_undef // "undefined"'
+            },
+            {
+                sc_en: 'Null',
+                sc_cn: '空值',
+                sc_desc: '表示"空值"，意指变量有意地不指向任何对象。typeof 检测返回 "object" 属于历史遗留特例。',
+                sc_badge: 'typeof → object（特例）',
+                sc_code: 'let sc_empty = null;   // 有意置空\ntypeof sc_empty // "object"（特例）'
+            },
+            {
+                sc_en: 'Symbol',
+                sc_cn: '符号',
+                sc_desc: 'ES6 新增类型，表示独一无二的值，常用作对象的属性名以避免命名冲突。',
+                sc_badge: 'typeof → symbol',
+                sc_code: 'let sc_id = Symbol("id");  // 每次创建都唯一\ntypeof sc_id    // "symbol"'
+            }
+        ];
+
+        // 渲染六种类型卡片
+        function sc_renderTypes() {
+            var sc_html = '';
+            sc_types.forEach(function (sc_t) {
+                sc_html += ''
+                    + '<article class="sc_card">'
+                    + '  <div class="sc_card_top">'
+                    + '    <span class="sc_card_title">' + sc_t.sc_en + '<small>' + sc_t.sc_cn + '</small></span>'
+                    + '    <span class="sc_badge">' + sc_t.sc_badge + '</span>'
+                    + '  </div>'
+                    + '  <p class="sc_desc">' + sc_t.sc_desc + '</p>'
+                    + '  <pre class="sc_code">' + sc_t.sc_code + '</pre>'
+                    + '</article>';
+            });
+            document.getElementById('sc_type_grid').innerHTML = sc_html;
+        }
+
+        // 预设检测值
+        var sc_presets = ['"沈畅"', '2026', 'true', 'null', 'undefined', 'Symbol("id")', '{sc_a: 1}'];
+
+        function sc_renderPresets() {
+            var sc_box = document.getElementById('sc_presets');
+            sc_presets.forEach(function (sc_p) {
+                var sc_b = document.createElement('button');
+                sc_b.className = 'sc_preset';
+                sc_b.textContent = sc_p;
+                sc_b.addEventListener('click', function () {
+                    document.getElementById('sc_input').value = sc_p;
+                    sc_checkType();
+                });
+                sc_box.appendChild(sc_b);
+            });
+        }
+
+        // 转义 HTML 特殊字符，防止输入内容破坏页面结构
+        function sc_escape(sc_text) {
+            return sc_text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        // 检测输入字面量的类型
+        function sc_checkType() {
+            var sc_input = document.getElementById('sc_input');
+            var sc_box = document.getElementById('sc_result');
+            var sc_text = sc_input.value.trim();
+
+            if (sc_text === '') {
+                sc_box.innerHTML = '<span class="sc_tip">请先输入一个 JavaScript 字面量。</span>';
+                return;
+            }
+
+            var sc_value;
+            try {
+                sc_value = new Function('return (' + sc_text + ')')();
+            } catch (sc_err) {
+                sc_box.innerHTML = '<span class="sc_err">无法解析输入：' + sc_escape(sc_text) + '，请检查书写是否正确。</span>';
+                return;
+            }
+
+            var sc_kind = typeof sc_value;
+            var sc_name_map = {
+                string: '字符串（基础类型）',
+                number: '数字（基础类型）',
+                boolean: '布尔（基础类型）',
+                undefined: '未定义（基础类型）',
+                symbol: '符号（基础类型）',
+                object: '对象（引用类型）',
+                function: '函数（引用类型）'
+            };
+
+            var sc_extra = '';
+            if (sc_value === null) {
+                sc_extra = '<br><span class="sc_warn">注意：typeof null 返回 "object" 是历史遗留问题，null 本身属于基础数据类型。</span>';
+            } else if (sc_kind === 'object' || sc_kind === 'function') {
+                sc_extra = '<br><span class="sc_tip">该值属于引用类型，不属于六种基础数据类型。</span>';
+            }
+
+            sc_box.innerHTML = ''
+                + '<span class="sc_ok">检测成功</span>：输入值 <code>' + sc_escape(sc_text) + '</code>'
+                + ' → typeof 结果 <code>"' + sc_kind + '"</code>'
+                + ' → 类型：<strong>' + sc_name_map[sc_kind] + '</strong>'
+                + sc_extra;
+        }
+
+        // 初始化页面
+        sc_renderTypes();
+        sc_renderPresets();
+        document.getElementById('sc_btn').addEventListener('click', sc_checkType);
+        document.getElementById('sc_input').addEventListener('keydown', function (sc_e) {
+            if (sc_e.key === 'Enter') { sc_checkType(); }
+        });
+    </script>
+</body>
+</html>

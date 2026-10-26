@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10-4 · 响应式 8 盒子 · 沈畅</title>
+<style>
+    *{ margin: 0; padding: 0; box-sizing: border-box; }
+
+    body{
+        font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        background: linear-gradient(135deg, #f0f9ff, #e0e7ff);
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .header{
+        text-align: center;
+        margin-bottom: 24px;
+    }
+    .header h1{
+        font-size: clamp(20px, 5vw, 32px);
+        color: #1e293b;
+        letter-spacing: 0.3em;
+        padding-left: 0.3em;
+    }
+    .header h1 b{
+        color: #ec4899;
+    }
+    .header p{
+        margin-top: 8px;
+        font-size: 13px;
+        color: #64748b;
+        letter-spacing: 0.1em;
+    }
+
+    /* 容器：使用 flex + wrap，8 个盒子顺序换行 */
+    .grid{
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* 基础：每个盒子 width: 100%，移动端一行 1 个 */
+    .item{
+        width: 100%;
+        min-height: 110px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
+        transition: transform 0.3s ease;
+    }
+    .item:hover{
+        transform: translateY(-6px) scale(1.02);
+    }
+
+    .item span{
+        display: inline-block;
+        padding: 6px 16px;
+        background: rgba(255, 255, 255, 0.22);
+        border-radius: 8px;
+    }
+
+    /* 8 个盒子的不同主题色 */
+    .item:nth-child(1){ background: linear-gradient(135deg, #f43f5e, #f59e0b); }
+    .item:nth-child(2){ background: linear-gradient(135deg, #f59e0b, #facc15); }
+    .item:nth-child(3){ background: linear-gradient(135deg, #84cc16, #10b981); }
+    .item:nth-child(4){ background: linear-gradient(135deg, #10b981, #14b8a6); }
+    .item:nth-child(5){ background: linear-gradient(135deg, #06b6d4, #3b82f6); }
+    .item:nth-child(6){ background: linear-gradient(135deg, #3b82f6, #6366f1); }
+    .item:nth-child(7){ background: linear-gradient(135deg, #8b5cf6, #a855f7); }
+    .item:nth-child(8){ background: linear-gradient(135deg, #ec4899, #f43f5e); }
+
+    /* 扩展：3 个 media 断点，min-width: 320px 起 */
+    @media (min-width: 320px){
+        /* 移动端：一行 1 个 */
+        .item{ width: 100%; }
+    }
+    @media (min-width: 600px){
+        /* 平板小屏：一行 2 个 */
+        .item{ width: calc(50% - 8px); }
+    }
+    @media (min-width: 900px){
+        /* 桌面端：一行 4 个 */
+        .item{ width: calc(25% - 12px); }
+    }
+    @media (min-width: 1100px){
+        /* 大屏：一行 4 个，更舒展 */
+        .item{ width: calc(25% - 12px); }
+        .grid{ gap: 20px; }
+    }
+
+    .tip{
+        margin-top: 28px;
+        text-align: center;
+        font-size: 12px;
+        color: #94a3b8;
+        letter-spacing: 0.1em;
+    }
+</style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>沈畅· 响应式 8 盒子</h1>
+        <p>320 / 600 / 900 / 1100 px 断点切换</p>
+    </div>
+
+    <div class="grid">
+        <div class="item"><span>01</span></div>
+        <div class="item"><span>02</span></div>
+        <div class="item"><span>03</span></div>
+        <div class="item"><span>04</span></div>
+        <div class="item"><span>05</span></div>
+        <div class="item"><span>06</span></div>
+        <div class="item"><span>07</span></div>
+        <div class="item"><span>08</span></div>
+    </div>
+
+   
+
+</body>
+</html>

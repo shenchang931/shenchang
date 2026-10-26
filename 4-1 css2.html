@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        h2,h3,p{
+            padding: 0;
+            margin: 0;
+        }
+        #box{
+            padding:8px;
+            margin: 20px;
+            border: 1px solid #ccc;
+            font-size: 12px;
+            width: 488px;
+        }
+        #box h3{
+            font-size: 16px;
+            line-height: 33px;
+            text-align: center;
+            color: #034;
+            letter-spacing: 3px;
+        }
+        #box>p{
+            color: #666;
+            text-indent: 2em;
+            line-height: 150%;
+
+        }
+        #box a{
+            color: #f11;
+            text-decoration: none;
+        }
+       .bb{
+        color: rgb(19, 155, 200);
+        font-weight: bold;
+       }
+       .xm{
+        color: rgb(19, 155, 200);
+        font-weight: bold;
+       }
+        .bj{
+        color: rgb(19, 155, 200);
+        font-weight: bold;
+       }
+       h2{
+         background-color: black;
+            color: white;
+            text-align: center;
+            line-height: 150%;
+       }
+     .pp{
+        background-color: blue;
+            color: white;
+     }
+
+    </style>
+</head>
+<body>
+    <h2>css群组选择器和后代选择器</h2>
+    <div id="box">
+        <h3>CSS进阶</h3>
+        <p>学号：<span class="bb">931</span>,姓名：<span class="xm">沈畅</span>，班级：<span class="bj">计算机24009</span>，《高级网页设计》设计的学习难度：还好，
+            本实例的<span class="pp">知识点</span>：CSS群组选择器和后代选择器。
+            <a href="#">【更多】</a>
+        </p>
+    </div>
+    <!-- 扩展：
+     1.学号，姓名，班级的值是蓝色加粗，使用1个css选择器
+     2.h2黑底白字居中行高15%
+     3.知识点的字蓝底白字
+            -->
+</body>
+</html>

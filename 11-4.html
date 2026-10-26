@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11-4 · 3D 画廊 · 沈畅</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+            background: #080c16;
+            color: #e2e8f0;
+            min-height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .shen_header {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 10;
+        }
+
+        .shen_header h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 4px;
+        }
+
+        .shen_header p {
+            color: #64748b;
+            font-size: 0.82rem;
+            margin-top: 4px;
+            letter-spacing: 2px;
+        }
+
+        .shen_gallery-scene {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 900px;
+        }
+
+        .shen_gallery {
+            width: 200px;
+            height: 280px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: shen_rotate_gallery 20s linear infinite;
+        }
+
+        .shen_gallery:hover {
+            animation-play-state: paused;
+        }
+
+        @keyframes shen_rotate_gallery {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+
+        .shen_gallery-item {
+            position: absolute;
+            width: 200px;
+            height: 280px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .shen_gallery-item:hover {
+            box-shadow: 0 12px 48px rgba(139, 92, 246, 0.4);
+        }
+
+        .shen_gallery-item .shen_item-bg {
+            position: absolute;
+            inset: 0;
+        }
+
+        .shen_gallery-item .shen_item-emoji {
+            font-size: 3.5rem;
+            z-index: 1;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        }
+
+        .shen_gallery-item .shen_item-label {
+            position: absolute;
+            bottom: 16px;
+            z-index: 1;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #fff;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+            background: rgba(0, 0, 0, 0.35);
+            padding: 4px 14px;
+            border-radius: 999px;
+            backdrop-filter: blur(4px);
+        }
+
+        .shen_item-1 .shen_item-bg { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .shen_item-2 .shen_item-bg { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .shen_item-3 .shen_item-bg { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .shen_item-4 .shen_item-bg { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+        .shen_item-5 .shen_item-bg { background: linear-gradient(135deg, #fa709a, #fee140); }
+        .shen_item-6 .shen_item-bg { background: linear-gradient(135deg, #a18cd1, #fbc2eb); }
+        .shen_item-7 .shen_item-bg { background: linear-gradient(135deg, #fccb90, #d57eeb); }
+        .shen_item-8 .shen_item-bg { background: linear-gradient(135deg, #e0c3fc, #8ec5fc); }
+
+        .shen_gallery-item:nth-child(1) { transform: rotateY(0deg) translateZ(350px); }
+        .shen_gallery-item:nth-child(2) { transform: rotateY(45deg) translateZ(350px); }
+        .shen_gallery-item:nth-child(3) { transform: rotateY(90deg) translateZ(350px); }
+        .shen_gallery-item:nth-child(4) { transform: rotateY(135deg) translateZ(350px); }
+        .shen_gallery-item:nth-child(5) { transform: rotateY(180deg) translateZ(350px); }
+        .shen_gallery-item:nth-child(6) { transform: rotateY(225deg) translateZ(350px); }
+        .shen_gallery-item:nth-child(7) { transform: rotateY(270deg) translateZ(350px); }
+        .shen_gallery-item:nth-child(8) { transform: rotateY(315deg) translateZ(350px); }
+
+        .shen_controls {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 10;
+        }
+
+        .shen_btn {
+            padding: 10px 24px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.05);
+            color: #e2e8f0;
+            font-size: 0.85rem;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+        }
+
+        .shen_btn:hover {
+            background: rgba(139, 92, 246, 0.25);
+            border-color: rgba(139, 92, 246, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .shen_btn.shen_btn-active {
+            background: rgba(139, 92, 246, 0.35);
+            border-color: #a78bfa;
+        }
+
+        .shen_floor {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40vh;
+            background: linear-gradient(to top, rgba(139, 92, 246, 0.06), transparent);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .shen_instruction {
+            position: fixed;
+            bottom: 88px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #475569;
+            font-size: 0.78rem;
+            letter-spacing: 1px;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div class="shen_header">
+        <h1>3D 画廊</h1>
+        <p>沈畅 · CSS3 3D Carousel Gallery</p>
+    </div>
+
+    <div class="shen_gallery-scene">
+        <div class="shen_gallery" id="shen_gallery">
+            <div class="shen_gallery-item shen_item-1">
+                <div class="shen_item-bg"></div>
+                <span class="shen_item-emoji">山</span>
+                <span class="shen_item-label">山水</span>
+            </div>
+            <div class="shen_gallery-item shen_item-2">
+                <div class="shen_item-bg"></div>
+                <span class="shen_item-emoji">花</span>
+                <span class="shen_item-label">花卉</span>
+            </div>
+            <div class="shen_gallery-item shen_item-3">
+                <div class="shen_item-bg"></div>
+                <span class="shen_item-emoji">海</span>
+                <span class="shen_item-label">海洋</span>
+            </div>
+            <div class="shen_gallery-item shen_item-4">
+                <div class="shen_item-bg"></div>
+                <span class="shen_item-emoji">森</span>
+                <span class="shen_item-label">森林</span>
+            </div>
+            <div class="shen_gallery-item shen_item-5">
+                <div class="shen_item-bg"></div>
+                <span class="shen_item-emoji">星</span>
+                <span class="shen_item-label">星空</span>
+            </div>
+            <div class="shen_gallery-item shen_item-6">
+                <div class="shen_item-bg"></div>
+                <span class="shen_item-emoji">梦</span>
+                <span class="shen_item-label">梦境</span>
+            </div>
+            <div class="shen_gallery-item shen_item-7">
+                <div class="shen_item-bg"></div>
+                <span class="shen_item-emoji">光</span>
+                <span class="shen_item-label">光影</span>
+            </div>
+            <div class="shen_gallery-item shen_item-8">
+                <div class="shen_item-bg"></div>
+                <span class="shen_item-emoji">云</span>
+                <span class="shen_item-label">云彩</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="shen_floor"></div>
+    <p class="shen_instruction">鼠标悬停暂停旋转 · 点击按钮控制速度</p>
+
+    <div class="shen_controls">
+        <button class="shen_btn" id="shen_btn-slow" onclick="shen_setSpeed(40)">慢速</button>
+        <button class="shen_btn shen_btn-active" id="shen_btn-normal" onclick="shen_setSpeed(20)">正常</button>
+        <button class="shen_btn" id="shen_btn-fast" onclick="shen_setSpeed(8)">快速</button>
+        <button class="shen_btn" id="shen_btn-pause" onclick="shen_togglePause()">暂停</button>
+    </div>
+
+    <script>
+        var shen_gallery = document.getElementById('shen_gallery');
+        var shen_isPaused = false;
+        var shen_currentDuration = 20;
+        var shen_buttons = document.querySelectorAll('.shen_btn');
+
+        function shen_setSpeed(seconds) {
+            shen_currentDuration = seconds;
+            shen_gallery.style.animationDuration = seconds + 's';
+            shen_isPaused = false;
+            shen_gallery.style.animationPlayState = 'running';
+            shen_updateButtons();
+        }
+
+        function shen_togglePause() {
+            shen_isPaused = !shen_isPaused;
+            shen_gallery.style.animationPlayState = shen_isPaused ? 'paused' : 'running';
+            shen_updateButtons();
+        }
+
+        function shen_updateButtons() {
+            shen_buttons.forEach(function(btn) {
+                btn.classList.remove('shen_btn-active');
+            });
+            if (shen_isPaused) {
+                document.getElementById('shen_btn-pause').classList.add('shen_btn-active');
+            } else if (shen_currentDuration === 40) {
+                document.getElementById('shen_btn-slow').classList.add('shen_btn-active');
+            } else if (shen_currentDuration === 8) {
+                document.getElementById('shen_btn-fast').classList.add('shen_btn-active');
+            } else {
+                document.getElementById('shen_btn-normal').classList.add('shen_btn-active');
+            }
+        }
+    </script>
+</body>
+</html>

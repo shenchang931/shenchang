@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>13-4 SVG 图标下导航 · 沈畅</title>
+    <style>
+        :root {
+            --shen_bg: #0b1020;
+            --shen_card: rgba(30, 41, 59, 0.82);
+            --shen_text: #f1f5f9;
+            --shen_muted: #94a3b8;
+            --shen_accent: #38bdf8;
+            --shen_accent2: #6366f1;
+            --shen_danger: #ff4d4f;
+            --shen_radius: 16px;
+            --shen_nav_h: 60px;
+            --shen_gradient: linear-gradient(135deg, #38bdf8, #6366f1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+            background: var(--shen_bg);
+            color: var(--shen_text);
+            min-height: 100vh;
+            line-height: 1.6;
+            padding-bottom: calc(var(--shen_nav_h) + env(safe-area-inset-bottom, 0px) + 20px);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background:
+                radial-gradient(56vw 56vw at 10% -6%, rgba(56, 189, 248, 0.22), transparent 60%),
+                radial-gradient(56vw 56vw at 96% 6%, rgba(99, 102, 241, 0.20), transparent 60%),
+                radial-gradient(64vw 64vw at 50% 112%, rgba(56, 189, 248, 0.14), transparent 62%);
+        }
+
+        /* ---------- 顶部应用栏 ---------- */
+        .shen_appbar {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px 16px;
+            background: rgba(11, 16, 32, 0.82);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .shen_appbar .shen_title {
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .shen_appbar .shen_title b {
+            background: var(--shen_gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .shen_appbar .shen_tools {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: var(--shen_muted);
+        }
+
+        .shen_appbar .shen_tools svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            transition: color 0.25s ease, transform 0.25s ease;
+        }
+
+        .shen_appbar .shen_tools svg:hover {
+            color: var(--shen_accent);
+            transform: scale(1.12);
+        }
+
+        /* ---------- 说明卡片 ---------- */
+        .shen_hint {
+            margin: 18px 16px 0;
+            padding: 16px 18px;
+            border-radius: var(--shen_radius);
+            background: var(--shen_card);
+            border: 1px solid rgba(56, 189, 248, 0.28);
+            font-size: 13.5px;
+            color: #cdeafe;
+            line-height: 1.8;
+        }
+
+        .shen_hint code {
+            font-family: Consolas, "Courier New", monospace;
+            color: #7dd3fc;
+            background: rgba(255, 255, 255, 0.07);
+            border-radius: 5px;
+            padding: 1px 7px;
+        }
+
+        .shen_hint .shen_row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .shen_hint .shen_chip {
+            font-size: 11.5px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--shen_muted);
+        }
+
+        /* ---------- 商品流（模拟滚动内容） ---------- */
+        .shen_feed {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            padding: 16px;
+        }
+
+        .shen_goods {
+            background: var(--shen_card);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--shen_radius);
+            overflow: hidden;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .shen_goods:hover {
+            transform: translateY(-4px);
+            border-color: rgba(56, 189, 248, 0.5);
+        }
+
+        .shen_goods .shen_cover {
+            height: 104px;
+            display: grid;
+            place-items: center;
+            color: rgba(255, 255, 255, 0.92);
+            background: linear-gradient(135deg, #38bdf8, #6366f1);
+        }
+
+        .shen_goods:nth-child(2n) .shen_cover {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+        }
+
+        .shen_goods:nth-child(3n) .shen_cover {
+            background: linear-gradient(135deg, #34d399, #0ea5e9);
+        }
+
+        .shen_goods .shen_cover svg {
+            width: 42px;
+            height: 42px;
+            fill: currentColor;
+        }
+
+        .shen_goods .shen_info {
+            padding: 12px 14px 14px;
+        }
+
+        .shen_goods .shen_info h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .shen_goods .shen_info .shen_price {
+            color: var(--shen_accent);
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .shen_goods .shen_info .shen_price small {
+            font-size: 11px;
+            font-weight: 400;
+            color: var(--shen_muted);
+            text-decoration: line-through;
+            margin-left: 6px;
+        }
+
+        /* ---------- 固定下导航 ---------- */
+        .shen_bottom-nav {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            z-index: 50;
+            height: calc(var(--shen_nav_h) + env(safe-area-inset-bottom, 0px));
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+            display: flex;
+            background: rgba(15, 21, 40, 0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.35);
+        }
+
+        .shen_nav-item {
+            flex: 1 1 0;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            color: var(--shen_muted);
+            text-decoration: none;
+            -webkit-tap-highlight-color: transparent;
+            transition: color 0.25s ease;
+        }
+
+        .shen_nav-item:active {
+            transform: scale(0.94);
+        }
+
+        .shen_nav-icon {
+            position: relative;
+            display: inline-block;
+            line-height: 1;
+        }
+
+        .shen_nav-item .shen_svg-icon {
+            width: 23px;
+            height: 23px;
+            fill: currentColor;
+            overflow: hidden;
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .shen_nav-item .shen_nav-label {
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            transition: transform 0.25s ease;
+        }
+
+        .shen_nav-item.shen_active,
+        .shen_nav-item:hover {
+            color: var(--shen_accent);
+        }
+
+        .shen_nav-item.shen_active .shen_svg-icon {
+            transform: translateY(-2px) scale(1.1);
+        }
+
+        /* 数字徽章 */
+        .shen_nav-badge {
+            position: absolute;
+            top: -7px;
+            right: -11px;
+            min-width: 17px;
+            height: 17px;
+            padding: 0 5px;
+            border-radius: 999px;
+            background: var(--shen_danger);
+            color: #fff;
+            font-size: 10.5px;
+            font-style: normal;
+            font-weight: 600;
+            line-height: 17px;
+            text-align: center;
+            border: 1.5px solid rgba(15, 21, 40, 1);
+            box-sizing: border-box;
+            animation: shen_pulse 2s ease-in-out infinite;
+        }
+
+        /* 右上角红点 */
+        .shen_nav-dot {
+            position: absolute;
+            top: -2px;
+            right: -3px;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--shen_danger);
+            border: 1.5px solid rgba(15, 21, 40, 1);
+            animation: shen_pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes shen_pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 77, 79, 0.55); }
+            50% { box-shadow: 0 0 0 6px rgba(255, 77, 79, 0); }
+        }
+
+        .shen_footnote {
+            text-align: center;
+            color: #64748b;
+            font-size: 12px;
+            padding: 6px 16px 24px;
+        }
+
+        .shen_footnote a {
+            color: var(--shen_accent);
+            text-decoration: none;
+        }
+
+        /* 自适应：窄屏进一步收紧间距 */
+        @media (max-width: 360px) {
+            .shen_nav-item .shen_svg-icon {
+                width: 21px;
+                height: 21px;
+            }
+            .shen_nav-item .shen_nav-label {
+                font-size: 10px;
+            }
+            .shen_feed {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部应用栏 -->
+    <header class="shen_appbar">
+        <div class="shen_title"><b>沈畅</b> 的移动商城</div>
+        <div class="shen_tools">
+            <svg aria-hidden="true"><use href="#icon-sousuo" xlink:href="#icon-sousuo"></use></svg>
+            <svg aria-hidden="true"><use href="#icon-tongzhi" xlink:href="#icon-tongzhi"></use></svg>
+        </div>
+    </header>
+
+    <!-- 说明 -->
+    <div class="shen_hint">
+        本页面使用 <code>font/iconfont.js</code> 的 <b>SVG Symbol</b> 方案：通过 <code>&lt;svg&gt;&lt;use xlink:href="#icon-xxx"&gt;&lt;/svg&gt;</code> 引用精灵图中的矢量路径，
+        由 <code>fill: currentColor</code> 继承文字颜色。下方是<b>全屏宽度、自适应等分</b>的固定下导航，
+        包含<b>数字徽章</b>与<b>右上角红点</b>两种提示样式。
+        <div class="shen_row">
+            <span class="shen_chip">SVG symbol</span>
+            <span class="shen_chip">fixed bottom</span>
+            <span class="shen_chip">flex:1 等分</span>
+            <span class="shen_chip">badge + dot</span>
+        </div>
+    </div>
+
+    <!-- 模拟商品流 -->
+    <main class="shen_feed">
+        <div class="shen_goods">
+            <div class="shen_cover"><svg aria-hidden="true"><use href="#icon-good" xlink:href="#icon-good"></use></svg></div>
+            <div class="shen_info"><h4>无线蓝牙耳机</h4><div class="shen_price">¥199<small>¥299</small></div></div>
+        </div>
+        <div class="shen_goods">
+            <div class="shen_cover"><svg aria-hidden="true"><use href="#icon-shoucang" xlink:href="#icon-shoucang"></use></svg></div>
+            <div class="shen_info"><h4>复古机械键盘</h4><div class="shen_price">¥329<small>¥459</small></div></div>
+        </div>
+        <div class="shen_goods">
+            <div class="shen_cover"><svg aria-hidden="true"><use href="#icon-shangcheng" xlink:href="#icon-shangcheng"></use></svg></div>
+            <div class="shen_info"><h4>便携充电宝</h4><div class="shen_price">¥89<small>¥129</small></div></div>
+        </div>
+        <div class="shen_goods">
+            <div class="shen_cover"><svg aria-hidden="true"><use href="#icon-gouwuche" xlink:href="#icon-gouwuche"></use></svg></div>
+            <div class="shen_info"><h4>智能手环</h4><div class="shen_price">¥159<small>¥219</small></div></div>
+        </div>
+        <div class="shen_goods">
+            <div class="shen_cover"><svg aria-hidden="true"><use href="#icon-shouye" xlink:href="#icon-shouye"></use></svg></div>
+            <div class="shen_info"><h4>桌面小音箱</h4><div class="shen_price">¥129<small>¥199</small></div></div>
+        </div>
+        <div class="shen_goods">
+            <div class="shen_cover"><svg aria-hidden="true"><use href="#icon-fenlei" xlink:href="#icon-fenlei"></use></svg></div>
+            <div class="shen_info"><h4>人体工学椅</h4><div class="shen_price">¥899<small>¥1299</small></div></div>
+        </div>
+    </main>
+
+    <p class="shen_footnote">
+        931 沈畅 · 计算机 24009 · 《高级网页设计》第 13 章练习<br>
+        <a href="13-3.html">← 上一节：字体图标方案下导航</a> · <a href="index.html">返回作品集导航</a>
+    </p>
+
+    <!-- 固定下导航（SVG 图标） -->
+    <nav class="shen_bottom-nav" id="shen_nav">
+        <a class="shen_nav-item" href="javascript:void(0)" data-shen="mall">
+            <span class="shen_nav-icon">
+                <svg class="shen_svg-icon" aria-hidden="true"><use href="#icon-shangcheng" xlink:href="#icon-shangcheng"></use></svg>
+                <em class="shen_nav-dot"></em>
+            </span>
+            <span class="shen_nav-label">商城</span>
+        </a>
+        <a class="shen_nav-item" href="javascript:void(0)" data-shen="cart">
+            <span class="shen_nav-icon">
+                <svg class="shen_svg-icon" aria-hidden="true"><use href="#icon-gouwuche" xlink:href="#icon-gouwuche"></use></svg>
+                <em class="shen_nav-badge">3</em>
+            </span>
+            <span class="shen_nav-label">购物车</span>
+        </a>
+        <a class="shen_nav-item" href="javascript:void(0)" data-shen="fav">
+            <span class="shen_nav-icon">
+                <svg class="shen_svg-icon" aria-hidden="true"><use href="#icon-shoucang" xlink:href="#icon-shoucang"></use></svg>
+                <em class="shen_nav-badge">9</em>
+            </span>
+            <span class="shen_nav-label">收藏</span>
+        </a>
+        <a class="shen_nav-item shen_active" href="javascript:void(0)" data-shen="home">
+            <span class="shen_nav-icon">
+                <svg class="shen_svg-icon" aria-hidden="true"><use href="#icon-shouye" xlink:href="#icon-shouye"></use></svg>
+                <em class="shen_nav-dot"></em>
+            </span>
+            <span class="shen_nav-label">首页</span>
+        </a>
+    </nav>
+
+    <script src="font/iconfont.js"></script>
+    <script>
+        var shen_nav = document.getElementById('shen_nav');
+        var shen_items = shen_nav.querySelectorAll('.shen_nav-item');
+
+        shen_items.forEach(function (shen_item) {
+            shen_item.addEventListener('click', function () {
+                shen_items.forEach(function (shen_other) {
+                    shen_other.classList.remove('shen_active');
+                });
+                this.classList.add('shen_active');
+            });
+        });
+    </script>
+</body>
+</html>

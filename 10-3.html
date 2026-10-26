@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10-3 · 全屏盒子 · 沈畅</title>
+<style>
+    /* 根字号用 rem，扩展：视口变化时 rem 变化，文字大小自动变 */
+    html{
+        font-size: 16px;
+    }
+
+    *{ margin: 0; padding: 0; box-sizing: border-box; }
+
+    body{
+        min-height: 100vh;
+        font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        background: #fef9c3;
+        transition: background 0.5s ease;
+    }
+
+    /* 全屏盒子 */
+    .box{
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* 基础媒体查询：viewport 变化时背景颜色变化 */
+    @media (min-width: 320px){
+        body{ background: #fef9c3; }
+    }
+    @media (min-width: 480px){
+        body{ background: #bae6fd; }
+    }
+    @media (min-width: 768px){
+        body{ background: #bbf7d0; }
+    }
+    @media (min-width: 1024px){
+        body{ background: #fbcfe8; }
+    }
+    @media (min-width: 1280px){
+        body{ background: #ddd6fe; }
+    }
+
+    /* 扩展：视口变化时根字号变化，文字自动按 rem 缩放 */
+    @media (min-width: 320px){
+        html{ font-size: 14px; }
+    }
+    @media (min-width: 480px){
+        html{ font-size: 16px; }
+    }
+    @media (min-width: 768px){
+        html{ font-size: 20px; }
+    }
+    @media (min-width: 1024px){
+        html{ font-size: 26px; }
+    }
+    @media (min-width: 1280px){
+        html{ font-size: 32px; }
+    }
+
+    .name{
+        font-size: 3rem;          /* 跟随根字号变化 */
+        font-weight: 800;
+        letter-spacing: 0.5em;
+        color: #1f2937;
+        padding-left: 0.5em;      /* 抵消字间距导致的视觉偏移 */
+    }
+    .name b{
+        color: #ec4899;
+    }
+
+    .tip{
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.875rem;
+        background: rgba(0, 0, 0, 0.55);
+        color: #fff;
+        padding: 6px 14px;
+        border-radius: 999px;
+        letter-spacing: 0.05em;
+    }
+</style>
+</head>
+<body>
+    <div class="box">
+        <div class="name"><b>沈</b>畅</div>
+    </div>
+   
+</body>
+</html>

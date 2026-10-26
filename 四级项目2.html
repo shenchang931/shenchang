@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>四级项目2 · 底部导航栏</title>
+  <link rel="stylesheet" href="font/iconfont.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #f5f5f5;
+      padding-bottom: 60px;
+    }
+
+    .shen_header {
+      background: #fff;
+      padding: 20px 16px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 99;
+    }
+
+    .shen_content {
+      padding: 24px 16px;
+      font-size: 15px;
+      color: #666;
+      line-height: 1.8;
+    }
+
+    .shen_tabbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #fff;
+      border-top: 1px solid #eee;
+      display: flex;
+      z-index: 100;
+    }
+
+    .shen_tabbar__item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      font-size: 11px;
+      color: #999;
+      cursor: pointer;
+      transition: color .2s;
+      text-decoration: none;
+      position: relative;
+    }
+
+    .shen_tabbar__item .iconfont {
+      font-size: 22px;
+    }
+
+    .shen_tabbar__item--active {
+      color: #8c2f2f;
+    }
+
+    .shen_tabbar__badge {
+      position: absolute;
+      top: 4px;
+      right: calc(50% - 20px);
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      background: #e6432d;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 10px;
+      line-height: 16px;
+      text-align: center;
+      font-style: normal;
+    }
+
+    .shen_tabbar__dot {
+      position: absolute;
+      top: 6px;
+      right: calc(50% - 18px);
+      width: 8px;
+      height: 8px;
+      background: #e6432d;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="shen_header">首页</div>
+
+  <div class="shen-content">
+    这是页面内容区域。底部导航栏使用 font/iconfont.css 中的图标，包含首页、分类、购物车、我的四个选项。
+  </div>
+
+  <nav class="shen_tabbar">
+    <a class="shen_tabbar__item shen_tabbar__item--active" href="#">
+      <i class="iconfont icon-shouye"></i>
+      <span>首页</span>
+    </a>
+    <a class="shen_tabbar__item" href="#">
+      <i class="iconfont icon-fenlei"></i>
+      <span>分类</span>
+    </a>
+    <a class="shen_tabbar__item" href="#">
+      <i class="iconfont icon-gouwuche"></i>
+      <span class="shen_tabbar__badge">3</span>
+      <span>购物车</span>
+    </a>
+    <a class="shen_tabbar__item" href="#">
+      <i class="iconfont icon-wode"></i>
+      <span class="shen_tabbar__dot"></span>
+      <span>我的</span>
+    </a>
+  </nav>
+
+</body>
+</html>

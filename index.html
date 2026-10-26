@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>931沈畅 · 《高级网页设计》课堂实践</title>
+<style>
+    :root {
+        --bg: #070b18;
+        --card: rgba(255, 255, 255, 0.055);
+        --card-hover: rgba(255, 255, 255, 0.09);
+        --line: rgba(255, 255, 255, 0.12);
+        --txt: #e9edff;
+        --muted: #98a2c8;
+        --c1: #7c8cff;
+        --c2: #a855f7;
+        --c3: #38bdf8;
+        --c4: #f472b6;
+        --c5: #34d399;
+        --c6: #fbbf24;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--txt);
+        min-height: 100vh;
+        overflow-x: hidden;
+        line-height: 1.7;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* ---------- 背景光晕 ---------- */
+    body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -2;
+        background:
+            radial-gradient(55vw 55vw at 12% 0%, rgba(124, 140, 255, 0.30), transparent 62%),
+            radial-gradient(48vw 48vw at 88% 8%, rgba(168, 85, 247, 0.26), transparent 62%),
+            radial-gradient(60vw 60vw at 50% 105%, rgba(56, 189, 248, 0.20), transparent 62%);
+        animation: aurora 16s ease-in-out infinite alternate;
+    }
+
+    @keyframes aurora {
+        0% {
+            transform: scale(1) translate3d(0, 0, 0);
+            opacity: 0.9;
+        }
+        100% {
+            transform: scale(1.15) translate3d(0, -2%, 0);
+            opacity: 1;
+        }
+    }
+
+    /* 网格纹理 */
+    body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background-image:
+            linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+        background-size: 56px 56px;
+        mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 20%, transparent 78%);
+        -webkit-mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 20%, transparent 78%);
+    }
+
+    /* ---------- 阅读进度条 ---------- */
+    .progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        z-index: 99;
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+    .progress span {
+        display: block;
+        height: 100%;
+        width: 0;
+        border-radius: 0 3px 3px 0;
+        background: linear-gradient(90deg, var(--c1), var(--c2), var(--c4));
+        box-shadow: 0 0 12px rgba(168, 85, 247, 0.8);
+        transition: width 0.12s linear;
+    }
+
+    /* ---------- 布局容器 ---------- */
+    .wrap {
+        width: 100%;
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    /* ---------- 顶部导航 ---------- */
+    .nav {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        background: rgba(7, 11, 24, 0.62);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .nav-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 14px 24px;
+        max-width: 1180px;
+        margin: 0 auto;
+    }
+
+    .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
+    .logo-mark {
+        width: 30px;
+        height: 30px;
+        border-radius: 9px;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+        color: #0a0f1f;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--c3), var(--c1) 55%, var(--c2));
+        box-shadow: 0 6px 18px rgba(124, 140, 255, 0.45);
+    }
+
+    .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        font-size: 14px;
+    }
+
+    .nav-links a {
+        color: var(--muted);
+        text-decoration: none;
+        position: relative;
+        transition: color 0.25s ease;
+    }
+
+    .nav-links a::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -5px;
+        width: 0;
+        height: 2px;
+        border-radius: 2px;
+        background: linear-gradient(90deg, var(--c1), var(--c4));
+        transition: width 0.3s ease;
+    }
+
+    .nav-links a:hover {
+        color: #fff;
+    }
+
+    .nav-links a:hover::after {
+        width: 100%;
+    }
+
+    /* ---------- Hero ---------- */
+    .hero {
+        padding: 84px 0 56px;
+        text-align: center;
+        position: relative;
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        letter-spacing: 2px;
+        color: #cdd4ff;
+        padding: 7px 18px;
+        border-radius: 999px;
+        border: 1px solid rgba(124, 140, 255, 0.35);
+        background: rgba(124, 140, 255, 0.10);
+        margin-bottom: 26px;
+        animation: fadeUp 0.7s ease both;
+    }
+
+    .badge i {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--c5);
+        box-shadow: 0 0 10px var(--c5);
+        animation: blink 1.8s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+        50% { opacity: 0.25; }
+    }
+
+    .hero h1 {
+        font-size: clamp(38px, 8vw, 76px);
+        font-weight: 800;
+        letter-spacing: 6px;
+        line-height: 1.18;
+        margin-bottom: 18px;
+    }
+
+    .hero h1 span {
+        display: inline-block;
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        animation: floatY 3s ease-in-out infinite;
+    }
+
+    .hero h1 span:nth-child(1) { background-image: linear-gradient(180deg, #9db4ff, #5b6dff); animation-delay: 0s; }
+    .hero h1 span:nth-child(2) { background-image: linear-gradient(180deg, #d6a8ff, #9333ea); animation-delay: 0.18s; }
+    .hero h1 span:nth-child(3) { background-image: linear-gradient(180deg, #8fe3ff, #0ea5e9); animation-delay: 0.36s; }
+    .hero h1 span:nth-child(4) { background-image: linear-gradient(180deg, #ffb0d6, #ec4899); animation-delay: 0.54s; }
+    .hero h1 span:nth-child(5) { background-image: linear-gradient(180deg, #9df5cb, #10b981); animation-delay: 0.72s; }
+    .hero h1 span:nth-child(6) { background-image: linear-gradient(180deg, #ffe08a, #f59e0b); animation-delay: 0.90s; }
+
+    @keyframes floatY {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+
+    @keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(22px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .hero .sub {
+        font-size: clamp(15px, 2.4vw, 19px);
+        color: #b9c2ea;
+        letter-spacing: 3px;
+        margin-bottom: 14px;
+    }
+
+    .hero .desc {
+        max-width: 660px;
+        margin: 0 auto;
+        color: var(--muted);
+        font-size: 15px;
+    }
+
+    .hero .desc b {
+        color: #d9e0ff;
+        font-weight: 600;
+    }
+
+    /* 数据统计 */
+    .stats {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-top: 40px;
+    }
+
+    .stat {
+        min-width: 138px;
+        padding: 16px 22px;
+        border-radius: 16px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .stat:hover {
+        transform: translateY(-4px);
+        border-color: rgba(124, 140, 255, 0.55);
+    }
+
+    .stat strong {
+        display: block;
+        font-size: 26px;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--c3), var(--c1), var(--c2));
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+    }
+
+    .stat span {
+        font-size: 12.5px;
+        color: var(--muted);
+        letter-spacing: 1px;
+    }
+
+    /* ---------- 区块标题 ---------- */
+    .section {
+        padding: 26px 0 20px;
+    }
+
+    .section-head {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 30px;
+    }
+
+    .section-head h2 {
+        font-size: 21px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        white-space: nowrap;
+    }
+
+    .section-head .line {
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, rgba(255, 255, 255, 0.22), transparent);
+    }
+
+    .section-head .count {
+        font-size: 12.5px;
+        color: var(--muted);
+        padding: 4px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        white-space: nowrap;
+    }
+
+    /* 章节小标题 */
+    .group-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 26px 0 16px;
+        font-size: 13px;
+        color: #c9d2f1;
+        letter-spacing: 2px;
+    }
+
+    .group-head:first-child {
+        margin-top: 6px;
+    }
+
+    .group-head .ch {
+        font-weight: 700;
+        color: #fff;
+        padding: 4px 12px;
+        border-radius: 8px;
+        background: rgba(124, 140, 255, 0.18);
+        border: 1px solid rgba(124, 140, 255, 0.4);
+    }
+
+    .group-head .gh-line {
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, rgba(255, 255, 255, 0.14), transparent);
+    }
+
+    .group-head .gh-count {
+        color: var(--muted);
+        font-size: 12px;
+    }
+
+    /* ---------- 卡片网格 ---------- */
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 22px;
+    }
+
+    .card {
+        position: relative;
+        display: block;
+        padding: 26px 26px 24px;
+        border-radius: 20px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        text-decoration: none;
+        color: inherit;
+        overflow: hidden;
+        transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                    background 0.35s ease,
+                    border-color 0.35s ease,
+                    box-shadow 0.35s ease;
+        opacity: 0;
+        transform: translateY(26px);
+    }
+
+    .card.in {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .card:hover {
+        background: var(--card-hover);
+        border-color: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 22px 46px rgba(0, 0, 0, 0.5);
+        transform: translateY(-8px);
+    }
+
+    /* 鼠标跟随光斑 */
+    .card .glow {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        transition: opacity 0.35s ease;
+        background: radial-gradient(200px 200px at var(--mx, 50%) var(--my, 50%),
+                    rgba(124, 140, 255, 0.22), transparent 70%);
+        pointer-events: none;
+    }
+
+    .card:hover .glow {
+        opacity: 1;
+    }
+
+    /* 顶部彩色条 */
+    .card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--accent, var(--c1));
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .card:hover::before {
+        transform: scaleX(1);
+    }
+
+    /* 角标序号水印 */
+    .card .no {
+        position: absolute;
+        right: 16px;
+        top: 6px;
+        font-size: 62px;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: -2px;
+        color: rgba(255, 255, 255, 0.05);
+        transition: color 0.35s ease, transform 0.35s ease;
+        pointer-events: none;
+    }
+
+    .card:hover .no {
+        color: rgba(255, 255, 255, 0.12);
+        transform: translateY(-2px) scale(1.06);
+    }
+
+    .card-top {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+        position: relative;
+    }
+
+    .dot-mark {
+        width: 34px;
+        height: 34px;
+        border-radius: 11px;
+        display: grid;
+        place-items: center;
+        font-size: 13px;
+        font-weight: 800;
+        color: #08101f;
+        background: var(--accent, var(--c1));
+        box-shadow: 0 8px 20px -6px var(--accent, var(--c1));
+    }
+
+    .card-kind {
+        font-size: 12px;
+        letter-spacing: 1.5px;
+        color: var(--muted);
+        padding: 3px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+    }
+
+    .card h3 {
+        position: relative;
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        letter-spacing: 0.5px;
+    }
+
+    .card .file-name {
+        display: inline-block;
+        position: relative;
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 12.5px;
+        color: var(--accent, var(--c1));
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px dashed rgba(255, 255, 255, 0.16);
+        border-radius: 7px;
+        padding: 2px 9px;
+        margin-bottom: 14px;
+        word-break: break-all;
+    }
+
+    .card p {
+        position: relative;
+        font-size: 14px;
+        color: var(--muted);
+        min-height: 46px;
+    }
+
+    .card-foot {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 20px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        gap: 12px;
+    }
+
+    .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+    }
+
+    .tags span {
+        font-size: 11.5px;
+        color: #aab3d8;
+        background: rgba(255, 255, 255, 0.055);
+        border-radius: 6px;
+        padding: 3px 8px;
+        transition: background 0.3s ease, color 0.3s ease;
+        white-space: nowrap;
+    }
+
+    .card:hover .tags span {
+        background: rgba(255, 255, 255, 0.1);
+        color: #dfe5ff;
+    }
+
+    .open {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--accent, var(--c1));
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .open i {
+        display: inline-block;
+        transition: transform 0.3s ease;
+        font-style: normal;
+    }
+
+    .card:hover .open i {
+        transform: translateX(5px);
+    }
+
+    /* ---------- 提示词卡片 ---------- */
+    .prompt {
+        margin-top: 12px;
+        border-radius: 20px;
+        border: 1px solid var(--line);
+        background: rgba(10, 15, 32, 0.72);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        overflow: hidden;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+    }
+
+    .prompt-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 13px 18px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.035);
+    }
+
+    .prompt-bar b {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .prompt-bar b:nth-child(1) { background: #ff5f57; }
+    .prompt-bar b:nth-child(2) { background: #febc2e; }
+    .prompt-bar b:nth-child(3) { background: #28c840; }
+
+    .prompt-bar em {
+        font-style: normal;
+        font-size: 12.5px;
+        color: var(--muted);
+        font-family: Consolas, "Courier New", monospace;
+        margin-left: 8px;
+        letter-spacing: 1px;
+    }
+
+    .prompt-body {
+        padding: 26px 28px 30px;
+        font-size: 15px;
+        color: #cdd5f5;
+        line-height: 2;
+        position: relative;
+    }
+
+    .prompt-body::before {
+        content: "“";
+        position: absolute;
+        left: 8px;
+        top: -6px;
+        font-size: 76px;
+        line-height: 1;
+        font-family: Georgia, serif;
+        color: rgba(124, 140, 255, 0.25);
+    }
+
+    .prompt-body .hl {
+        color: #fff;
+        font-weight: 700;
+        background: linear-gradient(180deg, transparent 62%, rgba(168, 85, 247, 0.45) 62%);
+        padding: 0 2px;
+    }
+
+    .prompt-body .code {
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 13.5px;
+        color: #8fe3ff;
+        background: rgba(56, 189, 248, 0.12);
+        border-radius: 5px;
+        padding: 1px 6px;
+    }
+
+    /* ---------- 技术栈 ---------- */
+    .stack {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 4px;
+    }
+
+    .stack span {
+        font-size: 13px;
+        color: #c7cff0;
+        padding: 8px 16px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: var(--card);
+        transition: all 0.3s ease;
+        cursor: default;
+    }
+
+    .stack span:hover {
+        color: #fff;
+        border-color: rgba(124, 140, 255, 0.6);
+        background: rgba(124, 140, 255, 0.16);
+        transform: translateY(-3px);
+    }
+
+    /* ---------- 页脚 ---------- */
+    footer {
+        margin-top: 72px;
+        padding: 34px 0 46px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        text-align: center;
+        color: #6f7aa4;
+        font-size: 13px;
+        letter-spacing: 1px;
+    }
+
+    footer .fname {
+        font-size: 15px;
+        color: #aeb8de;
+        font-weight: 600;
+        letter-spacing: 3px;
+        margin-bottom: 8px;
+    }
+
+    /* ---------- 回到顶部 ---------- */
+    #top {
+        position: fixed;
+        right: 26px;
+        bottom: 26px;
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: rgba(16, 22, 44, 0.85);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        color: #cfd7ff;
+        font-size: 18px;
+        cursor: pointer;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(14px);
+        transition: all 0.35s ease;
+        z-index: 60;
+    }
+
+    #top.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    #top:hover {
+        color: #fff;
+        border-color: rgba(124, 140, 255, 0.7);
+        background: rgba(124, 140, 255, 0.25);
+        transform: translateY(-4px);
+    }
+
+    /* ---------- 响应式 ---------- */
+    @media (max-width: 720px) {
+        .hero {
+            padding: 56px 0 46px;
+        }
+        .hero h1 {
+            letter-spacing: 3px;
+        }
+        .nav-links {
+            display: none;
+        }
+        .grid {
+            grid-template-columns: 1fr;
+        }
+        .prompt-body {
+            padding: 22px 20px 26px;
+            font-size: 14px;
+        }
+        .stat {
+            min-width: 120px;
+            padding: 13px 16px;
+        }
+        .stat strong {
+            font-size: 22px;
+        }
+        .group-head {
+            font-size: 12px;
+        }
+    }
+
+    /* 滚动条美化 */
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #0a0f1f;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #3a4785, #5b3a85);
+        border-radius: 10px;
+        border: 2px solid #0a0f1f;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(180deg, #5566bb, #7d51b5);
+    }
+</style>
+</head>
+<body>
+
+<!-- 阅读进度 -->
+<div class="progress"><span id="bar"></span></div>
+
+<!-- 顶部导航 -->
+<nav class="nav">
+    <div class="nav-inner">
+        <div class="logo">
+            <span class="logo-mark">931</span>
+            <span>高级网页设计</span>
+        </div>
+        <div class="nav-links">
+            <a href="#works">作品导航</a>
+            <a href="#prompt">任务提示词</a>
+            <a href="#stack">技术小结</a>
+            <a href="1.html">个人名片</a>
+        </div>
+    </div>
+</nav>
+
+<div class="wrap">
+
+    <!-- Hero -->
+    <header class="hero">
+        <div class="badge"><i></i>931 沈畅 · 计算机 24009</div>
+        <h1>
+            <span>高</span><span>级</span><span>网</span><span>页</span><span>设</span><span>计</span>
+        </h1>
+        <p class="sub">《高级网页设计》课堂实践</p>
+        <p class="desc">
+            本页面汇总了本目录下的全部 <b>23 个课堂实践作品</b>，
+            全部使用 <b>原生 HTML / CSS / JavaScript</b> 编写，
+            未引入任何 CDN 与第三方框架，点击卡片即可直接打开对应页面。
+        </p>
+
+        <div class="stats">
+            <div class="stat"><strong>23</strong><span>实践页面</span></div>
+            <div class="stat"><strong>7</strong><span>知识模块</span></div>
+            <div class="stat"><strong>0</strong><span>外部依赖</span></div>
+            <div class="stat"><strong>100%</strong><span>原生代码</span></div>
+        </div>
+    </header>
+
+    <!-- 作品导航 -->
+    <section class="section" id="works">
+        <div class="section-head">
+            <h2>作品导航</h2>
+            <span class="line"></span>
+            <span class="count">            共 23 个页面</span>
+        </div>
+
+        <!-- 第 1 章：综合美化 -->
+        <div class="group-head">
+            <span class="ch">CH 1</span>
+            <span>综合美化 · 综合实践</span>
+            <span class="gh-line"></span>
+            <span class="gh-count">1 / 23</span>
+        </div>
+        <div class="grid">
+            <a class="card" href="1.html" style="--accent:#7c8cff">
+                <span class="glow"></span>
+                <span class="no">01</span>
+                <div class="card-top">
+                    <span class="dot-mark">01</span>
+                    <span class="card-kind">综合美化</span>
+                </div>
+                <h3>个人名片主页</h3>
+                <span class="file-name">1.html</span>
+                <p>渐变动态背景 + 毛玻璃卡片，包含头像、学号徽章、标签与社交按钮，逐字跳动的姓名色彩。</p>
+                <div class="card-foot">
+                    <div class="tags"><span>渐变</span><span>动画</span><span>毛玻璃</span></div>
+                    <span class="open">打开页面 <i>→</i></span>
+                </div>
+            </a>
+        </div>
+
+        <!-- 第 2 章：HTML 基础 -->
+        <div class="group-head">
+            <span class="ch">CH 2</span>
+            <span>HTML 基础 · 元素与多媒体</span>
+            <span class="gh-line"></span>
+            <span class="gh-count">2 / 23</span>
+        </div>
+        <div class="grid">
+            <a class="card" href="2-1.html" style="--accent:#a855f7">
+                <span class="glow"></span>
+                <span class="no">02</span>
+                <div class="card-top">
+                    <span class="dot-mark">02</span>
+                    <span class="card-kind">HTML 基础</span>
+                </div>
+                <h3>HTML 元素与标签</h3>
+                <span class="file-name">2-1.html</span>
+                <p>标签结构、换行与段落、《山居秋暝》诗句、无序列表，以及用 span 实现每字不同颜色。</p>
+                <div class="card-foot">
+                    <div class="tags"><span>标签</span><span>列表</span><span>行内样式</span></div>
+                    <span class="open">打开页面 <i>→</i></span>
+                </div>
+            </a>
+
+            <a class="card" href="2-2.html" style="--accent:#38bdf8">
+                <span class="glow"></span>
+                <span class="no">03</span>
+                <div class="card-top">
+                    <span class="dot-mark">03</span>
+                    <span class="card-kind">HTML 多媒体</span>
+                </div>
+                <h3>超链接、图像与表格</h3>
+                <span class="file-name">2-2.html</span>
+                <p>外部与相对路径超链接、新窗口打开、图片的路径与 title 优化，以及「大国重器」数据表格。</p>
+                <div class="card-foot">
+                    <div class="tags"><span>超链接</span><span>图像</span><span>表格</span></div>
+                    <span class="open">打开页面 <i>→</i></span>
+                </div>
+            </a>
+        </div>
+
+        <!-- 第 3 章：表单与 CSS 入门 -->
+        <div class="group-head">
+            <span class="ch">CH 3</span>
+            <span>表单与 CSS 入门</span>
+            <span class="gh-line"></span>
+            <span class="gh-count">2 / 23</span>
+        </div>
+        <div class="grid">
+            <a class="card" href="3-1form.html" style="--accent:#f472b6">
+                <span class="glow"></span>
+                <span class="no">04</span>
+                <div class="card-top">
+                    <span class="dot-mark">04</span>
+                    <span class="card-kind">HTML 表单</span>
+                </div>
+                <h3>表单元素综合练习</h3>
+                <span class="file-name">3-1form.html</span>
+                <p>文本框、密码框、单选、复选、下拉框、文本域、日期、文件上传与提交/重置按钮全套表单控件。</p>
+                <div class="card-foot">
+                    <div class="tags"><span>form</span><span>input</span><span>select</span></div>
+                    <span class="open">打开页面 <i>→</i></span>
+                </div>
+            </a>
+
+            <a class="card" href="3-2css.html" style="--accent:#34d399">
+                <span class="glow"></span>
+                <span class="no">05</span>
+                <div class="card-top">
+                    <span class="dot-mark">05</span>
+                    <span class="card-kind">CSS 基础</span>
+                </div>
+                <h3>CSS 选择器入门</h3>
+                <span class="file-name">3-2css.html</span>
+                <p>标签选择器、id 选择器、类选择器与优先级，配合学号信息盒子的样式实践。</p>
+                <div class="card-foot">
+                    <div class="tags"><span>选择器</span><span>优先级</span><span>盒子</span></div>
+                    <span class="open">打开页面 <i>→</i></span>
+                </div>
+            </a>
+        </div>
+
+        <!-- 第 4 章：CSS 进阶 -->
+        <div class="group-head">
+            <span class="ch">CH 4</span>
+            <span>CSS 进阶 · 选择器与盒模型</span>
+            <span class="gh-line"></span>
+            <span class="gh-count">4 / 23</span>
+        </div>
+        <div class="grid">
+            <a class="card" href="4-1%20css2.html" style="--accent:#fbbf24">
+                <span class="glow"></span>
+                <span class="no">06</span>
+                <div class="card-top">
+                    <span class="dot-mark">06</span>
+                    <span class="card-kind">CSS 进阶</span>
+                </div>
+                <h3>群组选择器与后代选择器</h3>
+                <span class="file-name">4-1 css2.html</span>
+                <p>群组选择器 h2,h3,p 统一重置样式，后代选择器 #box p 精准控制，文本缩进与行高排版。</p>
+                <div class="card-foot">
+                    <div class="tags"><span>群组</span><span>后代</span><span>排版</span></div>
+                    <span class="open">打开页面 <i>→</i></span>
+                </div>
+            </a>
+
+            <a class="card" href="5-1%20%E5%B1%82%E5%8F%A0%E4%B8%8E%E7%BB%A7%E6%89%BF.html" style="--accent:#fb7185">
+                <span class="glow"></span>
+                <span class="no">07</span>
+                <div class="card-top">
+                    <span class="dot-mark">07</span>
+                    <span class="card-kind">CSS 进阶</span>
+                </div>
+                <h3>层叠与继承</h3>
+                <span class="file-name">5-1 层叠与继承.html</span>
+                <p>理解 !important 与选择器优先级，展示同一元素被多种规则同时命中时的最终效果。</p>
+                <div class="card-foot">
+                    <div class="tags"><span>优先级</span><span>!important</span><span>继承</span></div>
+                    <span class="open">打开页面 <i>→</i></span>
+                </div>
+            </a>
+
+            <a class="card" href="5-2%20%E7%9B%92%E6%A8%A1%E5%9E%8B.html" style="--accent:#22d3ee">
+                <span class="glow"></span>
+                <span class="no">08</span>
+                <div class="card-top">
+                    <span class="dot-mark">08</span>
+                    <span class="card-kind">CSS 盒模型</span>
+                </div>
+                <h3>盒模型（box model）</h3>
+                <span class="file-name">5-2 盒模型.html</span>
+                <p>margin / padding / border 三种虚实边框对比，水平 auto 居中与四值简写语法练习。</p>
+                <div class="card-foot">
+                    <div class="tags"><span>margin</span><span>padding</span><span>居中</span></div>
+                    <span class="open">打开页面 <i>→</i></span>
+                </div>
+            </a>
+
+            <a class="card" href="8-1%20css3%E9%80%89%E6%8B%A9%E5%99%A8.html" style="--accent:#06b6d4">
+                <span class="glow"></span>
+                <span class="no">09</span>
+                <div class="card-top">
+                    <span class="dot-mark">09</span>
+                    <span class="card-kind">CSS3 选择器</span>
+                </div>
+                <h3>CSS3 选择器与 :hover 实践</h3>
+                <span class="file-name">8-1 css3选择器.html</span>
+                <p>基础选择器 + 拓展 1 的"沈畅"自定义效果 + 拓展 2 的偶数盒紫底白字，12 个盒子 12 种 hover 玩法。</p>
+                <div class="card-foot">
+                    <div class="tags"><span>:hover</span><span>::after</span><span>:not</span></div>
+                    <span class="open">打开页面 <i>→</i></span>
+                </div>
+            </a>
+        </div>
+
+        <!-- 第 5 章：布局实战 -->
+        <div class="group-head">
+            <span class="ch">CH 5</span>
+            <span>布局实战 · Flex 与综合排版</span>
+            <span class="gh-line"></span>
+            <span class="gh-count">4 / 23</span>
+        </div>
+        <div class="grid">
+            <a class="card" href="6-1%20flex.html" style="--accent:#c084fc">
+                <span class="glow"></span>
+                <span class="no">09</span>
+                <div class="card-top">
+                    <span class="dot-mark">09</span>
+                    <span class="card-kind">Flex 布局</span>
+                </div>
+                <h3>Flex 布局演示</h3>
+                <span class="file-name">6-1 flex.html</span>
+                <p>居中、垂直排列、2×2 网格与上宽下窄四种典型场景，justify-content 与 align-items 联动演练。</p>
+                <div class="card-foot">
+                    <div class="tags"><span>flex</span><span>justify</span><span>align</span></div>
+                    <span class="open">打开页面 <i>→</i></span>
+                </div>
+            </a>
+
+            <a class="card" href="6-2%20%E4%B8%80%E5%B7%A6%E4%B8%80%E5%8F%B3.html" style="--accent:#4ade80">
+                <span class="glow"></span>
+                <span class="no">10</span>
+                <div class="card-top">
+                    <span class="dot-mark">10</span>
+                    <span class="card-kind">Flex 实战</span>
+                </div>
+                <h3>一左一右标题栏</h3>
+                <span class="file-name">6-2 一左一右.html</span>
+                <p>标题与「更多」按钮左右分布的三种实现：flex space-between、flex-grow 与 position 绝对定位。</p>
+                <div class="card-foot">
+                    <div class="tags"><span>flex-grow</span><span>justify</span><span>position</span></div>
+                    <span class="open">打开页面 <i>→</i></span>
+                </div>
+            </a>
+
+            <a class="card" href="7-1%20%E4%B8%8A%E5%9B%BE%E4%B8%8B%E6%96%87.html" style="--accent:#f59e0b">
+                <span class="glow"></span>
+                <span class="no">11</span>
+                <div class="card-top">
+                    <span class="dot-mark">11</span>
+                    <span class="card-kind">综合排版</span>
+                </div>
+                <h3>上图下文卡片</h3>
+                <span class="file-name">7-1 上图下文.html</span>
+                <p>图片与底部半透明遮罩标题的经典组合，flex 等分布局与 absolute 定位的实战应用。</p>
+                <div class="card-foot">
+                    <div class="tags"><span>flex</span><span>absolute</span><span>半透明</span></div>
+                    <span class="open">打开页面 <i>→</i></span>
+                </div>
+            </a>
+
+            <a class="card" href="7-2%20%E5%B7%A6%E5%9B%BE%E5%8F%B3%E6%96%87.html" style="--accent:#ec4899">
+                <span class="glow"></span>
+                <span class="no">12</span>
+                <div class="card-top">
+                    <span class="dot-mark">12</span>
+                    <span class="card-kind">综合排版</span>
+                </div>
+                <h3>左图右文卡片</h3>
+                <span class="file-name">7-2 左图右文.html</span>
+                <p>列表项中图片与多行文本的水平排布，flex-grow 与 flex-wrap 实现自适应的新闻条目样式。</p>
+                <div class="card-foot">
+                    <div class="tags"><span>flex</span><span>wrap</span><span>图文</span></div>
+                    <span class="open">打开页面 <i>→</i></span>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- 任务提示词 -->
+    <section class="section" id="prompt">
+        <div class="section-head">
+            <h2>任务提示词</h2>
+            <span class="line"></span>
+            <span class="count">页面生成依据</span>
+        </div>
+
+        <div class="prompt">
+            <div class="prompt-bar">
+                <b></b><b></b><b></b>
+                <em>prompt.txt — 本页面即根据以下提示词生成</em>
+            </div>
+            <div class="prompt-body">
+                创建一个新页面，包括本目录下的所有网页的超链接，使用<span class="hl">原生代码</span>，不使用<span class="hl">cdn</span>，
+                新页面名称为<span class="code">index.html</span>，主题为
+                <span class="hl">931沈畅的《高级网页设计》课堂实践</span>，美化页面，页面中包括本提示词。
+            </div>
+        </div>
+    </section>
+
+    <!-- 第 6 章：动画与过渡 -->
+    <div class="group-head">
+        <span class="ch">CH 6</span>
+        <span>动画与过渡 · animation &amp; transition</span>
+        <span class="gh-line"></span>
+        <span class="gh-count">3 / 23</span>
+    </div>
+    <div class="grid">
+        <a class="card" href="9-1%20transition.html" style="--accent:#84cc16">
+            <span class="glow"></span>
+            <span class="no">13</span>
+            <div class="card-top">
+                <span class="dot-mark">13</span>
+                <span class="card-kind">CSS 过渡</span>
+            </div>
+            <h3>transition 过渡实战</h3>
+            <span class="file-name">9-1 transition.html</span>
+            <p>属性过渡、持续时间、缓动函数与延迟；background-color 与 width 等多属性同步过渡练习。</p>
+            <div class="card-foot">
+                <div class="tags"><span>transition</span><span>ease</span><span>delay</span></div>
+                <span class="open">打开页面 <i>→</i></span>
+            </div>
+        </a>
+
+        <a class="card" href="10-1%20animation.html" style="--accent:#f97316">
+            <span class="glow"></span>
+            <span class="no">14</span>
+            <div class="card-top">
+                <span class="dot-mark">14</span>
+                <span class="card-kind">CSS 动画</span>
+            </div>
+            <h3>animation 4 色循环</h3>
+            <span class="file-name">10-1 animation.html</span>
+            <p>单一盒子通过 @keyframes 在 0/25/50/75% 切换红橙绿蓝四色，linear 缓动无限循环。</p>
+            <div class="card-foot">
+                <div class="tags"><span>@keyframes</span><span>linear</span><span>infinite</span></div>
+                <span class="open">打开页面 <i>→</i></span>
+            </div>
+        </a>
+
+        <a class="card" href="10-2.html" style="--accent:#06b6d4">
+            <span class="glow"></span>
+            <span class="no">15</span>
+            <div class="card-top">
+                <span class="dot-mark">15</span>
+                <span class="card-kind">CSS 幻灯片</span>
+            </div>
+            <h3>CSS 动画幻灯片</h3>
+            <span class="file-name">10-2.html</span>
+            <p>上图下文幻灯片，字"沈畅"在图片上 · 黑底白字，图片使用 translateX 位置切换而非透明度。</p>
+            <div class="card-foot">
+                <div class="tags"><span>translateX</span><span>slide</span><span>黑底白字</span></div>
+                <span class="open">打开页面 <i>→</i></span>
+            </div>
+        </a>
+    </div>
+
+    <!-- 第 7 章：响应式与媒体查询 -->
+    <div class="group-head">
+        <span class="ch">CH 7</span>
+        <span>响应式与媒体查询 · media query</span>
+        <span class="gh-line"></span>
+        <span class="gh-count">2 / 23</span>
+    </div>
+    <div class="grid">
+        <a class="card" href="10-3.html" style="--accent:#a855f7">
+            <span class="glow"></span>
+            <span class="no">16</span>
+            <div class="card-top">
+                <span class="dot-mark">16</span>
+                <span class="card-kind">媒体查询</span>
+            </div>
+            <h3>全屏盒子 · 视口变背景变</h3>
+            <span class="file-name">10-3.html</span>
+            <p>viewport 变化时切换 body 背景色，文字"袁磊"以 rem 跟随根字号自适应缩放。</p>
+            <div class="card-foot">
+                <div class="tags"><span>rem</span><span>media</span><span>viewport</span></div>
+                <span class="open">打开页面 <i>→</i></span>
+            </div>
+        </a>
+
+             <a class="card" href="10-4.html" style="--accent:#ec4899">
+             <span class="glow"></span>
+             <span class="no">17</span>
+             <div class="card-top">
+                 <span class="dot-mark">17</span>
+                 <span class="card-kind">响应式布局</span>
+             </div>
+             <h3>八盒子响应式布局</h3>
+             <span class="file-name">10-4.html</span>
+             <p>min-width:320 起，3 个 media 断点控制一行 1/2/4 个盒子，文字"袁磊"标题栏。</p>
+             <div class="card-foot">
+                 <div class="tags"><span>flex-wrap</span><span>min-width</span><span>3断点</span></div>
+                 <span class="open">打开页面 <i>→</i></span>
+             </div>
+         </a>
+     </div>
+
+     <!-- 第 8 章：CSS 变量 -->
+     <div class="group-head">
+         <span class="ch">CH 8</span>
+         <span>CSS 变量 · Custom Properties</span>
+         <span class="gh-line"></span>
+         <span class="gh-count">1 / 23</span>
+     </div>
+     <div class="grid">
+         <a class="card" href="12-1.html" style="--accent:#34d399">
+             <span class="glow"></span>
+             <span class="no">18</span>
+             <div class="card-top">
+                 <span class="dot-mark">18</span>
+                 <span class="card-kind">CSS 变量</span>
+             </div>
+             <h3>CSS 变量交互演示</h3>
+             <span class="file-name">12-1.html</span>
+             <p>:root 定义 --shen_* 变量，滑块与色板实时调节圆角、间距、字号、颜色，JS 动态修改 :root 变量。</p>
+             <div class="card-foot">
+                 <div class="tags"><span>var()</span><span>:root</span><span>JS 修改变量</span></div>
+                 <span class="open">打开页面 <i>→</i></span>
+             </div>
+         </a>
+      </div>
+
+     <!-- 第 13 章：图标库 -->
+     <div class="group-head">
+         <span class="ch">CH 13</span>
+         <span>图标库 · Font Awesome、Lucide 与 iconfont</span>
+         <span class="gh-line"></span>
+         <span class="gh-count">4 / 23</span>
+     </div>
+     <div class="grid">
+         <a class="card" href="13-1.html" style="--accent:#fbbf24">
+             <span class="glow"></span>
+             <span class="no">19</span>
+             <div class="card-top">
+                 <span class="dot-mark">19</span>
+                 <span class="card-kind">字体图标</span>
+             </div>
+             <h3>Font Awesome 字体图标</h3>
+             <span class="file-name">13-1.html</span>
+             <p>字体 + CSS 伪元素渲染，实心 / 品牌图标、fa-1x~fa-5x 缩放与 color 上色，本地字体离线可用。</p>
+             <div class="card-foot">
+                 <div class="tags"><span>Font Icon</span><span>@font-face</span><span>fa-*</span></div>
+                 <span class="open">打开页面 <i>→</i></span>
+             </div>
+         </a>
+
+         <a class="card" href="13-2.html" style="--accent:#38bdf8">
+             <span class="glow"></span>
+             <span class="no">20</span>
+             <div class="card-top">
+                 <span class="dot-mark">20</span>
+                 <span class="card-kind">SVG 图标</span>
+             </div>
+             <h3>Lucide SVG 图标</h3>
+             <span class="file-name">13-2.html</span>
+             <p>data-lucide 占位 + createIcons 生成内联 SVG，矢量缩放、描边与颜色控制，本地脚本离线可用。</p>
+             <div class="card-foot">
+                 <div class="tags"><span>SVG</span><span>data-lucide</span><span>createIcons</span></div>
+                 <span class="open">打开页面 <i>→</i></span>
+             </div>
+         </a>
+
+         <a class="card" href="13-3.html" style="--accent:#ff6b35">
+             <span class="glow"></span>
+             <span class="no">21</span>
+             <div class="card-top">
+                 <span class="dot-mark">21</span>
+                 <span class="card-kind">字体图标下导航</span>
+             </div>
+             <h3>iconfont 字体图标下导航</h3>
+             <span class="file-name">13-3.html</span>
+             <p>font/iconfont.css 字体图标方案，全屏宽度固定下导航，商城/购物车/收藏/首页四项等分，含数字徽章与右上角红点。</p>
+             <div class="card-foot">
+                 <div class="tags"><span>iconfont</span><span>fixed bottom</span><span>badge + dot</span></div>
+                 <span class="open">打开页面 <i>→</i></span>
+             </div>
+         </a>
+
+         <a class="card" href="13-4.html" style="--accent:#38bdf8">
+             <span class="glow"></span>
+             <span class="no">22</span>
+             <div class="card-top">
+                 <span class="dot-mark">22</span>
+                 <span class="card-kind">SVG 图标下导航</span>
+             </div>
+             <h3>iconfont SVG 图标下导航</h3>
+             <span class="file-name">13-4.html</span>
+             <p>font/iconfont.js 的 SVG Symbol 方案，use 引用矢量路径 + fill:currentColor，同样的全屏固定下导航与徽章红点。</p>
+             <div class="card-foot">
+                 <div class="tags"><span>SVG symbol</span><span>use</span><span>fill</span></div>
+                 <span class="open">打开页面 <i>→</i></span>
+             </div>
+         </a>
+
+         <a class="card" href="14-2.html" style="--accent:#a78bfa">
+             <span class="glow"></span>
+             <span class="no">23</span>
+             <div class="card-top">
+                 <span class="dot-mark">23</span>
+                 <span class="card-kind">JS 数据类型</span>
+             </div>
+             <h3>JavaScript 六种基础数据类型</h3>
+             <span class="file-name">14-2.html</span>
+             <p>Undefined、Null、Boolean、Number、String、Symbol 六种基础类型的定义与 typeof 检测演示，含交互式类型测试器。</p>
+             <div class="card-foot">
+                 <div class="tags"><span>typeof</span><span>基础类型</span><span>Symbol</span></div>
+                 <span class="open">打开页面 <i>→</i></span>
+             </div>
+         </a>
+
+         <a class="card" href="15-1.html" style="--accent:#f87171">
+             <span class="glow"></span>
+             <span class="no">24</span>
+             <div class="card-top">
+                 <span class="dot-mark">24</span>
+                 <span class="card-kind">JS 循环练习</span>
+             </div>
+             <h3>一百个盒子 · 7 的规则</h3>
+             <span class="file-name">15-1.html</span>
+             <p>1–100 共 100 个盒子，命中 7 的倍数或个位为 7 的显示空盒子，其余盒子显示内部数字，含规则说明与图例。</p>
+             <div class="card-foot">
+                 <div class="tags"><span>for 循环</span><span>取余判断</span><span>网格布局</span></div>
+                 <span class="open">打开页面 <i>→</i></span>
+             </div>
+         </a>
+     </div>
+
+     <!-- 技术小结 -->
+     <section class="section" id="stack">
+        <div class="section-head">
+            <h2>技术小结</h2>
+            <span class="line"></span>
+            <span class="count">本页所用知识点</span>
+        </div>
+        <div class="stack">
+            <span>语义化 HTML5 结构</span>
+            <span>CSS 自定义属性变量</span>
+            <span>Grid 自适应网格布局</span>
+            <span>Flex 弹性布局</span>
+            <span>径向渐变与背景动画</span>
+            <span>backdrop-filter 毛玻璃</span>
+            <span>background-clip 文字渐变</span>
+            <span>transform 变换与过渡</span>
+            <span>@keyframes 关键帧动画</span>
+            <span>媒体查询响应式</span>
+            <span>IntersectionObserver 滚动入场</span>
+            <span>原生 DOM 事件监听</span>
+        </div>
+    </section>
+
+    <footer>
+        <div class="fname">931 沈畅 · 计算机 24009</div>
+        <div>《高级网页设计》课堂实践作品集 · 纯原生 HTML / CSS / JavaScript 构建</div>
+    </footer>
+
+</div>
+
+<button id="top" title="回到顶部">↑</button>
+
+<script>
+    /* 1. 阅读进度条 */
+    var bar = document.getElementById('bar');
+    function updateBar() {
+        var h = document.documentElement.scrollHeight - window.innerHeight;
+        bar.style.width = (h > 0 ? (window.scrollY / h) * 100 : 0) + '%';
+    }
+
+    /* 2. 回到顶部按钮 */
+    var topBtn = document.getElementById('top');
+    function updateTopBtn() {
+        if (window.scrollY > 400) {
+            topBtn.classList.add('show');
+        } else {
+            topBtn.classList.remove('show');
+        }
+    }
+    topBtn.addEventListener('click', function () {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    window.addEventListener('scroll', function () {
+        updateBar();
+        updateTopBtn();
+    }, { passive: true });
+    updateBar();
+    updateTopBtn();
+
+    /* 3. 卡片滚动入场动画 */
+    var cards = document.querySelectorAll('.card');
+    if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry, i) {
+                if (entry.isIntersecting) {
+                    var el = entry.target;
+                    setTimeout(function () {
+                        el.classList.add('in');
+                    }, i * 80);
+                    io.unobserve(el);
+                }
+            });
+        }, { threshold: 0.15 });
+        cards.forEach(function (c) { io.observe(c); });
+    } else {
+        cards.forEach(function (c) { c.classList.add('in'); });
+    }
+
+    /* 4. 卡片鼠标跟随光斑 */
+    cards.forEach(function (card) {
+        card.addEventListener('mousemove', function (e) {
+            var r = card.getBoundingClientRect();
+            card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+            card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+        });
+    });
+
+    /* 5. 导航锚点平滑滚动 */
+    document.querySelectorAll('.nav-links a[href^="#"]').forEach(function (link) {
+        link.addEventListener('click', function (e) {
+            var target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                e.preventDefault();
+                window.scrollTo({ top: target.offsetTop - 70, behavior: 'smooth' });
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
