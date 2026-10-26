@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<!-- 姓名：沈畅，日期：2026-10-26，功能名称：JavaScript程序结构演示（条件与循环） -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>15-2 JavaScript 程序结构 · 条件与循环</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            background: linear-gradient(160deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 40px 16px 60px;
+        }
+
+        .sc_header { text-align: center; margin-bottom: 30px; }
+        .sc_header h1 {
+            font-size: 32px;
+            background: linear-gradient(90deg, #34d399, #38bdf8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 8px;
+        }
+        .sc_header p { color: #94a3b8; font-size: 14px; letter-spacing: 1px; }
+        .sc_header .sc_name { color: #fbbf24; font-weight: bold; }
+
+        .sc_container { max-width: 900px; margin: 0 auto; }
+
+        .sc_section_title {
+            font-size: 22px;
+            color: #34d399;
+            margin: 34px 0 14px;
+            padding-left: 12px;
+            border-left: 4px solid #34d399;
+        }
+
+        .sc_card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: border-color .25s, box-shadow .25s;
+        }
+        .sc_card:hover { border-color: #34d399; box-shadow: 0 10px 26px rgba(52, 211, 153, .12); }
+
+        .sc_card h3 { font-size: 17px; color: #e2e8f0; margin-bottom: 10px; }
+        .sc_card h3 small { color: #64748b; font-size: 12px; font-family: Consolas, monospace; margin-left: 8px; }
+        .sc_card p.sc_intro { font-size: 13.5px; color: #94a3b8; line-height: 1.8; margin-bottom: 12px; }
+
+        .sc_code {
+            background: #0b1220;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+            line-height: 1.85;
+            color: #7dd3fc;
+            white-space: pre;
+            overflow-x: auto;
+            margin-bottom: 14px;
+        }
+        .sc_code .sc_cmt { color: #64748b; }
+        .sc_code .sc_kw { color: #34d399; }
+        .sc_code .sc_str { color: #fbbf24; }
+
+        .sc_row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .sc_input {
+            flex: 1;
+            min-width: 180px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 14px;
+            color: #e2e8f0;
+            background: #0b1220;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 11px 14px;
+            outline: none;
+        }
+        .sc_input:focus { border-color: #34d399; }
+        .sc_btn {
+            font-size: 14px;
+            font-weight: bold;
+            color: #06281e;
+            background: linear-gradient(90deg, #34d399, #38bdf8);
+            border: none;
+            border-radius: 10px;
+            padding: 11px 24px;
+            cursor: pointer;
+            transition: opacity .2s, transform .2s;
+        }
+        .sc_btn:hover { opacity: .88; }
+        .sc_btn:active { transform: scale(.97); }
+
+        .sc_result {
+            margin-top: 14px;
+            font-size: 14px;
+            line-height: 1.9;
+            background: #0b1220;
+            border: 1px dashed #334155;
+            border-radius: 10px;
+            padding: 13px 16px;
+            min-height: 48px;
+            word-break: break-all;
+        }
+        .sc_result code { font-family: Consolas, Monaco, monospace; color: #38bdf8; }
+        .sc_tip { color: #94a3b8; }
+        .sc_err { color: #f87171; }
+        .sc_ok { color: #34d399; }
+        .sc_warn { color: #fbbf24; }
+
+        .sc_mult_table {
+            margin-top: 14px;
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 4px;
+        }
+        .sc_mult_cell {
+            font-family: Consolas, Monaco, monospace;
+            font-size: 12px;
+            text-align: center;
+            padding: 6px 2px;
+            border-radius: 6px;
+            background: #0b1220;
+            border: 1px solid #334155;
+            color: #7dd3fc;
+        }
+        .sc_mult_cell.sc_head { color: #34d399; border-color: #34d399; }
+
+        .sc_footer_note {
+            margin-top: 30px;
+            text-align: center;
+            color: #64748b;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <header class="sc_header">
+        <h1>JavaScript 程序结构 · 条件与循环</h1>
+        <p>姓名：<span class="sc_name">沈畅</span> · if / switch 三种条件结构 · for / while / do-while 循环</p>
+    </header>
+
+    <main class="sc_container">
+        <!-- ============ 条件结构 ============ -->
+        <h2 class="sc_section_title">一、条件结构（分支）</h2>
+
+        <section class="sc_card">
+            <h3>1. if...else if...else 多分支 <small>根据条件从上到下依次判断，命中即执行</small></h3>
+            <p class="sc_intro">语法：条件为 true 执行对应代码块，所有条件都不满足时执行 else 分支。</p>
+            <div class="sc_code"><span class="sc_kw">if</span> (sc_score &gt;= 90) {
+    <span class="sc_cmt">// 优秀</span>
+} <span class="sc_kw">else if</span> (sc_score &gt;= 60) {
+    <span class="sc_cmt">// 及格</span>
+} <span class="sc_kw">else</span> {
+    <span class="sc_cmt">// 不及格</span>
+}</div>
+
+            <h3>2. switch 多值匹配 <small>精确匹配某一个值时更清晰</small></h3>
+            <div class="sc_code"><span class="sc_kw">switch</span> (sc_day) {
+    <span class="sc_kw">case</span> <span class="sc_str">"六"</span>:
+    <span class="sc_kw">case</span> <span class="sc_str">"日"</span>: sc_r = <span class="sc_str">"休息日"</span>; <span class="sc_kw">break</span>;
+    <span class="sc_kw">default</span>: sc_r = <span class="sc_str">"工作日"</span>;
+}</div>
+        </section>
+
+        <section class="sc_card">
+            <h3>演示① 成绩等级判定 <small>if...else if...else</small></h3>
+            <p class="sc_intro">输入 0~100 的分数：≥90 优秀，≥80 良好，≥70 中等，≥60 及格，否则不及格。</p>
+            <div class="sc_row">
+                <input id="sc_score_input" class="sc_input" type="number" min="0" max="100" placeholder="请输入分数，例如 85">
+                <button id="sc_score_btn" class="sc_btn">判定等级</button>
+            </div>
+            <div id="sc_score_result" class="sc_result"><span class="sc_tip">判定结果将显示在这里。</span></div>
+        </section>
+
+        <!-- ============ 循环结构 ============ -->
+        <h2 class="sc_section_title">二、循环结构</h2>
+
+        <section class="sc_card">
+            <h3>1. for 循环 <small>已知循环次数时首选</small></h3>
+            <div class="sc_code"><span class="sc_kw">for</span> (<span class="sc_kw">var</span> sc_i = 1; sc_i &lt;= 9; sc_i++) {
+    <span class="sc_cmt">// 初始化; 条件; 步进</span>
+}</div>
+            <h3>2. while 与 do...while <small>先判断后执行 / 先执行后判断</small></h3>
+            <div class="sc_code"><span class="sc_kw">while</span> (sc_i &lt;= 100) { sc_sum += sc_i; sc_i++; }
+<span class="sc_kw">do</span> { sc_sum += sc_i; sc_i++; } <span class="sc_kw">while</span> (sc_i &lt;= 100);  <span class="sc_cmt">// 至少执行一次</span></div>
+            <h3>3. break 与 continue <small>break 跳出整个循环，continue 跳过本次</small></h3>
+        </section>
+
+        <section class="sc_card">
+            <h3>演示② 九九乘法表 <small>嵌套 for 循环</small></h3>
+            <p class="sc_intro">外层循环控制行（被乘数），内层循环控制列（乘数），j ≤ i 时输出形成下三角。</p>
+            <div id="sc_table_box" class="sc_mult_table"></div>
+        </section>
+
+        <section class="sc_card">
+            <h3>演示③ 1~N 累加求和 <small>while 循环</small></h3>
+            <p class="sc_intro">输入 N（1~1000），用 while 循环从 1 累加到 N，输出结果与循环次数。</p>
+            <div class="sc_row">
+                <input id="sc_sum_input" class="sc_input" type="number" min="1" max="1000" value="100" placeholder="例如 100">
+                <button id="sc_sum_btn" class="sc_btn">开始累加</button>
+            </div>
+            <div id="sc_sum_result" class="sc_result"><span class="sc_tip">累加结果将显示在这里。</span></div>
+        </section>
+
+        <section class="sc_card">
+            <h3>演示④ break 与 continue <small>循环流程控制</small></h3>
+            <p class="sc_intro">遍历 1~20：遇到 3 的倍数用 continue 跳过；数到 15 用 break 提前终止循环。</p>
+            <div class="sc_row">
+                <button id="sc_flow_btn" class="sc_btn">运行演示</button>
+            </div>
+            <div id="sc_flow_result" class="sc_result"><span class="sc_tip">流程输出将显示在这里。</span></div>
+        </section>
+
+        <p class="sc_footer_note">沈畅 · 《高级网页设计》 · 原生 HTML / CSS / JavaScript 实现</p>
+    </main>
+
+    <script>
+        // ========== 演示① 成绩等级判定：if...else if...else ==========
+        function sc_judgeGrade() {
+            var sc_input = document.getElementById('sc_score_input');
+            var sc_box = document.getElementById('sc_score_result');
+            var sc_score = Number(sc_input.value);
+
+            if (sc_input.value === '' || isNaN(sc_score) || sc_score < 0 || sc_score > 100) {
+                sc_box.innerHTML = '<span class="sc_err">请输入 0~100 之间的有效分数。</span>';
+                return;
+            }
+
+            var sc_grade;
+            if (sc_score >= 90) {
+                sc_grade = '优秀';
+            } else if (sc_score >= 80) {
+                sc_grade = '良好';
+            } else if (sc_score >= 70) {
+                sc_grade = '中等';
+            } else if (sc_score >= 60) {
+                sc_grade = '及格';
+            } else {
+                sc_grade = '不及格';
+            }
+
+            sc_box.innerHTML = '<span class="sc_ok">判定完成</span>：分数 <code>' + sc_score + '</code> 的等级为 <strong>' + sc_grade + '</strong>';
+        }
+
+        // ========== 演示② 九九乘法表：嵌套 for 循环 ==========
+        function sc_genTable() {
+            var sc_box = document.getElementById('sc_table_box');
+            var sc_html = '';
+
+            for (var sc_i = 1; sc_i <= 9; sc_i++) {
+                for (var sc_j = 1; sc_j <= 9; sc_j++) {
+                    if (sc_j <= sc_i) {
+                        // 下三角区域：输出乘法算式
+                        sc_html += '<div class="sc_mult_cell">' + sc_j + '×' + sc_i + '=' + (sc_i * sc_j) + '</div>';
+                    } else {
+                        // 上三角区域：空白占位
+                        sc_html += '<div class="sc_mult_cell"></div>';
+                    }
+                }
+            }
+
+            sc_box.innerHTML = sc_html;
+        }
+
+        // ========== 演示③ 1~N 累加：while 循环 ==========
+        function sc_calcSum() {
+            var sc_input = document.getElementById('sc_sum_input');
+            var sc_box = document.getElementById('sc_sum_result');
+            var sc_n = Number(sc_input.value);
+
+            if (isNaN(sc_n) || sc_n < 1 || sc_n > 1000) {
+                sc_box.innerHTML = '<span class="sc_err">请输入 1~1000 之间的有效数字。</span>';
+                return;
+            }
+
+            var sc_sum = 0;
+            var sc_i = 1;
+            var sc_count = 0;
+            while (sc_i <= sc_n) {
+                sc_sum += sc_i;
+                sc_i++;
+                sc_count++;
+            }
+
+            sc_box.innerHTML = '<span class="sc_ok">计算完成</span>：1+2+…+' + sc_n
+                + ' = <code>' + sc_sum + '</code>，while 循环共执行 <code>' + sc_count + '</code> 次';
+        }
+
+        // ========== 演示④ break 与 continue ==========
+        function sc_demoFlow() {
+            var sc_box = document.getElementById('sc_flow_result');
+            var sc_output = [];
+            var sc_i;
+
+            for (sc_i = 1; sc_i <= 20; sc_i++) {
+                if (sc_i === 15) {
+                    sc_output.push('<span class="sc_warn">遇到 15，break 终止循环</span>');
+                    break;               // 跳出整个 for 循环
+                }
+                if (sc_i % 3 === 0) {
+                    sc_output.push('<span class="sc_err">跳过' + sc_i + '</span>');
+                    continue;            // 跳过本次，进入下一次循环
+                }
+                sc_output.push(sc_i);
+            }
+
+            sc_box.innerHTML = '<span class="sc_ok">输出序列</span>：' + sc_output.join('、');
+        }
+
+        // ========== 初始化与事件绑定 ==========
+        document.getElementById('sc_score_btn').addEventListener('click', sc_judgeGrade);
+        document.getElementById('sc_sum_btn').addEventListener('click', sc_calcSum);
+        document.getElementById('sc_flow_btn').addEventListener('click', sc_demoFlow);
+        sc_genTable();   // 页面加载后自动生成乘法表
+    </script>
+</body>
+</html>
