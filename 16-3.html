@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<!-- 姓名：沈畅，日期：2026-10-29，功能名称：热榜列表组件页面还原 -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>16-3 热榜列表</title>
+    <link rel="stylesheet" href="font/iconfont.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            background: #121212;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+        }
+
+        /* ---------- 热榜卡片 ---------- */
+        .sc_hot {
+            width: 302px;
+            background: #1e1e1e;
+            border-radius: 12px;
+            padding: 14px 14px 10px;
+            box-shadow: 0 12px 34px rgba(0, 0, 0, .55);
+        }
+
+        .sc_hot_head {
+            display: flex;
+            align-items: center;
+            padding: 0 2px 12px;
+        }
+
+        .sc_flame {
+            font-size: 17px;
+            line-height: 1;
+            margin-right: 7px;
+        }
+
+        .sc_hot_title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #f5f5f5;
+            letter-spacing: .5px;
+        }
+
+        .sc_more {
+            margin-left: auto;
+            font-size: 15px;
+            color: #9a9a9a;
+            cursor: pointer;
+            transition: color .2s;
+        }
+        .sc_more:hover { color: #d0d0d0; }
+
+        /* ---------- 榜单条目 ---------- */
+        .sc_hot_list { list-style: none; }
+
+        .sc_item {
+            display: flex;
+            align-items: center;
+            padding: 7px 2px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background .2s;
+        }
+        .sc_item:hover { background: rgba(255, 255, 255, .045); }
+
+        .sc_rank {
+            flex: 0 0 20px;
+            width: 20px;
+            height: 20px;
+            line-height: 20px;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 11.5px;
+            font-weight: 700;
+            font-family: Arial, "Microsoft YaHei", sans-serif;
+            color: #ffffff;
+            margin-right: 10px;
+        }
+
+        /* 前三名：亮橙红色系 */
+        .sc_rank_top1 { background: linear-gradient(135deg, #fb7a33, #f04e1e); }
+        .sc_rank_top2 { background: linear-gradient(135deg, #f56a45, #e73b24); }
+        .sc_rank_top3 { background: linear-gradient(135deg, #ef5340, #d92b1c); }
+
+        /* 第四名及以后：暗红色系 */
+        .sc_rank_dim {
+            background: #5c1d17;
+            color: rgba(255, 255, 255, .78);
+        }
+
+        .sc_item_title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #eaeaea;
+            line-height: 22px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sc_item:hover .sc_item_title { color: #ffffff; }
+    </style>
+</head>
+<body>
+    <section class="sc_hot">
+        <div class="sc_hot_head">
+            <span class="sc_flame">🔥</span>
+            <h2 class="sc_hot_title">热榜</h2>
+            <i class="iconfont icon-gengduo sc_more"></i>
+        </div>
+        <ul class="sc_hot_list" id="sc_hot_list"></ul>
+    </section>
+
+    <script>
+        var sc_hotData = [
+            '国内最长地铁环线全线开通',
+            '被指为日本品牌？山下有松回应',
+            '特斯拉机器人工作是无人车充电',
+            '“未来优秀超市品牌不是胖东来”',
+            '国产游戏《影之刃零》登顶全球',
+            '华为制药军团不做药'
+        ];
+
+        function sc_renderHot() {
+            var sc_list = document.getElementById('sc_hot_list');
+            var sc_html = '';
+            for (var sc_i = 0; sc_i < sc_hotData.length; sc_i++) {
+                var sc_no = sc_i + 1;
+                var sc_cls = 'sc_rank';
+                if (sc_no <= 3) {
+                    sc_cls += ' sc_rank_top' + sc_no;
+                } else {
+                    sc_cls += ' sc_rank_dim';
+                }
+                sc_html += '<li class="sc_item">'
+                    + '<span class="' + sc_cls + '">' + sc_no + '</span>'
+                    + '<span class="sc_item_title">' + sc_hotData[sc_i] + '</span>'
+                    + '</li>';
+            }
+            sc_list.innerHTML = sc_html;
+        }
+
+        sc_renderHot();
+    </script>
+</body>
+</html>

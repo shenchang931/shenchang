@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<!-- 姓名：沈畅，日期：2026-10-29，功能名称：tab 选项卡排行列表页还原 -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>16-4 点击排行 / 评论排行 选项卡</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            background: #ffffff;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .sc_wrap { width: 100%; max-width: 407px; }
+
+        /* ---------- 排行榜卡片 ---------- */
+        .sc_card {
+            background: #ffffff;
+        }
+
+        .sc_tabbar { display: flex; height: 38px; background: #dbeaf9; }
+
+        .sc_tab {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #4b6f92;
+            background: transparent;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: background .2s, color .2s;
+            user-select: none;
+        }
+        .sc_tab:hover { color: #2f5c86; }
+
+        .sc_tab.sc_tab_active {
+            background: #ffffff;
+            color: #1b1b1b;
+            font-weight: 700;
+            border-color: #b7d5f2;
+            border-bottom-color: #ffffff;
+        }
+
+        /* ---------- 列表 ---------- */
+        .sc_list { list-style: none; }
+
+        .sc_item {
+            display: flex;
+            align-items: center;
+            height: 37px;
+            padding: 0 12px;
+            border-bottom: 1px dotted #e3e3e3;
+        }
+        .sc_item:last-child { border-bottom: none; }
+
+        .sc_no {
+            flex: 0 0 22px;
+            font-family: Arial, "Microsoft YaHei", sans-serif;
+            font-size: 13px;
+            color: #b9b9b9;
+        }
+
+        .sc_item_title {
+            flex: 1;
+            min-width: 0;
+            font-size: 14px;
+            font-weight: 500;
+            color: #3b3b3b;
+            line-height: 37px;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .sc_count {
+            flex: 0 0 58px;
+            text-align: right;
+            font-family: Arial, "Microsoft YaHei", sans-serif;
+            font-size: 13px;
+            color: #c0392b;
+        }
+
+        @media (max-width: 420px) {
+            .sc_item_title { font-size: 13.5px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sc_wrap">
+        <!-- ========== 选项卡 + 排行列表 ========== -->
+        <section class="sc_card">
+            <div class="sc_tabbar" id="sc_tabbar"></div>
+            <ul class="sc_list" id="sc_list"></ul>
+        </section>
+    </div>
+
+    <script>
+        // ---------- 榜单数据 ----------
+        var sc_tabData = [
+            {
+                sc_label: '点击排行',
+                sc_list: [
+                    { sc_title: '中国各城市房子还要卖多少年（详细数据）', sc_count: 187706 },
+                    { sc_title: '任志强：60多年来 我不知道国企给了我们', sc_count: 171180 },
+                    { sc_title: '三精制药跳楼老总被查因华润商贿案 省食', sc_count: 127631 },
+                    { sc_title: '内地17省铺开不动产统一登记职责整合工作', sc_count: 113865 },
+                    { sc_title: '山西煤老板抛售整栋99套二手房 8年投资翻', sc_count: 72770 },
+                    { sc_title: '北京城南楼市“沦陷” 变相降价措施加码', sc_count: 62971 },
+                    { sc_title: '中国3D打印技术取得重大突破 近1200人连', sc_count: 27456 },
+                    { sc_title: '重磅利空突至致全球暴跌 A股或黑周五无悬', sc_count: 25322 },
+                    { sc_title: '七匹狼早盘上演奇葩一幕：单笔4手卖单刷', sc_count: 20912 },
+                    { sc_title: '长油小股东主导股东大会 当场爆料董事长', sc_count: 11667 }
+                ]
+            },
+            {
+                sc_label: '评论排行',
+                sc_list: [
+                    { sc_title: '地铁环线全线开通 网友：终于不用换乘了', sc_count: 98432 },
+                    { sc_title: '“山下有松”回应品牌争议 评论区观点两极', sc_count: 87301 },
+                    { sc_title: '特斯拉机器人真在给无人车充电？评论炸了', sc_count: 76215 },
+                    { sc_title: '胖东来模式能否复制 超市从业者吵翻了', sc_count: 65120 },
+                    { sc_title: '《影之刃零》登顶全球 国产游戏扬眉吐气', sc_count: 54988 },
+                    { sc_title: '华为制药军团不做药 网友：先把手机做好', sc_count: 43210 },
+                    { sc_title: '房贷利率再下调 购房者：还是不敢下手', sc_count: 32654 },
+                    { sc_title: '3D打印重大突破 有人担心会取代人工', sc_count: 21877 },
+                    { sc_title: '年轻人开始反向消费 评论区一片共鸣', sc_count: 15432 },
+                    { sc_title: '长油股东大会爆料 小股东：只想问一句', sc_count: 9876 }
+                ]
+            }
+        ];
+
+        var sc_activeTab = 0;
+
+        // ---------- 渲染选项卡 ----------
+        function sc_renderTabs() {
+            var sc_bar = document.getElementById('sc_tabbar');
+            var sc_html = '';
+            for (var sc_i = 0; sc_i < sc_tabData.length; sc_i++) {
+                var sc_cls = 'sc_tab' + (sc_i === sc_activeTab ? ' sc_tab_active' : '');
+                sc_html += '<div class="' + sc_cls + '" data-tab="' + sc_i + '">'
+                    + sc_tabData[sc_i].sc_label + '</div>';
+            }
+            sc_bar.innerHTML = sc_html;
+        }
+
+        // ---------- 渲染列表 ----------
+        function sc_renderList() {
+            var sc_listBox = document.getElementById('sc_list');
+            var sc_rows = sc_tabData[sc_activeTab].sc_list;
+            var sc_html = '';
+            for (var sc_i = 0; sc_i < sc_rows.length; sc_i++) {
+                sc_html += '<li class="sc_item">'
+                    + '<span class="sc_no">' + (sc_i + 1) + '</span>'
+                    + '<span class="sc_item_title">' + sc_rows[sc_i].sc_title + '</span>'
+                    + '<span class="sc_count">' + sc_rows[sc_i].sc_count + '</span>'
+                    + '</li>';
+            }
+            sc_listBox.innerHTML = sc_html;
+        }
+
+        // ---------- 切换选项卡 ----------
+        function sc_switchTab(sc_index) {
+            if (sc_index === sc_activeTab) { return; }
+            sc_activeTab = sc_index;
+            sc_renderTabs();
+            sc_renderList();
+        }
+
+        // ---------- 启动 ----------
+        sc_renderTabs();
+        sc_renderList();
+
+        document.getElementById('sc_tabbar').addEventListener('click', function (sc_e) {
+            var sc_tab = sc_e.target.closest('.sc_tab');
+            if (sc_tab) { sc_switchTab(Number(sc_tab.getAttribute('data-tab'))); }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<!-- 姓名：沈畅，日期：2026-10-29，功能名称：JavaScript 对象与字符串可视化演示 -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>16-2 JavaScript 对象与字符串可视化演示</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            background: radial-gradient(1200px 600px at 50% -10%, #17324d 0%, #0b1220 58%, #070b14 100%);
+            background-attachment: fixed;
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 36px 16px 60px;
+        }
+
+        .sc_header { text-align: center; margin-bottom: 26px; }
+        .sc_header h1 {
+            font-size: 30px;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, #a78bfa, #38bdf8, #34d399);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+        }
+        .sc_header p { color: #94a3b8; font-size: 13.5px; letter-spacing: .5px; }
+        .sc_header .sc_name { color: #fbbf24; font-weight: bold; }
+
+        .sc_container { max-width: 1180px; margin: 0 auto; }
+
+        /* ---------- 通用面板 ---------- */
+        .sc_panel {
+            background: rgba(30, 41, 59, .72);
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 20px;
+            backdrop-filter: blur(6px);
+        }
+        .sc_panel h3 { font-size: 16px; color: #a78bfa; margin-bottom: 12px; }
+
+        .sc_group_title {
+            font-size: 20px;
+            color: #34d399;
+            margin: 34px 0 16px;
+            padding-left: 12px;
+            border-left: 4px solid #34d399;
+        }
+        .sc_group_title span { font-size: 12.5px; color: #64748b; font-weight: normal; margin-left: 10px; }
+
+        .sc_lede {
+            background: rgba(30, 41, 59, .72);
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 22px 24px;
+            margin-bottom: 8px;
+            font-size: 13.5px;
+            line-height: 1.9;
+            color: #94a3b8;
+        }
+        .sc_lede b { color: #e2e8f0; }
+
+        /* ---------- 对象结构可视化 ---------- */
+        .sc_obj_wrap {
+            display: grid;
+            grid-template-columns: 1.05fr 1fr;
+            gap: 18px;
+        }
+
+        .sc_obj {
+            font-family: Consolas, Monaco, monospace;
+            font-size: 14px;
+            background: #0b1220;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 14px 16px;
+            line-height: 2.1;
+        }
+        .sc_obj_head { color: #64748b; }
+        .sc_obj_name { color: #38bdf8; }
+        .sc_obj_end { color: #64748b; }
+        .sc_obj_row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 3px 8px;
+            border-radius: 8px;
+            transition: background .3s, box-shadow .3s, transform .3s;
+        }
+        .sc_key { color: #a78bfa; }
+        .sc_colon, .sc_comma { color: #64748b; }
+        .sc_oval { color: #34d399; }
+        .sc_oval_array { display: inline-flex; gap: 5px; flex-wrap: wrap; }
+        .sc_oval_item {
+            color: #7dd3fc;
+            background: rgba(56, 189, 248, .1);
+            border: 1px solid #38bdf8;
+            border-radius: 5px;
+            padding: 0 7px;
+            font-size: 12.5px;
+            line-height: 1.9;
+        }
+
+        .sc_obj_row.sc_row_new { background: rgba(52, 211, 153, .14); box-shadow: inset 0 0 0 1px #34d399; }
+        .sc_obj_row.sc_row_upd { background: rgba(251, 191, 36, .14); box-shadow: inset 0 0 0 1px #fbbf24; }
+        .sc_obj_row.sc_row_read { background: rgba(56, 189, 248, .14); box-shadow: inset 0 0 0 1px #38bdf8; }
+        .sc_obj_row.sc_row_del {
+            background: rgba(248, 113, 113, .14);
+            box-shadow: inset 0 0 0 1px #f87171;
+            text-decoration: line-through;
+            opacity: .75;
+        }
+        .sc_obj_row.sc_row_visit { background: rgba(167, 139, 250, .16); box-shadow: inset 0 0 0 1px #a78bfa; }
+
+        .sc_obj_tip { margin-top: 12px; font-size: 12.5px; color: #64748b; line-height: 1.8; }
+
+        /* ---------- 操作按钮 ---------- */
+        .sc_op_group { margin-bottom: 14px; }
+        .sc_op_group > span { display: block; font-size: 12.5px; color: #94a3b8; margin-bottom: 8px; }
+        .sc_btn_row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+        .sc_btn {
+            font-size: 13px;
+            font-weight: bold;
+            color: #06281e;
+            background: linear-gradient(90deg, #34d399, #38bdf8);
+            border: none;
+            border-radius: 9px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: opacity .2s, transform .2s;
+        }
+        .sc_btn:hover { opacity: .88; }
+        .sc_btn:active { transform: scale(.97); }
+
+        .sc_btn_key {
+            color: #c4b5fd;
+            background: rgba(167, 139, 250, .12);
+            border: 1px solid rgba(167, 139, 250, .5);
+            font-family: Consolas, Monaco, monospace;
+        }
+        .sc_btn_warn {
+            color: #fbbf24;
+            background: rgba(251, 191, 36, .12);
+            border: 1px solid rgba(251, 191, 36, .5);
+        }
+        .sc_btn_danger {
+            color: #f87171;
+            background: rgba(248, 113, 113, .12);
+            border: 1px solid rgba(248, 113, 113, .5);
+        }
+        .sc_btn_ghost {
+            color: #94a3b8;
+            background: #0b1220;
+            border: 1px solid #334155;
+        }
+
+        .sc_ret {
+            margin-top: 6px;
+            font-size: 13px;
+            line-height: 2;
+            background: #0b1220;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 12px 14px;
+            word-break: break-all;
+            min-height: 74px;
+        }
+        .sc_ret code { font-family: Consolas, Monaco, monospace; color: #7dd3fc; }
+        .sc_tip { color: #64748b; }
+        .sc_ok { color: #34d399; }
+        .sc_warn { color: #fbbf24; }
+        .sc_err { color: #f87171; }
+
+        /* ---------- 嵌套对象 ---------- */
+        .sc_nested { margin-top: 18px; }
+        .sc_nested_box {
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13.5px;
+            background: #0b1220;
+            border: 1px solid #334155;
+            border-left: 3px solid #a78bfa;
+            border-radius: 12px;
+            padding: 16px;
+            line-height: 2;
+        }
+        .sc_nested_box .sc_inner {
+            margin-left: 20px;
+            padding-left: 14px;
+            border-left: 2px dashed #475569;
+        }
+        .sc_path { margin-top: 12px; font-size: 12.5px; color: #64748b; }
+        .sc_path code { color: #fbbf24; font-family: Consolas, Monaco, monospace; }
+
+        /* ---------- 字符串字符格子 ---------- */
+        .sc_cells { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 0; }
+        .sc_empty { font-size: 12.5px; color: #64748b; padding: 12px 0; }
+        .sc_cell { display: flex; flex-direction: column; align-items: center; animation: sc_pop .32s ease both; }
+        .sc_idx { font-size: 10px; color: #475569; margin-bottom: 3px; }
+        .sc_val {
+            min-width: 44px;
+            padding: 8px 6px;
+            text-align: center;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13.5px;
+            color: #cbd5e1;
+            background: #0b1220;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            transition: .3s;
+        }
+        .sc_cells.sc_cells_new .sc_val {
+            color: #7dd3fc;
+            background: rgba(56, 189, 248, .12);
+            border-color: #38bdf8;
+        }
+        .sc_cell.sc_cell_changed .sc_val {
+            color: #fbbf24;
+            background: rgba(251, 191, 36, .14);
+            border-color: #fbbf24;
+            box-shadow: 0 0 12px rgba(251, 191, 36, .25);
+        }
+        .sc_cell.sc_cell_click { cursor: pointer; }
+        .sc_cell.sc_cell_click:hover .sc_val { border-color: #a78bfa; color: #a78bfa; }
+
+        @keyframes sc_pop {
+            from { opacity: 0; transform: translateY(-8px) scale(.88); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* ---------- 字符串方法卡片 ---------- */
+        .sc_str_intro { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 4px; }
+
+        .sc_grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+            gap: 18px;
+            margin-top: 18px;
+        }
+        .sc_card {
+            background: rgba(30, 41, 59, .72);
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 20px;
+            transition: border-color .25s, box-shadow .25s, transform .25s;
+        }
+        .sc_card:hover {
+            border-color: #38bdf8;
+            box-shadow: 0 14px 32px rgba(56, 189, 248, .12);
+            transform: translateY(-2px);
+        }
+        .sc_card_head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+        .sc_card_head h3 { font-size: 16.5px; color: #e2e8f0; font-family: Consolas, Monaco, monospace; }
+        .sc_badge {
+            font-size: 11.5px;
+            border-radius: 999px;
+            padding: 3px 10px;
+            white-space: nowrap;
+            color: #34d399;
+            background: rgba(52, 211, 153, .12);
+            border: 1px solid rgba(52, 211, 153, .45);
+        }
+        .sc_desc { font-size: 13.5px; color: #94a3b8; line-height: 1.85; margin-bottom: 12px; }
+        .sc_code {
+            background: #0b1220;
+            border: 1px solid #334155;
+            border-left: 3px solid #a78bfa;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+            color: #c4b5fd;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-bottom: 12px;
+        }
+        .sc_line { display: flex; align-items: flex-start; gap: 10px; }
+        .sc_line_label {
+            flex: 0 0 auto;
+            font-size: 11.5px;
+            color: #94a3b8;
+            background: #0b1220;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            padding: 4px 8px;
+            margin-top: 14px;
+            white-space: nowrap;
+        }
+        .sc_arrow {
+            font-size: 12.5px;
+            color: #34d399;
+            font-family: Consolas, Monaco, monospace;
+            padding: 9px 0 9px 8px;
+            margin-left: 8px;
+            border-left: 2px dashed #334155;
+        }
+        .sc_stage { margin-top: 14px; }
+        .sc_stage_hint { font-size: 12.5px; color: #64748b; text-align: center; padding: 14px 0; border: 1px dashed #334155; border-radius: 10px; }
+        .sc_ret_line {
+            margin-top: 12px;
+            font-size: 13px;
+            line-height: 1.8;
+            background: #0b1220;
+            border: 1px solid #334155;
+            border-radius: 9px;
+            padding: 10px 13px;
+            word-break: break-all;
+        }
+        .sc_ret_tag {
+            font-size: 11px;
+            color: #34d399;
+            background: rgba(52, 211, 153, .12);
+            border: 1px solid rgba(52, 211, 153, .4);
+            border-radius: 5px;
+            padding: 1px 7px;
+            margin-right: 8px;
+        }
+        .sc_ret_value { color: #fbbf24; font-family: Consolas, Monaco, monospace; }
+        .sc_note { margin-top: 9px; font-size: 12.5px; color: #64748b; line-height: 1.8; }
+        .sc_scalar {
+            font-family: Consolas, Monaco, monospace;
+            font-size: 20px;
+            color: #fbbf24;
+            padding: 6px 0;
+        }
+
+        .sc_footer_note { margin-top: 40px; text-align: center; color: #475569; font-size: 13px; }
+
+        @media (max-width: 900px) {
+            .sc_obj_wrap, .sc_str_intro { grid-template-columns: 1fr; }
+            .sc_grid { grid-template-columns: 1fr; }
+            .sc_header h1 { font-size: 22px; }
+            .sc_card { padding: 16px; }
+            .sc_val { min-width: 36px; padding: 7px 5px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="sc_header">
+        <h1>JavaScript 对象与字符串</h1>
+        <p>姓名：<span class="sc_name">沈畅</span> · 对象：键值对 / 访问 / 增删改 / 遍历 · 字符串：字符序列 / 不可变 / 常用方法</p>
+    </header>
+
+    <main class="sc_container">
+        <section class="sc_lede">
+            <b>对象</b>像一个"收纳盒"，用「键: 值」的形式描述一个事物的多项信息；<b>字符串</b>则是一串按顺序排列的字符，每个字符都有自己的下标。<br>
+            下面两部分都可以直接点击操作：对象区可以读取、增删改、遍历；字符串区可以点击字符格子查看下标访问，并逐个运行常用方法。
+        </section>
+
+        <!-- ================= 一、对象 ================= -->
+        <h2 class="sc_group_title">一、对象 Object <span>花括号 { } 里是一组「键: 值」</span></h2>
+
+        <div class="sc_obj_wrap">
+            <div class="sc_panel">
+                <h3>对象长什么样</h3>
+                <div id="sc_obj_box" class="sc_obj"></div>
+                <p class="sc_obj_tip">键（紫色）本质上是字符串，值（绿色）可以是数字、字符串、数组甚至另一个对象。</p>
+            </div>
+
+            <div class="sc_panel">
+                <h3>动手操作这个对象</h3>
+                <div class="sc_op_group">
+                    <span>① 读取属性（点击键名）</span>
+                    <div id="sc_read_btns" class="sc_btn_row"></div>
+                </div>
+                <div class="sc_op_group">
+                    <span>② 增加 / 修改 / 删除属性</span>
+                    <div class="sc_btn_row">
+                        <button class="sc_btn" id="sc_obj_add">新增属性</button>
+                        <button class="sc_btn sc_btn_warn" id="sc_obj_mod">修改属性</button>
+                        <button class="sc_btn sc_btn_danger" id="sc_obj_del">删除属性</button>
+                        <button class="sc_btn sc_btn_ghost" id="sc_obj_reset">重置对象</button>
+                    </div>
+                </div>
+                <div class="sc_op_group">
+                    <span>③ 遍历所有属性</span>
+                    <div class="sc_btn_row">
+                        <button class="sc_btn" id="sc_obj_visit">for...in 遍历</button>
+                    </div>
+                </div>
+                <div id="sc_obj_out" class="sc_ret"><span class="sc_tip">操作结果会显示在这里。</span></div>
+            </div>
+        </div>
+
+        <div class="sc_panel sc_nested">
+            <h3>对象里还能再套对象（嵌套）</h3>
+            <div class="sc_nested_box">
+                <div>const <span class="sc_obj_name">sc_course</span> = {</div>
+                <div style="margin-left:16px">姓名: <span class="sc_oval">"沈畅"</span>,</div>
+                <div style="margin-left:16px">课程: {</div>
+                <div class="sc_inner">
+                    <div>名称: <span class="sc_oval">"高级网页设计"</span>,</div>
+                    <div>章节: <span class="sc_oval">16</span>,</div>
+                    <div>技术: <span class="sc_oval">[HTML, CSS, JS]</span></div>
+                </div>
+                <div style="margin-left:16px">}</div>
+                <div>}</div>
+            </div>
+            <p class="sc_path">读取嵌套里的值要一层一层往下走：<code>sc_course.课程.名称</code> → "高级网页设计"</p>
+        </div>
+
+        <!-- ================= 二、字符串 ================= -->
+        <h2 class="sc_group_title">二、字符串 String <span>一串字符，每个字符都有下标，从 0 开始</span></h2>
+
+        <div class="sc_str_intro">
+            <div class="sc_panel">
+                <h3>字符串就是排好队的字符</h3>
+                <div id="sc_chars_box"></div>
+                <div id="sc_chars_out" class="sc_ret"><span class="sc_tip">点击任意一个字符，查看用下标取出它的结果。</span></div>
+            </div>
+
+            <div class="sc_panel">
+                <h3>字符串是不可变的</h3>
+                <p class="sc_obj_tip" style="margin-bottom:12px">字符串一旦创建就不能被修改，任何"修改"其实都会产生一个新字符串。</p>
+                <div class="sc_btn_row">
+                    <button class="sc_btn sc_btn_danger" id="sc_immut_try">sc_s[0] = "X"</button>
+                    <button class="sc_btn" id="sc_immut_upper">sc_s.toUpperCase()</button>
+                </div>
+                <div id="sc_immut_out" class="sc_ret"><span class="sc_tip">其中 sc_s = "JavaScript"。点击上面的按钮试试。</span></div>
+            </div>
+        </div>
+
+        <div id="sc_str_board" class="sc_grid"></div>
+
+        <p class="sc_footer_note">沈畅 · 《高级网页设计》 · 原生 HTML / CSS / JavaScript 实现</p>
+    </main>
+
+    <script>
+        // ================= 工具函数 =================
+        function sc_esc(sc_s) {
+            return String(sc_s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function sc_show(sc_v) {
+            if (Array.isArray(sc_v)) {
+                var sc_items = [];
+                for (var sc_k = 0; sc_k < sc_v.length; sc_k++) { sc_items.push(sc_show(sc_v[sc_k])); }
+                return '[' + sc_items.join(', ') + ']';
+            }
+            if (typeof sc_v === 'string') { return '"' + sc_v + '"'; }
+            if (sc_v === undefined) { return 'undefined'; }
+            if (sc_v === null) { return 'null'; }
+            return String(sc_v);
+        }
+
+        function sc_charLabel(sc_ch) {
+            return sc_ch === ' ' ? '␣' : sc_ch;
+        }
+
+        function sc_charCells(sc_text, sc_marks, sc_kind, sc_clickable) {
+            sc_marks = sc_marks || [];
+            if (sc_text.length === 0) {
+                return '<div class="sc_cells"><span class="sc_empty">空字符串 ""</span></div>';
+            }
+            var sc_html = '<div class="sc_cells' + (sc_kind ? ' ' + sc_kind : '') + '">';
+            for (var sc_i = 0; sc_i < sc_text.length; sc_i++) {
+                var sc_cls = 'sc_cell';
+                if (sc_marks.indexOf(sc_i) !== -1) { sc_cls += ' sc_cell_changed'; }
+                if (sc_clickable) { sc_cls += ' sc_cell_click'; }
+                sc_html += '<div class="' + sc_cls + '"'
+                    + (sc_clickable ? ' data-index="' + sc_i + '"' : '')
+                    + ' style="animation-delay:' + (sc_i * 40) + 'ms">'
+                    + '<span class="sc_idx">' + sc_i + '</span>'
+                    + '<span class="sc_val">' + sc_esc(sc_charLabel(sc_text[sc_i])) + '</span>'
+                    + '</div>';
+            }
+            sc_html += '</div>';
+            return sc_html;
+        }
+
+        function sc_arrayCells(sc_values, sc_kind) {
+            if (sc_values.length === 0) {
+                return '<div class="sc_cells"><span class="sc_empty">空数组 []</span></div>';
+            }
+            var sc_html = '<div class="sc_cells ' + (sc_kind || '') + '">';
+            for (var sc_i = 0; sc_i < sc_values.length; sc_i++) {
+                sc_html += '<div class="sc_cell" style="animation-delay:' + (sc_i * 45) + 'ms">'
+                    + '<span class="sc_idx">' + sc_i + '</span>'
+                    + '<span class="sc_val">' + sc_esc(sc_show(sc_values[sc_i])) + '</span>'
+                    + '</div>';
+            }
+            sc_html += '</div>';
+            return sc_html;
+        }
+
+        // ================= 一、对象部分 =================
+        var sc_objInit = { 姓名: '沈畅', 年龄: 20, 城市: '北京', 技能: ['HTML', 'CSS', 'JS'] };
+        var sc_obj = {};
+        var sc_objMarks = {};
+        var sc_addQueue = [
+            { 邮箱: 'shenchang@example.com' },
+            { 学校: '高级网页设计' },
+            { 爱好: '前端开发' }
+        ];
+        var sc_visitTimer = null;
+
+        function sc_resetObj() {
+            sc_obj = {};
+            for (var sc_k in sc_objInit) {
+                sc_obj[sc_k] = Array.isArray(sc_objInit[sc_k]) ? sc_objInit[sc_k].slice() : sc_objInit[sc_k];
+            }
+            sc_objMarks = {};
+        }
+
+        function sc_valHtml(sc_v) {
+            if (Array.isArray(sc_v)) {
+                var sc_html = '<span class="sc_oval_array">';
+                for (var sc_i = 0; sc_i < sc_v.length; sc_i++) {
+                    sc_html += '<span class="sc_oval_item">' + sc_esc(sc_v[sc_i]) + '</span>';
+                }
+                sc_html += '</span>';
+                return sc_html;
+            }
+            if (typeof sc_v === 'string') { return '<span class="sc_oval">"' + sc_esc(sc_v) + '"</span>'; }
+            return '<span class="sc_oval">' + sc_esc(sc_v) + '</span>';
+        }
+
+        function sc_renderObj() {
+            var sc_box = document.getElementById('sc_obj_box');
+            var sc_html = '<div class="sc_obj_head">const <span class="sc_obj_name">sc_student</span> = {</div>';
+            var sc_keys = Object.keys(sc_obj);
+            for (var sc_i = 0; sc_i < sc_keys.length; sc_i++) {
+                var sc_k = sc_keys[sc_i];
+                var sc_cls = 'sc_obj_row' + (sc_objMarks[sc_k] ? ' ' + sc_objMarks[sc_k] : '');
+                sc_html += '<div class="' + sc_cls + '" data-key="' + sc_esc(sc_k) + '">'
+                    + '<span class="sc_key">' + sc_esc(sc_k) + '</span>'
+                    + '<span class="sc_colon">:</span>'
+                    + sc_valHtml(sc_obj[sc_k])
+                    + '<span class="sc_comma">,</span>'
+                    + '</div>';
+            }
+            sc_html += '<div class="sc_obj_end">};</div>';
+            sc_box.innerHTML = sc_html;
+            sc_buildReadBtns();
+        }
+
+        function sc_buildReadBtns() {
+            var sc_box = document.getElementById('sc_read_btns');
+            var sc_keys = Object.keys(sc_obj);
+            var sc_html = '';
+            for (var sc_i = 0; sc_i < sc_keys.length; sc_i++) {
+                sc_html += '<button class="sc_btn sc_btn_key" data-key="' + sc_esc(sc_keys[sc_i]) + '">'
+                    + sc_esc(sc_keys[sc_i]) + '</button>';
+            }
+            sc_box.innerHTML = sc_html;
+        }
+
+        function sc_out(sc_html) {
+            document.getElementById('sc_obj_out').innerHTML = sc_html;
+        }
+
+        function sc_readProp(sc_k) {
+            sc_objMarks = {};
+            sc_objMarks[sc_k] = 'sc_row_read';
+            sc_renderObj();
+            var sc_v = sc_obj[sc_k];
+            sc_out('<span class="sc_ok">读取到属性</span> <code>' + sc_esc(sc_k) + '</code>，值为 <code>'
+                + sc_esc(sc_show(sc_v)) + '</code><br>'
+                + '点号写法：<code>sc_student.' + sc_esc(sc_k) + '</code><br>'
+                + '方括号写法：<code>sc_student["' + sc_esc(sc_k) + '"]</code><br>'
+                + '变量写法：<code>sc_student[sc_key]</code>，其中 <code>sc_key = "' + sc_esc(sc_k) + '"</code>');
+        }
+
+        function sc_addProp() {
+            if (sc_addQueue.length === 0) {
+                sc_out('<span class="sc_warn">已经演示完所有新属性，可以点「重置对象」还原后再试。</span>');
+                return;
+            }
+            var sc_new = sc_addQueue.shift();
+            var sc_k = Object.keys(sc_new)[0];
+            sc_obj[sc_k] = sc_new[sc_k];
+            sc_objMarks = {};
+            sc_objMarks[sc_k] = 'sc_row_new';
+            sc_renderObj();
+            sc_out('<span class="sc_ok">新增成功</span>：执行 <code>sc_student.' + sc_esc(sc_k) + ' = "'
+                + sc_esc(sc_new[sc_k]) + '"</code>，对象里多了一个键值对，属性总数变为 '
+                + Object.keys(sc_obj).length + ' 个。');
+        }
+
+        function sc_modProp() {
+            sc_obj.年龄 = sc_obj.年龄 + 1;
+            sc_objMarks = {};
+            sc_objMarks.年龄 = 'sc_row_upd';
+            sc_renderObj();
+            sc_out('<span class="sc_warn">修改成功</span>：执行 <code>sc_student.年龄 = '
+                + (sc_obj.年龄) + '</code>，用已有的键赋值就是"修改"，<b>不会</b>新增键。');
+        }
+
+        function sc_delProp() {
+            var sc_keys = Object.keys(sc_obj);
+            if (sc_keys.length === 0) {
+                sc_out('<span class="sc_err">对象已经空了。</span>');
+                return;
+            }
+            // 依次删除：城市 → 技能 → 邮箱 → 学校 → 爱好，最后删到只剩前两个
+            var sc_target = null;
+            var sc_order = ['城市', '技能', '邮箱', '学校', '爱好'];
+            for (var sc_i = 0; sc_i < sc_order.length; sc_i++) {
+                if (sc_obj.hasOwnProperty(sc_order[sc_i])) { sc_target = sc_order[sc_i]; break; }
+            }
+            if (sc_target === null) {
+                sc_out('<span class="sc_warn">只剩核心属性了，删除演示到此为止，可点「重置对象」重来。</span>');
+                return;
+            }
+            sc_objMarks = {};
+            sc_objMarks[sc_target] = 'sc_row_del';
+            sc_renderObj();
+            sc_out('执行 <code>delete sc_student.' + sc_esc(sc_target) + '</code> …');
+            setTimeout(function () {
+                delete sc_obj[sc_target];
+                sc_objMarks = {};
+                sc_renderObj();
+                sc_out('<span class="sc_err">删除成功</span>：属性 <code>' + sc_esc(sc_target)
+                    + '</code> 被移除，对象现在只剩 ' + Object.keys(sc_obj).length + ' 个属性。');
+            }, 500);
+        }
+
+        function sc_visitObj() {
+            var sc_keys = Object.keys(sc_obj);
+            if (sc_visitTimer) { clearInterval(sc_visitTimer); }
+            var sc_i = 0;
+            var sc_log = [];
+            sc_out('<span class="sc_tip">正在遍历 …</span>');
+            sc_visitTimer = setInterval(function () {
+                var sc_rows = document.querySelectorAll('#sc_obj_box .sc_obj_row');
+                for (var sc_j = 0; sc_j < sc_rows.length; sc_j++) {
+                    sc_rows[sc_j].classList.remove('sc_row_visit');
+                }
+                if (sc_i >= sc_keys.length) {
+                    clearInterval(sc_visitTimer);
+                    sc_visitTimer = null;
+                    sc_out('<span class="sc_ok">遍历结束</span>：for...in 依次拿到键 <code>'
+                        + sc_esc(sc_log.join('、')) + '</code><br>'
+                        + '想直接拿到所有键也可以用 <code>Object.keys(sc_student)</code>，拿到所有值用 <code>Object.values(sc_student)</code>。');
+                    return;
+                }
+                var sc_k = sc_keys[sc_i];
+                var sc_rowsArr = document.querySelectorAll('#sc_obj_box .sc_obj_row');
+                for (var sc_m = 0; sc_m < sc_rowsArr.length; sc_m++) {
+                    if (sc_rowsArr[sc_m].getAttribute('data-key') === sc_k) {
+                        sc_rowsArr[sc_m].classList.add('sc_row_visit');
+                    }
+                }
+                sc_log.push(sc_k + '=' + sc_show(sc_obj[sc_k]));
+                sc_out('<span class="sc_tip">遍历中 …</span> 当前键 <code>' + sc_esc(sc_k) + '</code>，值 <code>'
+                    + sc_esc(sc_show(sc_obj[sc_k])) + '</code>');
+                sc_i++;
+            }, 620);
+        }
+
+        // ================= 二、字符串部分 =================
+        var sc_demoStr = '沈畅2026';
+
+        function sc_renderChars() {
+            var sc_box = document.getElementById('sc_chars_box');
+            sc_box.innerHTML = sc_charCells(sc_demoStr, [], '', true);
+            sc_box.addEventListener('click', function (sc_e) {
+                var sc_cell = sc_e.target.closest('.sc_cell');
+                if (!sc_cell) { return; }
+                var sc_i = Number(sc_cell.getAttribute('data-index'));
+                var sc_outBox = document.getElementById('sc_chars_out');
+                var sc_all = document.querySelectorAll('#sc_chars_box .sc_cell');
+                for (var sc_j = 0; sc_j < sc_all.length; sc_j++) { sc_all[sc_j].classList.remove('sc_cell_changed'); }
+                sc_cell.classList.add('sc_cell_changed');
+                sc_outBox.innerHTML = '点击了下标 <code>' + sc_i + '</code> 的字符：<code>sc_s[' + sc_i + ']</code> → <code>'
+                    + sc_esc(sc_show(sc_demoStr[sc_i])) + '</code><br>'
+                    + '也可以写成 <code>sc_s.charAt(' + sc_i + ')</code>，结果相同。';
+            });
+        }
+
+        function sc_immutDemo(sc_mode) {
+            var sc_s = 'JavaScript';
+            var sc_outBox = document.getElementById('sc_immut_out');
+            var sc_html = '<div class="sc_tip" style="margin-bottom:6px">原字符串 sc_s</div>'
+                + sc_charCells(sc_s, []);
+
+            if (sc_mode === 'set') {
+                var sc_try = sc_s;
+                try { sc_try[0] = 'X'; } catch (sc_e) { /* 严格模式下会报错，普通模式下静默失败 */ }
+                sc_html += '<div class="sc_note">执行 <code>sc_s[0] = "X"</code> 后</div>'
+                    + sc_charCells(sc_try, [0])
+                    + '<div class="sc_err" style="margin-top:8px">结果仍是 "JavaScript" —— 下标赋值对字符串无效，字符串不会被改变。</div>';
+            } else {
+                var sc_new = sc_s.toUpperCase();
+                sc_html += '<div class="sc_note">执行 <code>sc_s.toUpperCase()</code> 后返回的新字符串</div>'
+                    + sc_charCells(sc_new, [], 'sc_cells_new')
+                    + '<div class="sc_ok" style="margin-top:8px">返回了全新的 "JAVASCRIPT"，而 sc_s 依然是 "JavaScript"。</div>';
+            }
+            sc_outBox.innerHTML = sc_html;
+        }
+
+        // 字符串方法演示配置
+        var sc_strMethods = [
+            {
+                sc_name: 'length', sc_desc: '读取字符串的字符个数（属性，不是方法，不加括号）。',
+                sc_code: 'sc_s.length', sc_base: '沈畅2026',
+                sc_run: function (sc_s) {
+                    return [sc_s.length, sc_s.length + '（字符个数）', '汉字、数字、空格、标点都各算 1 个字符。', []];
+                }
+            },
+            {
+                sc_name: 'charAt() / 下标', sc_desc: '按位置取出单个字符，下标从 0 开始。',
+                sc_code: 'sc_s[0]  // 或 sc_s.charAt(0)', sc_base: '沈畅2026',
+                sc_run: function (sc_s) {
+                    return ['沈', '"沈"（下标 0 的字符）', '下标 3 得到 "2"；超出范围时 sc_s[i] 是 undefined，charAt 返回空字符串。', [0]];
+                }
+            },
+            {
+                sc_name: 'indexOf()', sc_desc: '查找子串第一次出现的位置，找不到返回 -1。',
+                sc_code: "sc_s.indexOf('2026')", sc_base: '沈畅2026',
+                sc_run: function (sc_s) {
+                    var sc_i = sc_s.indexOf('2026');
+                    var sc_marks = [];
+                    for (var sc_k = 0; sc_k < 4; sc_k++) { sc_marks.push(sc_i + sc_k); }
+                    return [sc_i, sc_i + '（子串起始下标）', '从前往后查找，找到就返回起始位置的下标。', sc_marks];
+                }
+            },
+            {
+                sc_name: 'includes()', sc_desc: '判断字符串里是否包含某个子串，返回 true / false。',
+                sc_code: "sc_s.includes('畅')", sc_base: '沈畅2026',
+                sc_run: function (sc_s) {
+                    return [sc_s.includes('畅'), 'true（包含该内容）', '只关心有没有，不关心在哪里。', [1]];
+                }
+            },
+            {
+                sc_name: 'slice()', sc_desc: '截取一段连续的字符，含起始下标、不含结束下标。',
+                sc_code: 'sc_s.slice(0, 2)', sc_base: '沈畅2026',
+                sc_run: function (sc_s) {
+                    return [sc_s.slice(0, 2), '"沈畅"（截取出的新字符串）', '取下标 0 和 1 两个字符，下标 2 的 "2" 不包含在内。', [0, 1]];
+                }
+            },
+            {
+                sc_name: 'toUpperCase()', sc_desc: '把英文字母全部转成大写，返回新字符串。',
+                sc_code: 'sc_s.toUpperCase()', sc_base: 'JavaScript',
+                sc_run: function (sc_s) {
+                    var sc_r = sc_s.toUpperCase();
+                    var sc_marks = [];
+                    for (var sc_k = 0; sc_k < sc_r.length; sc_k++) { sc_marks.push(sc_k); }
+                    return [sc_r, '"JAVASCRIPT"（转成大写的新字符串）', '每个字母都变了大写，原字符串保持不变。', sc_marks];
+                }
+            },
+            {
+                sc_name: 'trim()', sc_desc: '去掉字符串首尾的空白字符，中间的空格保留。',
+                sc_code: 'sc_s.trim()', sc_base: '  沈畅  ',
+                sc_run: function (sc_s) {
+                    return [sc_s.trim(), '"沈畅"（去掉首尾空格）', '格子里的 ␣ 表示空格，trim 只处理开头和结尾的空格、换行、制表符。', []];
+                }
+            },
+            {
+                sc_name: 'split()', sc_desc: '按分隔符把字符串切开，返回一个数组。',
+                sc_code: "sc_s.split(',')", sc_base: 'HTML,CSS,JS',
+                sc_run: function (sc_s) {
+                    return [sc_s.split(','), '["HTML", "CSS", "JS"]（切成的数组）', '字符串 → 数组，之后就能使用数组的 forEach、map 等方法。', []];
+                }
+            },
+            {
+                sc_name: 'replace()', sc_desc: '把找到的第一个子串替换成新内容，返回新字符串。',
+                sc_code: "sc_s.replace('JavaScript', 'JS')", sc_base: '我爱JavaScript',
+                sc_run: function (sc_s) {
+                    var sc_r = sc_s.replace('JavaScript', 'JS');
+                    var sc_marks = [];
+                    for (var sc_k = 2; sc_k < 12; sc_k++) { sc_marks.push(sc_k); }
+                    return [sc_r, '"我爱JS"（替换后的新字符串）', '被替换的 10 个字符变成了 2 个，新字符串长度也随之变短。', sc_marks];
+                }
+            },
+            {
+                sc_name: 'repeat()', sc_desc: '把字符串重复若干次，返回新字符串。',
+                sc_code: 'sc_s.repeat(3)', sc_base: '沈畅',
+                sc_run: function (sc_s) {
+                    return [sc_s.repeat(3), '"沈畅沈畅沈畅"（重复 3 次）', '新字符串长度 = 原长度 × 重复次数。', []];
+                }
+            },
+            {
+                sc_name: 'padStart()', sc_desc: '在开头补字符，直到总长度达到指定位数。',
+                sc_code: "sc_s.padStart(4, '0')", sc_base: '16',
+                sc_run: function (sc_s) {
+                    return [sc_s.padStart(4, '0'), '"0016"（补足 4 位）', '不足 4 位时在前面补 0，常用于编号、日期格式化。', []];
+                }
+            },
+            {
+                sc_name: '模板字符串', sc_desc: '用反引号和 ${ } 把变量直接嵌进字符串，可读性更好。',
+                sc_code: '`姓名：${sc_name}，年龄：${sc_age}`', sc_base: '沈畅',
+                sc_run: function (sc_s) {
+                    return ['姓名：沈畅，年龄：20', '"姓名：沈畅，年龄：20"（插值后的结果）', '用反引号包裹字符串，${ } 里可以直接写变量或表达式。', []];
+                }
+            }
+        ];
+
+        function sc_resultHtml(sc_val, sc_marks) {
+            if (typeof sc_val === 'string') { return sc_charCells(sc_val, sc_marks, 'sc_cells_new'); }
+            if (Array.isArray(sc_val)) { return sc_arrayCells(sc_val, 'sc_cells_new'); }
+            return '<div class="sc_scalar">' + sc_esc(sc_show(sc_val)) + '</div>';
+        }
+
+        function sc_buildStrCards() {
+            var sc_board = document.getElementById('sc_str_board');
+            var sc_html = '';
+            for (var sc_i = 0; sc_i < sc_strMethods.length; sc_i++) {
+                var sc_m = sc_strMethods[sc_i];
+                sc_html += '<article class="sc_card">'
+                    + '<div class="sc_card_head"><h3>' + sc_m.sc_name + '</h3>'
+                    + '<span class="sc_badge">不改变原字符串</span></div>'
+                    + '<p class="sc_desc">' + sc_m.sc_desc + '</p>'
+                    + '<div class="sc_code">' + sc_esc(sc_m.sc_code) + '</div>'
+                    + '<button class="sc_btn sc_str_run" data-index="' + sc_i + '">运行演示</button>'
+                    + '<div class="sc_stage" id="sc_str_stage_' + sc_i + '">'
+                    + '<div class="sc_stage_hint">点击「运行演示」查看结果</div>'
+                    + '</div>'
+                    + '</article>';
+            }
+            sc_board.innerHTML = sc_html;
+            sc_board.addEventListener('click', function (sc_e) {
+                var sc_btn = sc_e.target.closest('.sc_str_run');
+                if (sc_btn) { sc_runStr(Number(sc_btn.getAttribute('data-index'))); }
+            });
+        }
+
+        function sc_runStr(sc_index) {
+            var sc_m = sc_strMethods[sc_index];
+            var sc_outData = sc_m.sc_run(sc_m.sc_base);
+            var sc_result = sc_outData[0];
+            var sc_ret = sc_outData[1];
+            var sc_note = sc_outData[2] || '';
+            var sc_marks = sc_outData[3] || [];
+
+            var sc_html = '<div class="sc_line"><span class="sc_line_label">原字符串</span>'
+                + sc_charCells(sc_m.sc_base, []) + '</div>'
+                + '<div class="sc_arrow">↓ ' + sc_esc(sc_m.sc_code) + '</div>'
+                + '<div class="sc_line"><span class="sc_line_label">结果</span>'
+                + sc_resultHtml(sc_result, sc_marks) + '</div>'
+                + '<div class="sc_ret_line"><span class="sc_ret_tag">返回值</span><span class="sc_ret_value">'
+                + sc_esc(sc_ret) + '</span></div>'
+                + (sc_note ? '<div class="sc_note">' + sc_esc(sc_note) + '</div>' : '');
+
+            document.getElementById('sc_str_stage_' + sc_index).innerHTML = sc_html;
+        }
+
+        // ================= 启动 =================
+        sc_resetObj();
+        sc_renderObj();
+
+        document.getElementById('sc_read_btns').addEventListener('click', function (sc_e) {
+            var sc_btn = sc_e.target.closest('.sc_btn_key');
+            if (sc_btn) { sc_readProp(sc_btn.getAttribute('data-key')); }
+        });
+        document.getElementById('sc_obj_add').addEventListener('click', sc_addProp);
+        document.getElementById('sc_obj_mod').addEventListener('click', sc_modProp);
+        document.getElementById('sc_obj_del').addEventListener('click', sc_delProp);
+        document.getElementById('sc_obj_visit').addEventListener('click', sc_visitObj);
+        document.getElementById('sc_obj_reset').addEventListener('click', function () {
+            sc_resetObj();
+            sc_addQueue = [
+                { 邮箱: 'shenchang@example.com' },
+                { 学校: '高级网页设计' },
+                { 爱好: '前端开发' }
+            ];
+            sc_renderObj();
+            sc_out('<span class="sc_ok">已重置</span>：对象恢复成最初的 4 个属性。');
+        });
+
+        sc_renderChars();
+        document.getElementById('sc_immut_try').addEventListener('click', function () { sc_immutDemo('set'); });
+        document.getElementById('sc_immut_upper').addEventListener('click', function () { sc_immutDemo('upper'); });
+
+        sc_buildStrCards();
+    </script>
+</body>
+</html>
