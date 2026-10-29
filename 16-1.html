@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<!-- 姓名：沈畅，日期：2026-10-29，功能名称：JavaScript 常用数组方法可视化演示 -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>16-1 JavaScript 常用数组方法可视化演示</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            background: radial-gradient(1200px 600px at 50% -10%, #16324f 0%, #0b1220 55%, #070b14 100%);
+            background-attachment: fixed;
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 36px 16px 60px;
+        }
+
+        .sc_header { text-align: center; margin-bottom: 26px; }
+        .sc_header h1 {
+            font-size: 30px;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, #38bdf8, #a78bfa, #fbbf24);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+        }
+        .sc_header p { color: #94a3b8; font-size: 13.5px; letter-spacing: .5px; }
+        .sc_header .sc_name { color: #fbbf24; font-weight: bold; }
+
+        .sc_container { max-width: 1180px; margin: 0 auto; }
+
+        /* ---------- 说明面板 ---------- */
+        .sc_intro_card {
+            background: rgba(30, 41, 59, .72);
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 22px 24px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(6px);
+        }
+        .sc_intro_card h2 { font-size: 18px; color: #38bdf8; margin-bottom: 10px; }
+        .sc_intro_card p { font-size: 13.5px; color: #94a3b8; line-height: 1.85; }
+
+        .sc_legend { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 16px; }
+        .sc_legend_item { display: flex; align-items: center; gap: 7px; font-size: 13px; color: #cbd5e1; }
+        .sc_dot { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+        .sc_dot_changed { background: rgba(251, 191, 36, .18); border: 1px solid #fbbf24; }
+        .sc_dot_new { background: rgba(56, 189, 248, .16); border: 1px solid #38bdf8; }
+        .sc_dot_same { background: #0b1220; border: 1px solid #334155; }
+
+        .sc_stat { margin-top: 16px; font-size: 13px; color: #64748b; }
+
+        .sc_chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+        .sc_chip {
+            font-size: 13px;
+            color: #cbd5e1;
+            background: #0b1220;
+            border: 1px solid #334155;
+            border-radius: 999px;
+            padding: 7px 16px;
+            cursor: pointer;
+            transition: .25s;
+        }
+        .sc_chip:hover { border-color: #38bdf8; color: #38bdf8; }
+
+        /* ---------- 分组标题 ---------- */
+        .sc_group_title {
+            font-size: 20px;
+            color: #34d399;
+            margin: 34px 0 16px;
+            padding-left: 12px;
+            border-left: 4px solid #34d399;
+        }
+        .sc_group_title span { font-size: 12.5px; color: #64748b; font-weight: normal; margin-left: 10px; }
+
+        /* ---------- 卡片 ---------- */
+        .sc_grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+            gap: 18px;
+        }
+
+        .sc_card {
+            background: rgba(30, 41, 59, .72);
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 20px;
+            transition: border-color .25s, box-shadow .25s, transform .25s;
+        }
+        .sc_card:hover {
+            border-color: #38bdf8;
+            box-shadow: 0 14px 32px rgba(56, 189, 248, .12);
+            transform: translateY(-2px);
+        }
+
+        .sc_card_head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+        .sc_card_head h3 { font-size: 17px; color: #e2e8f0; font-family: Consolas, Monaco, monospace; }
+        .sc_badge {
+            font-size: 11.5px;
+            border-radius: 999px;
+            padding: 3px 10px;
+            white-space: nowrap;
+        }
+        .sc_badge_mut { color: #fbbf24; background: rgba(251, 191, 36, .12); border: 1px solid rgba(251, 191, 36, .45); }
+        .sc_badge_safe { color: #34d399; background: rgba(52, 211, 153, .12); border: 1px solid rgba(52, 211, 153, .45); }
+
+        .sc_desc { font-size: 13.5px; color: #94a3b8; line-height: 1.85; margin-bottom: 12px; }
+
+        .sc_code {
+            background: #0b1220;
+            border: 1px solid #334155;
+            border-left: 3px solid #38bdf8;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+            color: #7dd3fc;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-bottom: 12px;
+        }
+
+        .sc_btn {
+            font-size: 13.5px;
+            font-weight: bold;
+            color: #06281e;
+            background: linear-gradient(90deg, #34d399, #38bdf8);
+            border: none;
+            border-radius: 9px;
+            padding: 9px 20px;
+            cursor: pointer;
+            transition: opacity .2s, transform .2s;
+        }
+        .sc_btn:hover { opacity: .88; }
+        .sc_btn:active { transform: scale(.97); }
+
+        /* ---------- 演示舞台 ---------- */
+        .sc_stage { margin-top: 14px; }
+        .sc_stage_hint { font-size: 12.5px; color: #64748b; text-align: center; padding: 14px 0; border: 1px dashed #334155; border-radius: 10px; }
+
+        .sc_line { display: flex; align-items: flex-start; gap: 10px; }
+        .sc_line_label {
+            flex: 0 0 auto;
+            font-size: 11.5px;
+            color: #94a3b8;
+            background: #0b1220;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            padding: 4px 8px;
+            margin-top: 14px;
+            white-space: nowrap;
+        }
+        .sc_line_label.sc_label_mut { color: #fbbf24; border-color: rgba(251, 191, 36, .5); }
+
+        .sc_cells { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 0; }
+        .sc_empty { font-size: 12.5px; color: #64748b; padding: 14px 0; }
+        .sc_cell { display: flex; flex-direction: column; align-items: center; animation: sc_pop .32s ease both; }
+        .sc_idx { font-size: 10px; color: #475569; margin-bottom: 3px; }
+        .sc_val {
+            min-width: 46px;
+            padding: 8px 8px;
+            text-align: center;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+            color: #cbd5e1;
+            background: #0b1220;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            transition: .3s;
+        }
+
+        .sc_cells.sc_cells_new .sc_val {
+            color: #7dd3fc;
+            background: rgba(56, 189, 248, .12);
+            border-color: #38bdf8;
+        }
+        .sc_cells.sc_cells_same .sc_val { opacity: .62; }
+
+        .sc_cell.sc_cell_changed .sc_val {
+            color: #fbbf24;
+            background: rgba(251, 191, 36, .14);
+            border-color: #fbbf24;
+            box-shadow: 0 0 12px rgba(251, 191, 36, .25);
+        }
+        .sc_cell.sc_cell_changed .sc_idx { color: #fbbf24; }
+
+        @keyframes sc_pop {
+            from { opacity: 0; transform: translateY(-8px) scale(.88); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .sc_arrow {
+            font-size: 12.5px;
+            color: #34d399;
+            font-family: Consolas, Monaco, monospace;
+            padding: 9px 0 9px 8px;
+            margin-left: 8px;
+            border-left: 2px dashed #334155;
+        }
+
+        .sc_ret {
+            margin-top: 12px;
+            font-size: 13px;
+            line-height: 1.8;
+            background: #0b1220;
+            border: 1px solid #334155;
+            border-radius: 9px;
+            padding: 10px 13px;
+            word-break: break-all;
+        }
+        .sc_ret_tag {
+            font-size: 11px;
+            color: #34d399;
+            background: rgba(52, 211, 153, .12);
+            border: 1px solid rgba(52, 211, 153, .4);
+            border-radius: 5px;
+            padding: 1px 7px;
+            margin-right: 8px;
+        }
+        .sc_ret_value { color: #fbbf24; font-family: Consolas, Monaco, monospace; }
+
+        .sc_note { margin-top: 9px; font-size: 12.5px; color: #64748b; line-height: 1.8; }
+
+        .sc_footer_note { margin-top: 40px; text-align: center; color: #475569; font-size: 13px; }
+
+        @media (max-width: 760px) {
+            .sc_grid { grid-template-columns: 1fr; }
+            .sc_header h1 { font-size: 22px; }
+            .sc_card { padding: 16px; }
+            .sc_val { min-width: 38px; padding: 7px 6px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="sc_header">
+        <h1>JavaScript 常用数组方法</h1>
+        <p>姓名：<span class="sc_name">沈畅</span> · 20 个常用方法 · 点击按钮即可看到数组的变化过程</p>
+    </header>
+
+    <main class="sc_container">
+        <section class="sc_intro_card">
+            <h2>怎么看这个页面</h2>
+            <p>每个方法一张卡片，卡片里先是语法代码，点击「运行演示」后，会显示<b>操作前的数组</b>、<b>操作后的数组</b>以及<b>方法的返回值</b>。数组中的每个小方块代表一个元素，方块顶部的小数字是它的下标。</p>
+            <div class="sc_legend">
+                <span class="sc_legend_item"><i class="sc_dot sc_dot_same"></i>原有元素</span>
+                <span class="sc_legend_item"><i class="sc_dot sc_dot_changed"></i>发生了变化 / 被增删的元素</span>
+                <span class="sc_legend_item"><i class="sc_dot sc_dot_new"></i>方法返回的全新数组</span>
+            </div>
+            <div class="sc_stat" id="sc_stat"></div>
+            <div class="sc_chips" id="sc_chips"></div>
+        </section>
+
+        <div id="sc_board"></div>
+
+        <p class="sc_footer_note">沈畅 · 《高级网页设计》 · 原生 HTML / CSS / JavaScript 实现</p>
+    </main>
+
+    <script>
+        // ---------- HTML 转义与值格式化 ----------
+        function sc_esc(sc_s) {
+            return String(sc_s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function sc_show(sc_v) {
+            if (Array.isArray(sc_v)) {
+                var sc_items = [];
+                for (var sc_k = 0; sc_k < sc_v.length; sc_k++) {
+                    sc_items.push(sc_show(sc_v[sc_k]));
+                }
+                return '[' + sc_items.join(', ') + ']';
+            }
+            if (typeof sc_v === 'string') { return '"' + sc_v + '"'; }
+            if (sc_v === undefined) { return 'undefined'; }
+            if (sc_v === null) { return 'null'; }
+            return String(sc_v);
+        }
+
+        // ---------- 分组 ----------
+        var sc_groups = [
+            '一、增删改 · 会改变原数组',
+            '二、查找与访问 · 不改变原数组',
+            '三、遍历与加工 · 不改变原数组'
+        ];
+
+        // ---------- 方法配置 ----------
+        // sc_group：所属分组；sc_base：演示用的原数组；sc_mutates：是否修改原数组
+        // sc_newArray：是否返回全新数组；sc_run：执行并返回 [结果数组, 返回值文本, 说明, 额外高亮下标]
+        var sc_methods = [
+            {
+                sc_group: 0, sc_name: 'push()', sc_mutates: true,
+                sc_desc: '在数组末尾添加一个或多个元素，并返回数组的新长度。',
+                sc_code: 'sc_a.push(4, 6)',
+                sc_base: [3, 1, 5, 2],
+                sc_run: function (sc_a) {
+                    sc_a.push(4, 6);
+                    return [sc_a, sc_a.length + '（数组的新长度）', '在末尾追加了 4 和 6，长度从 4 变成 6。'];
+                }
+            },
+            {
+                sc_group: 0, sc_name: 'pop()', sc_mutates: true,
+                sc_desc: '删除数组的最后一个元素，并返回被删除的那个元素。',
+                sc_code: 'sc_a.pop()',
+                sc_base: [3, 1, 5, 2],
+                sc_run: function (sc_a) {
+                    var sc_r = sc_a.pop();
+                    return [sc_a, sc_r + '（被删除的那个元素）', '末尾元素 2 被移除，长度从 4 变成 3。'];
+                }
+            },
+            {
+                sc_group: 0, sc_name: 'unshift()', sc_mutates: true,
+                sc_desc: '在数组开头添加一个或多个元素，并返回数组的新长度。',
+                sc_code: 'sc_a.unshift(0)',
+                sc_base: [1, 5, 2],
+                sc_run: function (sc_a) {
+                    sc_a.unshift(0);
+                    return [sc_a, sc_a.length + '（数组的新长度）', '在开头插入 0，原有元素全部右移一位。'];
+                }
+            },
+            {
+                sc_group: 0, sc_name: 'shift()', sc_mutates: true,
+                sc_desc: '删除数组的第一个元素，并返回被删除的那个元素。',
+                sc_code: 'sc_a.shift()',
+                sc_base: [3, 1, 5, 2],
+                sc_run: function (sc_a) {
+                    var sc_r = sc_a.shift();
+                    return [sc_a, sc_r + '（被删除的那个元素）', '开头元素 3 被移除，其余元素全部左移一位。'];
+                }
+            },
+            {
+                sc_group: 0, sc_name: 'splice()', sc_mutates: true,
+                sc_desc: '从指定位置删除若干元素（也可以就地插入新元素），返回被删除元素组成的数组。',
+                sc_code: 'sc_a.splice(1, 2)',
+                sc_base: [3, 1, 5, 2, 8],
+                sc_run: function (sc_a) {
+                    var sc_r = sc_a.splice(1, 2);
+                    return [sc_a, sc_show(sc_r) + '（被删除元素组成的数组）', '从下标 1 开始删除 2 个元素，后面的元素自动前移。'];
+                }
+            },
+            {
+                sc_group: 0, sc_name: 'sort()', sc_mutates: true,
+                sc_desc: '对数组元素就地排序，默认按字符串比较，数字排序需要传入比较函数。',
+                sc_code: 'sc_a.sort((x, y) => x - y)',
+                sc_base: [10, 3, 25, 1],
+                sc_run: function (sc_a) {
+                    sc_a.sort(function (sc_x, sc_y) { return sc_x - sc_y; });
+                    return [sc_a, '原数组本身（已经排好序）', '比较函数返回正数则交换位置，从而按数值从小到大排列。'];
+                }
+            },
+            {
+                sc_group: 0, sc_name: 'reverse()', sc_mutates: true,
+                sc_desc: '把数组元素的顺序就地反转，第一个变最后一个。',
+                sc_code: 'sc_a.reverse()',
+                sc_base: [1, 3, 5, 7],
+                sc_run: function (sc_a) {
+                    sc_a.reverse();
+                    return [sc_a, '原数组本身（已经反转）', '首尾对调，每个元素的位置都发生了变化。'];
+                }
+            },
+
+            {
+                sc_group: 1, sc_name: 'indexOf()', sc_mutates: false,
+                sc_desc: '查找某个元素第一次出现的下标，找不到时返回 -1。',
+                sc_code: "sc_a.indexOf('b')",
+                sc_base: ['a', 'b', 'c', 'b'],
+                sc_run: function (sc_a) {
+                    var sc_i = sc_a.indexOf('b');
+                    return [sc_a, sc_i + '（第一个匹配元素的下标）', '从前往后查找，找到第一个 "b" 就停下，找不到时返回 -1。', [sc_i]];
+                }
+            },
+            {
+                sc_group: 1, sc_name: 'includes()', sc_mutates: false,
+                sc_desc: '判断数组是否包含某个元素，只返回 true 或 false。',
+                sc_code: "sc_a.includes('b')",
+                sc_base: ['a', 'b', 'c'],
+                sc_run: function (sc_a) {
+                    var sc_i = sc_a.indexOf('b');
+                    return [sc_a, sc_a.includes('b') + '（数组中包含 "b"）', '只关心有没有，不关心在哪个位置。', sc_i >= 0 ? [sc_i] : []];
+                }
+            },
+            {
+                sc_group: 1, sc_name: 'find()', sc_mutates: false,
+                sc_desc: '返回第一个满足条件的元素本身，找不到时返回 undefined。',
+                sc_code: 'sc_a.find(x => x > 10)',
+                sc_base: [3, 8, 12, 20],
+                sc_run: function (sc_a) {
+                    var sc_r = sc_a.find(function (sc_x) { return sc_x > 10; });
+                    return [sc_a, sc_r + '（第一个满足条件的元素）', '依次判断 3、8、12，遇到 12（大于 10）立即返回，后面的 20 不再判断。', [sc_a.indexOf(sc_r)]];
+                }
+            },
+            {
+                sc_group: 1, sc_name: 'join()', sc_mutates: false,
+                sc_desc: '把数组所有元素拼接成一个字符串，可以自定义分隔符。',
+                sc_code: "sc_a.join('-')",
+                sc_base: ['沈', '畅', '2026'],
+                sc_run: function (sc_a) {
+                    var sc_r = sc_a.join('-');
+                    return [sc_a, '"' + sc_r + '"（拼接出的字符串）', '默认用英文逗号连接，这里用短横线把三个元素拼成一串。'];
+                }
+            },
+            {
+                sc_group: 1, sc_name: 'concat()', sc_mutates: false, sc_newArray: true,
+                sc_desc: '把另一个数组拼接到当前数组后面，返回拼接后的新数组。',
+                sc_code: 'sc_a.concat([3, 4])',
+                sc_base: [1, 2],
+                sc_run: function (sc_a) {
+                    var sc_r = sc_a.concat([3, 4]);
+                    return [sc_r, sc_show(sc_r) + '（拼接成的新数组）', '原数组 [1, 2] 保持不变，返回的是一个全新数组。'];
+                }
+            },
+            {
+                sc_group: 1, sc_name: 'slice()', sc_mutates: false, sc_newArray: true,
+                sc_desc: '截取一段连续的元素，包含起始下标、不包含结束下标，返回新数组。',
+                sc_code: 'sc_a.slice(1, 4)',
+                sc_base: [3, 1, 5, 2, 8],
+                sc_run: function (sc_a) {
+                    var sc_r = sc_a.slice(1, 4);
+                    return [sc_r, sc_show(sc_r) + '（截取出的新数组）', '取下标 1、2、3 三个元素，下标 4 的 8 不包含在内。'];
+                }
+            },
+
+            {
+                sc_group: 2, sc_name: 'forEach()', sc_mutates: false,
+                sc_desc: '遍历数组的每个元素并执行回调函数，它本身没有返回值。',
+                sc_code: "sc_a.forEach((v, i) => sc_log.push(i + ':' + v))",
+                sc_base: [1, 2, 3],
+                sc_run: function (sc_a) {
+                    var sc_log = [];
+                    sc_a.forEach(function (sc_v, sc_i) { sc_log.push(sc_i + ':' + sc_v); });
+                    return [sc_a, 'undefined（forEach 没有返回值）', '遍历轨迹 → ' + sc_log.join('、') + '；原数组保持不变。'];
+                }
+            },
+            {
+                sc_group: 2, sc_name: 'map()', sc_mutates: false, sc_newArray: true,
+                sc_desc: '对每个元素执行一次加工，把每次的返回值组成一个新数组。',
+                sc_code: 'sc_a.map(x => x * 2)',
+                sc_base: [1, 2, 3, 4],
+                sc_run: function (sc_a) {
+                    var sc_r = sc_a.map(function (sc_x) { return sc_x * 2; });
+                    return [sc_r, sc_show(sc_r) + '（映射出的新数组）', '新数组长度与原数组相同，元素一一对应，原数组不受影响。'];
+                }
+            },
+            {
+                sc_group: 2, sc_name: 'filter()', sc_mutates: false, sc_newArray: true,
+                sc_desc: '把满足条件的元素挑选出来，组成一个新数组返回。',
+                sc_code: 'sc_a.filter(x => x >= 10)',
+                sc_base: [5, 12, 8, 130, 44],
+                sc_run: function (sc_a) {
+                    var sc_r = sc_a.filter(function (sc_x) { return sc_x >= 10; });
+                    return [sc_r, sc_show(sc_r) + '（筛选出的新数组）', '5 和 8 不满足条件被丢弃，剩下的三个元素组成新数组。'];
+                }
+            },
+            {
+                sc_group: 2, sc_name: 'reduce()', sc_mutates: false,
+                sc_desc: '把整个数组"折叠"成一个值，常用于累加、累乘、统计。',
+                sc_code: 'sc_a.reduce((s, x) => s + x, 0)',
+                sc_base: [1, 2, 3, 4],
+                sc_run: function (sc_a) {
+                    var sc_r = sc_a.reduce(function (sc_s, sc_x) { return sc_s + sc_x; }, 0);
+                    return [sc_a, sc_r + '（累加后的单个值）', '累计过程：0+1=1 → 1+2=3 → 3+3=6 → 6+4=10，最终只得到一个数。'];
+                }
+            },
+            {
+                sc_group: 2, sc_name: 'some()', sc_mutates: false,
+                sc_desc: '判断是否至少有一个元素满足条件，返回布尔值。',
+                sc_code: 'sc_a.some(x => x > 5)',
+                sc_base: [1, 3, 8],
+                sc_run: function (sc_a) {
+                    return [sc_a, sc_a.some(function (sc_x) { return sc_x > 5; }) + '（存在满足条件的元素）', '只要有一个满足就返回 true，全部不满足才返回 false。'];
+                }
+            },
+            {
+                sc_group: 2, sc_name: 'every()', sc_mutates: false,
+                sc_desc: '判断是否所有元素都满足条件，返回布尔值。',
+                sc_code: 'sc_a.every(x => x % 2 === 0)',
+                sc_base: [2, 4, 6],
+                sc_run: function (sc_a) {
+                    return [sc_a, sc_a.every(function (sc_x) { return sc_x % 2 === 0; }) + '（所有元素都满足条件）', '只要有一个不满足就返回 false，必须全部满足才是 true。'];
+                }
+            },
+            {
+                sc_group: 2, sc_name: 'flat()', sc_mutates: false, sc_newArray: true,
+                sc_desc: '把嵌套的数组"展开"，默认只展开一层，返回新数组。',
+                sc_code: 'sc_a.flat()',
+                sc_base: [[1, 2], [3, 4]],
+                sc_run: function (sc_a) {
+                    var sc_r = sc_a.flat();
+                    return [sc_r, sc_show(sc_r) + '（展开后的新数组）', '两个子数组里的元素被取出，合并成一个一维数组。'];
+                }
+            }
+        ];
+
+        // ---------- 渲染工具 ----------
+        function sc_cellsHtml(sc_values, sc_kind, sc_marks) {
+            sc_marks = sc_marks || [];
+            var sc_html = '<div class="sc_cells' + (sc_kind ? ' ' + sc_kind : '') + '">';
+            if (sc_values.length === 0) {
+                sc_html += '<span class="sc_empty">空数组 []</span>';
+            }
+            for (var sc_i = 0; sc_i < sc_values.length; sc_i++) {
+                var sc_cls = 'sc_cell' + (sc_marks.indexOf(sc_i) !== -1 ? ' sc_cell_changed' : '');
+                sc_html += '<div class="' + sc_cls + '" style="animation-delay:' + (sc_i * 45) + 'ms">'
+                    + '<span class="sc_idx">' + sc_i + '</span>'
+                    + '<span class="sc_val">' + sc_esc(sc_show(sc_values[sc_i])) + '</span>'
+                    + '</div>';
+            }
+            sc_html += '</div>';
+            return sc_html;
+        }
+
+        function sc_diffMarks(sc_base, sc_result) {
+            var sc_marks = [];
+            var sc_len = Math.max(sc_base.length, sc_result.length);
+            for (var sc_i = 0; sc_i < sc_len; sc_i++) {
+                if (sc_base[sc_i] !== sc_result[sc_i]) { sc_marks.push(sc_i); }
+            }
+            return sc_marks;
+        }
+
+        function sc_cardHtml(sc_m, sc_index) {
+            var sc_badge = sc_m.sc_mutates
+                ? '<span class="sc_badge sc_badge_mut">会改变原数组</span>'
+                : '<span class="sc_badge sc_badge_safe">不改变原数组</span>';
+            return '<article class="sc_card">'
+                + '<div class="sc_card_head"><h3>' + sc_m.sc_name + '</h3>' + sc_badge + '</div>'
+                + '<p class="sc_desc">' + sc_m.sc_desc + '</p>'
+                + '<div class="sc_code">' + sc_esc(sc_m.sc_code) + '</div>'
+                + '<button class="sc_btn" data-index="' + sc_index + '">运行演示</button>'
+                + '<div class="sc_stage" id="sc_stage_' + sc_index + '">'
+                + '<div class="sc_stage_hint">点击「运行演示」查看结果</div>'
+                + '</div>'
+                + '</article>';
+        }
+
+        function sc_buildBoard() {
+            var sc_board = document.getElementById('sc_board');
+            var sc_html = '';
+            var sc_mutCount = 0;
+
+            for (var sc_g = 0; sc_g < sc_groups.length; sc_g++) {
+                sc_html += '<h2 class="sc_group_title" id="sc_group_' + sc_g + '">' + sc_groups[sc_g] + '</h2>';
+                sc_html += '<div class="sc_grid">';
+                for (var sc_i = 0; sc_i < sc_methods.length; sc_i++) {
+                    if (sc_methods[sc_i].sc_group !== sc_g) { continue; }
+                    sc_html += sc_cardHtml(sc_methods[sc_i], sc_i);
+                }
+                sc_html += '</div>';
+            }
+
+            sc_board.innerHTML = sc_html;
+
+            // 统计数量
+            for (var sc_j = 0; sc_j < sc_methods.length; sc_j++) {
+                if (sc_methods[sc_j].sc_mutates) { sc_mutCount++; }
+            }
+            document.getElementById('sc_stat').textContent =
+                '共 ' + sc_methods.length + ' 个方法：其中 ' + sc_mutCount + ' 个会改变原数组，'
+                + (sc_methods.length - sc_mutCount) + ' 个不改变原数组。';
+
+            // 分组快捷跳转
+            var sc_chips = document.getElementById('sc_chips');
+            var sc_chipHtml = '';
+            for (var sc_k = 0; sc_k < sc_groups.length; sc_k++) {
+                sc_chipHtml += '<span class="sc_chip" data-group="' + sc_k + '">' + sc_groups[sc_k] + '</span>';
+            }
+            sc_chips.innerHTML = sc_chipHtml;
+
+            // 事件绑定
+            sc_board.addEventListener('click', function (sc_e) {
+                var sc_btn = sc_e.target.closest('.sc_btn');
+                if (sc_btn) {
+                    sc_runCard(Number(sc_btn.getAttribute('data-index')));
+                }
+            });
+            sc_chips.addEventListener('click', function (sc_e) {
+                var sc_chip = sc_e.target.closest('.sc_chip');
+                if (!sc_chip) { return; }
+                var sc_target = document.getElementById('sc_group_' + sc_chip.getAttribute('data-group'));
+                if (sc_target) { sc_target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+            });
+        }
+
+        // ---------- 运行单个演示 ----------
+        function sc_runCard(sc_index) {
+            var sc_m = sc_methods[sc_index];
+            var sc_base = sc_m.sc_base.slice();
+            var sc_out = sc_m.sc_run(sc_base.slice());
+            var sc_result = sc_out[0];
+            var sc_ret = sc_out[1];
+            var sc_note = sc_out[2] || '';
+            var sc_marks = sc_out[3] || [];
+
+            // 会改变原数组的方法：用对比自动标出发生变化的元素
+            if (sc_m.sc_mutates && sc_marks.length === 0) {
+                sc_marks = sc_diffMarks(sc_base, sc_result);
+            }
+
+            var sc_kind = '';
+            if (!sc_m.sc_mutates) {
+                sc_kind = sc_m.sc_newArray ? 'sc_cells_new' : 'sc_cells_same';
+            }
+            if (sc_m.sc_newArray) { sc_marks = []; }
+
+            var sc_label = sc_m.sc_mutates
+                ? '<span class="sc_line_label sc_label_mut">操作后 · 原数组已被修改</span>'
+                : '<span class="sc_line_label">操作后 · 原数组未被修改</span>';
+
+            var sc_html = ''
+                + '<div class="sc_line"><span class="sc_line_label">操作前</span>'
+                + sc_cellsHtml(sc_base, '') + '</div>'
+                + '<div class="sc_arrow">↓ ' + sc_esc(sc_m.sc_code) + '  （长度 ' + sc_base.length + ' → ' + sc_result.length + '）</div>'
+                + '<div class="sc_line">' + sc_label + sc_cellsHtml(sc_result, sc_kind, sc_marks) + '</div>'
+                + '<div class="sc_ret"><span class="sc_ret_tag">返回值</span><span class="sc_ret_value">'
+                + sc_esc(sc_ret) + '</span></div>'
+                + (sc_note ? '<div class="sc_note">' + sc_esc(sc_note) + '</div>' : '');
+
+            document.getElementById('sc_stage_' + sc_index).innerHTML = sc_html;
+        }
+
+        // ---------- 启动 ----------
+        sc_buildBoard();
+    </script>
+</body>
+</html>
