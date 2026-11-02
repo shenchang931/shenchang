@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<!-- 姓名：沈畅，日期：2026-11-02，功能名称：用 Promise 与 async/await 演示包饺子流程 -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>17-6 Promise 与 async 包饺子流程</title>
+    <link rel="stylesheet" href="font/iconfont.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            background: #eef2f8;
+            color: #1e293b;
+            line-height: 1.7;
+            padding: 34px 20px 60px;
+        }
+
+        .sc_wrap { max-width: 1000px; margin: 0 auto; }
+
+        .sc_head { margin-bottom: 20px; }
+        .sc_tag {
+            display: inline-flex; align-items: center; gap: 7px;
+            font-size: 13px; color: #1d4ed8; background: #dbeafe;
+            border: 1px solid #bfdbfe; border-radius: 999px;
+            padding: 4px 14px; margin-bottom: 12px;
+        }
+        .sc_head h1 { font-size: 28px; color: #0f172a; margin-bottom: 8px; letter-spacing: .5px; }
+        .sc_head p { font-size: 14.5px; color: #64748b; max-width: 860px; }
+        .sc_head code {
+            font-family: Consolas, Monaco, monospace; font-size: 13px;
+            color: #1d4ed8; background: #dbeafe; border-radius: 4px; padding: 1px 6px;
+        }
+
+        /* 控制栏 */
+        .sc_toolbar {
+            display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+            background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px;
+            padding: 14px 18px; box-shadow: 0 8px 24px rgba(15, 23, 42, .05);
+            margin-bottom: 16px;
+        }
+        .sc_field { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #64748b; }
+        .sc_select {
+            font-family: inherit; font-size: 13.5px; font-weight: 700; color: #0f172a;
+            background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px;
+            padding: 7px 10px; cursor: pointer; outline: none;
+        }
+        .sc_select:focus { border-color: #2563eb; }
+        .sc_btn {
+            font-family: inherit; font-size: 14px; color: #ffffff; background: #2563eb;
+            border: none; border-radius: 9px; padding: 9px 22px; cursor: pointer;
+            transition: background .2s, transform .1s;
+        }
+        .sc_btn:hover { background: #1d4ed8; }
+        .sc_btn:active { transform: scale(.97); }
+        .sc_btn:disabled { background: #93b4f4; cursor: not-allowed; }
+        .sc_btn_ghost {
+            color: #475569; background: transparent; border: 1px solid #cbd5e1;
+            font-size: 13px; padding: 6px 14px;
+        }
+        .sc_btn_ghost:hover { background: #f1f5f9; border-color: #94a3b8; }
+        .sc_total { margin-left: auto; font-size: 13px; color: #64748b; }
+        .sc_total b { color: #2563eb; font-size: 17px; font-family: Consolas, Monaco, monospace; }
+
+        /* 流程 */
+        .sc_flow { display: flex; flex-direction: column; gap: 12px; }
+        .sc_step {
+            display: flex; gap: 14px;
+            background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid #e2e8f0;
+            border-radius: 12px; padding: 16px 18px;
+            transition: border-color .3s, box-shadow .3s, background .3s;
+        }
+        .sc_step.sc_st_run { border-left-color: #2563eb; box-shadow: 0 8px 24px rgba(37, 99, 235, .12); background: #fbfdff; }
+        .sc_step.sc_st_done { border-left-color: #16a34a; }
+
+        .sc_step_no {
+            flex: none; width: 30px; height: 30px; border-radius: 50%;
+            background: #eef2f8; color: #64748b; font-size: 14px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center; transition: all .3s;
+        }
+        .sc_step.sc_st_run .sc_step_no { background: #2563eb; color: #ffffff; }
+        .sc_step.sc_st_done .sc_step_no { background: #16a34a; color: #ffffff; }
+
+        .sc_step_body { flex: 1; min-width: 0; }
+        .sc_step_head {
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px;
+        }
+        .sc_step_head h3 { font-size: 15.5px; color: #0f172a; font-weight: 700; }
+        .sc_api {
+            font-family: Consolas, Monaco, monospace; font-size: 11.5px;
+            color: #7c3aed; background: #f3e8ff; border: 1px solid #e9d5ff;
+            border-radius: 5px; padding: 1px 7px;
+        }
+        .sc_api_green { color: #15803d; background: #dcfce7; border-color: #bbf7d0; }
+        .sc_api_blue { color: #1d4ed8; background: #dbeafe; border-color: #bfdbfe; }
+        .sc_node_state { margin-left: auto; font-size: 12.5px; color: #94a3b8; }
+        .sc_step.sc_st_run .sc_node_state { color: #2563eb; font-weight: 700; }
+        .sc_step.sc_st_done .sc_node_state { color: #16a34a; font-weight: 700; }
+        .sc_step_desc { font-size: 12.8px; color: #94a3b8; margin-bottom: 10px; }
+
+        .sc_branches { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .sc_branch {
+            border: 1px dashed #cbd5e1; border-radius: 9px; padding: 10px 12px;
+            background: #fcfdff; transition: border-color .3s, background .3s;
+        }
+        .sc_branch.sc_st_run { border-color: #2563eb; border-style: solid; background: #f5f9ff; }
+        .sc_branch.sc_st_done { border-color: #16a34a; border-style: solid; background: #f6fdf9; }
+        .sc_branch.sc_st_late { border-color: #f59e0b; background: #fffdf5; }
+        .sc_branch_head { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: #0f172a; font-weight: 700; }
+        .sc_branch_head .iconfont { color: #2563eb; font-size: 14px; }
+        .sc_branch_ms { margin-left: auto; font-size: 12px; color: #94a3b8; font-weight: 400; }
+        .sc_branch_state { font-size: 12.5px; color: #94a3b8; margin-top: 2px; }
+        .sc_branch.sc_st_run .sc_branch_state { color: #2563eb; }
+        .sc_branch.sc_st_done .sc_branch_state { color: #16a34a; }
+        .sc_branch.sc_st_late .sc_branch_state { color: #b45309; }
+
+        .sc_bar { height: 5px; border-radius: 999px; background: #eef2f8; overflow: hidden; margin-top: 8px; }
+        .sc_bar span {
+            display: block; width: 0; height: 100%; border-radius: 999px;
+            background: linear-gradient(90deg, #60a5fa, #2563eb);
+        }
+        .sc_branch.sc_st_done .sc_bar span { background: linear-gradient(90deg, #4ade80, #16a34a); }
+        .sc_branch.sc_st_late .sc_bar span { background: linear-gradient(90deg, #fcd34d, #f59e0b); }
+        .sc_step.sc_st_done > .sc_step_body > .sc_bar span { background: linear-gradient(90deg, #4ade80, #16a34a); }
+
+        /* 卡片 */
+        .sc_card {
+            margin-top: 16px; background: #ffffff; border: 1px solid #e2e8f0;
+            border-radius: 14px; padding: 18px; box-shadow: 0 8px 24px rgba(15, 23, 42, .05);
+        }
+        .sc_card_head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .sc_card_head h2 { display: flex; align-items: center; gap: 8px; font-size: 15px; color: #0f172a; font-weight: 700; }
+        .sc_card_head h2 .iconfont { color: #2563eb; }
+        .sc_card_head .sc_btn_ghost { margin-left: auto; }
+
+        .sc_logs {
+            list-style: none; max-height: 260px; overflow-y: auto;
+            border: 1px solid #e2e8f0; border-radius: 10px; padding: 6px 14px; background: #fcfdff;
+        }
+        .sc_log { display: flex; gap: 10px; font-size: 13px; padding: 7px 0; border-bottom: 1px dashed #e2e8f0; align-items: baseline; }
+        .sc_log:last-child { border-bottom: none; }
+        .sc_log_time { flex: 0 0 66px; font-family: Consolas, Monaco, monospace; font-size: 12px; color: #94a3b8; }
+        .sc_log_tag {
+            flex: 0 0 78px; font-size: 11.5px; border-radius: 4px; padding: 1px 6px;
+            text-align: center; color: #ffffff; background: #94a3b8;
+        }
+        .sc_tag_race { background: #7c3aed; }
+        .sc_tag_all { background: #2563eb; }
+        .sc_tag_seq { background: #16a34a; }
+        .sc_tag_ok { background: #0d9488; }
+        .sc_log_text { flex: 1; color: #475569; }
+        .sc_empty { font-size: 13px; color: #94a3b8; padding: 10px 0; }
+
+        .sc_code {
+            background: #0f172a; border-radius: 10px; padding: 14px 16px; overflow: auto;
+            font-family: Consolas, Monaco, "Courier New", monospace; font-size: 12.8px;
+            line-height: 1.8; color: #e2e8f0; white-space: pre;
+        }
+        .sc_c_kw { color: #93c5fd; }
+        .sc_c_fn { color: #fde68a; }
+        .sc_c_num { color: #fbbf24; }
+        .sc_c_str { color: #86efac; }
+        .sc_c_cm { color: #64748b; font-style: italic; }
+
+        .sc_notes { list-style: none; font-size: 13.5px; }
+        .sc_notes li { position: relative; padding: 6px 0 6px 18px; color: #475569; }
+        .sc_notes li::before { content: "•"; position: absolute; left: 4px; color: #2563eb; }
+        .sc_notes code {
+            font-family: Consolas, Monaco, monospace; font-size: 12.5px;
+            color: #1d4ed8; background: #eff6ff; border-radius: 4px; padding: 1px 5px;
+        }
+
+        @media (max-width: 700px) {
+            .sc_head h1 { font-size: 22px; }
+            .sc_branches { grid-template-columns: 1fr; }
+            .sc_total { margin-left: 0; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sc_wrap">
+        <header class="sc_head">
+            <span class="sc_tag"><i class="iconfont icon-shoucang"></i> 17-6 Promise / async</span>
+            <h1>用 Promise 与 async / await 包一顿饺子</h1>
+            <p>
+                把包饺子的工序写成异步流程：<code>Promise.race</code> 处理「线上、线下同时买原料，谁先到算谁」，
+                <code>Promise.all</code> 处理「和面、和馅必须都完成才能包饺子」，其余步骤用 <code>await</code> 顺序执行。
+                每一步都用 <code>setTimeout</code> 模拟耗时，页面会实时显示进行状态与日志。
+            </p>
+        </header>
+
+        <section class="sc_toolbar">
+            <button class="sc_btn" id="sc_btn_run">开始包饺子</button>
+            <label class="sc_field">演示速度
+                <select class="sc_select" id="sc_speed">
+                    <option value="1">1x（真实时长）</option>
+                    <option value="2" selected>2x（快一倍）</option>
+                    <option value="4">4x（快四倍）</option>
+                </select>
+            </label>
+            <button class="sc_btn sc_btn_ghost" id="sc_btn_reset">重置</button>
+            <div class="sc_total">总耗时 <b id="sc_total">—</b></div>
+        </section>
+
+        <section class="sc_flow">
+            <!-- 1 买原料 -->
+            <div class="sc_step sc_st_wait" id="sc_node_buy">
+                <div class="sc_step_no">1</div>
+                <div class="sc_step_body">
+                    <div class="sc_step_head">
+                        <h3>买原料</h3>
+                        <span class="sc_api">Promise.race</span>
+                        <span class="sc_node_state">等待中</span>
+                    </div>
+                    <p class="sc_step_desc">线上与线下同时购买，谁先完成就走谁的结果，另一条不再等待。</p>
+                    <div class="sc_branches">
+                        <div class="sc_branch sc_st_wait" id="sc_node_online">
+                            <div class="sc_branch_head"><i class="iconfont icon-shangcheng"></i> 线上购买 <span class="sc_branch_ms">6.0 s</span></div>
+                            <div class="sc_branch_state">等待中</div>
+                            <div class="sc_bar"><span></span></div>
+                        </div>
+                        <div class="sc_branch sc_st_wait" id="sc_node_offline">
+                            <div class="sc_branch_head"><i class="iconfont icon-gerenzhongxin"></i> 线下采购 <span class="sc_branch_ms">8.0 s</span></div>
+                            <div class="sc_branch_state">等待中</div>
+                            <div class="sc_bar"><span></span></div>
+                        </div>
+                    </div>
+                    <div class="sc_bar"><span></span></div>
+                </div>
+            </div>
+
+            <!-- 2 取原料 -->
+            <div class="sc_step sc_st_wait" id="sc_node_take">
+                <div class="sc_step_no">2</div>
+                <div class="sc_step_body">
+                    <div class="sc_step_head">
+                        <h3>取原料</h3>
+                        <span class="sc_api sc_api_blue">await</span>
+                        <span class="sc_node_state">等待中</span>
+                    </div>
+                    <p class="sc_step_desc">把买到的原料取回来拆包装。模拟耗时 2.0 s。</p>
+                    <div class="sc_bar"><span></span></div>
+                </div>
+            </div>
+
+            <!-- 3 和面 + 和馅 -->
+            <div class="sc_step sc_st_wait" id="sc_node_mix">
+                <div class="sc_step_no">3</div>
+                <div class="sc_step_body">
+                    <div class="sc_step_head">
+                        <h3>和面 / 和馅</h3>
+                        <span class="sc_api">Promise.all</span>
+                        <span class="sc_node_state">等待中</span>
+                    </div>
+                    <p class="sc_step_desc">两件事同时做，必须两个都完成才能进入下一步（慢的那个决定用时）。</p>
+                    <div class="sc_branches">
+                        <div class="sc_branch sc_st_wait" id="sc_node_dough">
+                            <div class="sc_branch_head"><i class="iconfont icon-caidan"></i> 和面 <span class="sc_branch_ms">5.0 s</span></div>
+                            <div class="sc_branch_state">等待中</div>
+                            <div class="sc_bar"><span></span></div>
+                        </div>
+                        <div class="sc_branch sc_st_wait" id="sc_node_filling">
+                            <div class="sc_branch_head"><i class="iconfont icon-fenlei"></i> 和馅 <span class="sc_branch_ms">4.0 s</span></div>
+                            <div class="sc_branch_state">等待中</div>
+                            <div class="sc_bar"><span></span></div>
+                        </div>
+                    </div>
+                    <div class="sc_bar"><span></span></div>
+                </div>
+            </div>
+
+            <!-- 4 包饺子 -->
+            <div class="sc_step sc_st_wait" id="sc_node_wrap">
+                <div class="sc_step_no">4</div>
+                <div class="sc_step_body">
+                    <div class="sc_step_head">
+                        <h3>包饺子</h3>
+                        <span class="sc_api sc_api_blue">await</span>
+                        <span class="sc_node_state">等待中</span>
+                    </div>
+                    <p class="sc_step_desc">擀皮、放馅、捏边，一个一个包好。模拟耗时 6.0 s。</p>
+                    <div class="sc_bar"><span></span></div>
+                </div>
+            </div>
+
+            <!-- 5 煮饺子 -->
+            <div class="sc_step sc_st_wait" id="sc_node_boil">
+                <div class="sc_step_no">5</div>
+                <div class="sc_step_body">
+                    <div class="sc_step_head">
+                        <h3>煮饺子</h3>
+                        <span class="sc_api sc_api_blue">await</span>
+                        <span class="sc_node_state">等待中</span>
+                    </div>
+                    <p class="sc_step_desc">水开下锅，点三次凉水，浮起来就熟。模拟耗时 8.0 s。</p>
+                    <div class="sc_bar"><span></span></div>
+                </div>
+            </div>
+
+            <!-- 6 吃饺子 -->
+            <div class="sc_step sc_st_wait" id="sc_node_eat">
+                <div class="sc_step_no">6</div>
+                <div class="sc_step_body">
+                    <div class="sc_step_head">
+                        <h3>吃饺子</h3>
+                        <span class="sc_api sc_api_green">done</span>
+                        <span class="sc_node_state">等待中</span>
+                    </div>
+                    <p class="sc_step_desc">蘸醋配蒜，开吃。模拟耗时 3.0 s。</p>
+                    <div class="sc_bar"><span></span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 日志 -->
+        <section class="sc_card">
+            <div class="sc_card_head">
+                <h2><i class="iconfont icon-liebiao"></i> 流程日志</h2>
+                <button class="sc_btn sc_btn_ghost" id="sc_btn_clear_log">清空日志</button>
+            </div>
+            <ul class="sc_logs" id="sc_logs">
+                <li class="sc_empty">点击「开始包饺子」查看每一步的执行过程</li>
+            </ul>
+        </section>
+
+        <!-- 核心代码 -->
+        <section class="sc_card">
+            <div class="sc_card_head">
+                <h2><i class="iconfont icon-yijianfankui"></i> 核心代码</h2>
+            </div>
+            <pre class="sc_code"><span class="sc_c_cm">// 用 setTimeout 模拟每一步的耗时，返回 Promise</span>
+<span class="sc_c_kw">function</span> <span class="sc_c_fn">sc_wait</span>(label, ms) {
+    <span class="sc_c_kw">return new</span> <span class="sc_c_fn">Promise</span>(<span class="sc_c_kw">function</span> (resolve) {
+        <span class="sc_c_fn">setTimeout</span>(<span class="sc_c_kw">function</span> () { <span class="sc_c_fn">resolve</span>(label); }, ms);
+    });
+}
+
+<span class="sc_c_kw">async function</span> <span class="sc_c_fn">sc_makeDumplings</span>() {
+    <span class="sc_c_cm">// ① 线上、线下同时买原料，谁先完成用谁</span>
+    <span class="sc_c_kw">const</span> buyer = <span class="sc_c_kw">await</span> <span class="sc_c_fn">Promise.race</span>([
+        <span class="sc_c_fn">sc_wait</span>(<span class="sc_c_str">'线上购买'</span>, <span class="sc_c_num">6000</span>),
+        <span class="sc_c_fn">sc_wait</span>(<span class="sc_c_str">'线下采购'</span>, <span class="sc_c_num">8000</span>)
+    ]);
+    console.log(buyer + <span class="sc_c_str">'先买到原料'</span>);
+
+    <span class="sc_c_cm">// ② 取原料</span>
+    <span class="sc_c_kw">await</span> <span class="sc_c_fn">sc_wait</span>(<span class="sc_c_str">'取原料'</span>, <span class="sc_c_num">2000</span>);
+
+    <span class="sc_c_cm">// ③ 和面、和馅必须都完成才能继续</span>
+    <span class="sc_c_kw">await</span> <span class="sc_c_fn">Promise.all</span>([
+        <span class="sc_c_fn">sc_wait</span>(<span class="sc_c_str">'和面'</span>, <span class="sc_c_num">5000</span>),
+        <span class="sc_c_fn">sc_wait</span>(<span class="sc_c_str">'和馅'</span>, <span class="sc_c_num">4000</span>)
+    ]);
+
+    <span class="sc_c_cm">// ④⑤⑥ 顺序执行：包饺子 → 煮饺子 → 吃饺子</span>
+    <span class="sc_c_kw">await</span> <span class="sc_c_fn">sc_wait</span>(<span class="sc_c_str">'包饺子'</span>, <span class="sc_c_num">6000</span>);
+    <span class="sc_c_kw">await</span> <span class="sc_c_fn">sc_wait</span>(<span class="sc_c_str">'煮饺子'</span>, <span class="sc_c_num">8000</span>);
+    <span class="sc_c_kw">await</span> <span class="sc_c_fn">sc_wait</span>(<span class="sc_c_str">'吃饺子'</span>, <span class="sc_c_num">3000</span>);
+}
+
+<span class="sc_c_fn">sc_makeDumplings</span>();</pre>
+        </section>
+
+        <!-- 知识点 -->
+        <section class="sc_card">
+            <div class="sc_card_head">
+                <h2><i class="iconfont icon-bangzhu"></i> 知识点</h2>
+            </div>
+            <ul class="sc_notes">
+                <li><code>Promise.race([a, b])</code>：只要其中一个完成就返回，另一个 Promise 仍在后台执行，但结果被忽略 —— 这就是「线上线下同时买，谁先到算谁」。</li>
+                <li><code>Promise.all([a, b])</code>：全部成功才 resolve，耗时等于最慢的那个；如果任意一个 reject，整体立即失败。</li>
+                <li><code>await</code> 只能写在 async 函数内，它暂停的是当前函数，页面其它交互照常运行。</li>
+                <li>每一步的实际时长 = 设定毫秒数 ÷ 演示速度，页面进度条与日志只是 Promise 状态的可视化。</li>
+            </ul>
+        </section>
+    </div>
+
+    <script>
+        var sc_nodes = {
+            buy: document.getElementById('sc_node_buy'),
+            online: document.getElementById('sc_node_online'),
+            offline: document.getElementById('sc_node_offline'),
+            take: document.getElementById('sc_node_take'),
+            mix: document.getElementById('sc_node_mix'),
+            dough: document.getElementById('sc_node_dough'),
+            filling: document.getElementById('sc_node_filling'),
+            wrap: document.getElementById('sc_node_wrap'),
+            boil: document.getElementById('sc_node_boil'),
+            eat: document.getElementById('sc_node_eat')
+        };
+
+        var sc_btnRun = document.getElementById('sc_btn_run');
+        var sc_btnReset = document.getElementById('sc_btn_reset');
+        var sc_speedSelect = document.getElementById('sc_speed');
+        var sc_totalText = document.getElementById('sc_total');
+        var sc_logsBox = document.getElementById('sc_logs');
+        var sc_btnClearLog = document.getElementById('sc_btn_clear_log');
+
+        var sc_token = 0;      // 每次运行/重置自增，用于让旧流程失效
+        var sc_speed = 2;
+        var sc_t0 = 0;
+        var sc_running = false;
+
+        // ---------- 工具函数 ----------
+        function sc_wait(sc_ms) {
+            return new Promise(function (resolve) {
+                setTimeout(resolve, sc_ms);
+            });
+        }
+
+        function sc_addLog(sc_tagType, sc_tagText, sc_text) {
+            var sc_empty = sc_logsBox.querySelector('.sc_empty');
+            if (sc_empty) { sc_logsBox.innerHTML = ''; }
+
+            var sc_sec = ((performance.now() - sc_t0) / 1000).toFixed(1);
+            var sc_tagClass = 'sc_log_tag';
+            if (sc_tagType === 'race') { sc_tagClass += ' sc_tag_race'; }
+            else if (sc_tagType === 'all') { sc_tagClass += ' sc_tag_all'; }
+            else if (sc_tagType === 'seq') { sc_tagClass += ' sc_tag_seq'; }
+            else if (sc_tagType === 'ok') { sc_tagClass += ' sc_tag_ok'; }
+
+            var sc_li = document.createElement('li');
+            sc_li.className = 'sc_log';
+            sc_li.innerHTML = '<span class="sc_log_time">+' + sc_sec + 's</span>'
+                + '<span class="' + sc_tagClass + '">' + sc_tagText + '</span>'
+                + '<span class="sc_log_text">' + sc_text + '</span>';
+            sc_logsBox.appendChild(sc_li);
+            sc_logsBox.scrollTop = sc_logsBox.scrollHeight;
+
+            while (sc_logsBox.children.length > 24) {
+                sc_logsBox.removeChild(sc_logsBox.firstChild);
+            }
+        }
+
+        function sc_barOf(sc_el) {
+            if (sc_el.classList.contains('sc_branch')) {
+                return sc_el.querySelector('.sc_bar > span');
+            }
+            return sc_el.querySelector('.sc_step_body > .sc_bar > span');
+        }
+
+        function sc_runBar(sc_el, sc_ms) {
+            var sc_bar = sc_barOf(sc_el);
+            if (!sc_bar) { return; }
+            sc_bar.style.transition = 'none';
+            sc_bar.style.width = '0%';
+            void sc_bar.offsetWidth;
+            sc_bar.style.transition = 'width ' + sc_ms + 'ms linear';
+            sc_bar.style.width = '100%';
+        }
+
+        function sc_setState(sc_el, sc_state, sc_text) {
+            sc_el.classList.remove('sc_st_wait', 'sc_st_run', 'sc_st_done', 'sc_st_late');
+            sc_el.classList.add('sc_st_' + sc_state);
+            var sc_stateEl = sc_el.classList.contains('sc_branch')
+                ? sc_el.querySelector('.sc_branch_state')
+                : sc_el.querySelector('.sc_node_state');
+            if (sc_stateEl) { sc_stateEl.textContent = sc_text; }
+        }
+
+        // ---------- 视觉重置 ----------
+        function sc_clearVisuals() {
+            var sc_els = document.querySelectorAll('.sc_step, .sc_branch');
+            for (var sc_i = 0; sc_i < sc_els.length; sc_i++) {
+                var sc_el = sc_els[sc_i];
+                sc_el.classList.remove('sc_st_run', 'sc_st_done', 'sc_st_late');
+                sc_el.classList.add('sc_st_wait');
+                var sc_stateEl = sc_el.classList.contains('sc_branch')
+                    ? sc_el.querySelector('.sc_branch_state')
+                    : sc_el.querySelector('.sc_node_state');
+                if (sc_stateEl) { sc_stateEl.textContent = '等待中'; }
+                var sc_bar = sc_barOf(sc_el);
+                if (sc_bar) {
+                    sc_bar.style.transition = 'none';
+                    sc_bar.style.width = '0%';
+                }
+            }
+            sc_logsBox.innerHTML = '<li class="sc_empty">点击「开始包饺子」查看每一步的执行过程</li>';
+            sc_totalText.textContent = '—';
+        }
+
+        // ---------- 顺序步骤 ----------
+        async function sc_stepTask(sc_node, sc_label, sc_baseMs, sc_runToken) {
+            var sc_actual = sc_baseMs / sc_speed;
+            sc_setState(sc_node, 'run', '进行中…');
+            sc_runBar(sc_node, sc_actual);
+            sc_addLog('seq', 'await', sc_label + ' 开始，预计 ' + (sc_actual / 1000).toFixed(1) + ' s');
+
+            await sc_wait(sc_actual);
+
+            if (sc_runToken !== sc_token) { return false; }
+
+            sc_setState(sc_node, 'done', '已完成 · ' + (sc_actual / 1000).toFixed(1) + ' s');
+            sc_addLog('ok', '完成', sc_label + ' 完成，用时 ' + (sc_actual / 1000).toFixed(1) + ' s');
+            return true;
+        }
+
+        // ---------- race 分支 ----------
+        function sc_raceTask(sc_node, sc_label, sc_baseMs, sc_runToken, sc_raceState) {
+            var sc_actual = sc_baseMs / sc_speed;
+            sc_setState(sc_node, 'run', '进行中…');
+            sc_runBar(sc_node, sc_actual);
+            sc_addLog('seq', '进行', sc_label + ' 开始，预计 ' + (sc_actual / 1000).toFixed(1) + ' s');
+
+            return new Promise(function (resolve) {
+                setTimeout(function () {
+                    if (sc_runToken === sc_token) {
+                        if (!sc_raceState.winner) {
+                            sc_raceState.winner = sc_label;
+                            sc_setState(sc_node, 'done', '已完成 · ' + (sc_actual / 1000).toFixed(1) + ' s');
+                            sc_addLog('race', 'race 采用', sc_label + '先完成，被 Promise.race 采用');
+                        } else {
+                            sc_setState(sc_node, 'late', '已完成，未被采用 · ' + (sc_actual / 1000).toFixed(1) + ' s');
+                            sc_addLog('ok', '提示', sc_label + '随后也完成了，但流程已按「' + sc_raceState.winner + '」继续');
+                        }
+                    }
+                    resolve({ label: sc_label, actual: sc_actual });
+                }, sc_actual);
+            });
+        }
+
+        // ---------- all 分支 ----------
+        function sc_branchTask(sc_node, sc_label, sc_baseMs, sc_runToken) {
+            var sc_actual = sc_baseMs / sc_speed;
+            sc_setState(sc_node, 'run', '进行中…');
+            sc_runBar(sc_node, sc_actual);
+            sc_addLog('all', '并行', sc_label + ' 开始，预计 ' + (sc_actual / 1000).toFixed(1) + ' s');
+
+            return new Promise(function (resolve) {
+                setTimeout(function () {
+                    if (sc_runToken === sc_token) {
+                        sc_setState(sc_node, 'done', '已完成 · ' + (sc_actual / 1000).toFixed(1) + ' s');
+                        sc_addLog('ok', '完成', sc_label + ' 完成，用时 ' + (sc_actual / 1000).toFixed(1) + ' s');
+                    }
+                    resolve();
+                }, sc_actual);
+            });
+        }
+
+        // ---------- 主流程 ----------
+        async function sc_runDemo() {
+            if (sc_running) { return; }
+
+            sc_speed = parseFloat(sc_speedSelect.value) || 1;
+            sc_token += 1;
+            var sc_runToken = sc_token;
+            sc_running = true;
+            sc_t0 = performance.now();
+            sc_clearVisuals();
+            sc_btnRun.disabled = true;
+
+            try {
+                sc_addLog('race', '开始', '演示开始 · 速度 ' + sc_speed + 'x');
+
+                // ① 买原料：Promise.race
+                sc_setState(sc_nodes.buy, 'run', '进行中…');
+                sc_runBar(sc_nodes.buy, 6000 / sc_speed);
+                sc_addLog('race', '① race', '线上购买（6 s）与线下采购（8 s）同时开始');
+
+                var sc_raceState = { winner: null };
+                var sc_winner = await Promise.race([
+                    sc_raceTask(sc_nodes.online, '线上购买', 6000, sc_runToken, sc_raceState),
+                    sc_raceTask(sc_nodes.offline, '线下采购', 8000, sc_runToken, sc_raceState)
+                ]);
+
+                if (sc_runToken !== sc_token) { return; }
+
+                sc_setState(sc_nodes.buy, 'done', '已买到 · ' + sc_winner.label + '先完成');
+                sc_addLog('ok', '完成', '① 原料已买到，用时 ' + (sc_winner.actual / 1000).toFixed(1) + ' s');
+
+                // ② 取原料
+                if (!await sc_stepTask(sc_nodes.take, '② 取原料', 2000, sc_runToken)) { return; }
+
+                // ③ 和面 + 和馅：Promise.all
+                sc_setState(sc_nodes.mix, 'run', '进行中…');
+                sc_runBar(sc_nodes.mix, 5000 / sc_speed);
+                sc_addLog('all', '③ all', '和面（5 s）与和馅（4 s）同时开始，两者都完成才继续');
+
+                var sc_mixStart = performance.now();
+                await Promise.all([
+                    sc_branchTask(sc_nodes.dough, '和面', 5000, sc_runToken),
+                    sc_branchTask(sc_nodes.filling, '和馅', 4000, sc_runToken)
+                ]);
+
+                if (sc_runToken !== sc_token) { return; }
+
+                var sc_mixCost = (performance.now() - sc_mixStart) / 1000;
+                sc_setState(sc_nodes.mix, 'done', '都完成 · ' + sc_mixCost.toFixed(1) + ' s（取最慢）');
+                sc_addLog('ok', '完成', '③ 和面、和馅全部完成，用时 ' + sc_mixCost.toFixed(1) + ' s');
+
+                // ④⑤⑥ 顺序步骤
+                if (!await sc_stepTask(sc_nodes.wrap, '④ 包饺子', 6000, sc_runToken)) { return; }
+                if (!await sc_stepTask(sc_nodes.boil, '⑤ 煮饺子', 8000, sc_runToken)) { return; }
+                if (!await sc_stepTask(sc_nodes.eat, '⑥ 吃饺子', 3000, sc_runToken)) { return; }
+
+                var sc_totalCost = (performance.now() - sc_t0) / 1000;
+                sc_totalText.textContent = sc_totalCost.toFixed(1) + ' s';
+                sc_addLog('ok', '完成', '⑥ 饺子吃完了，流程结束，总耗时 ' + sc_totalCost.toFixed(1) + ' s');
+            } catch (sc_err) {
+                sc_addLog('ok', '错误', '流程出错：' + sc_err.message);
+            } finally {
+                if (sc_runToken === sc_token) {
+                    sc_running = false;
+                    sc_btnRun.disabled = false;
+                }
+            }
+        }
+
+        // ---------- 事件 ----------
+        sc_btnRun.addEventListener('click', sc_runDemo);
+
+        sc_btnReset.addEventListener('click', function () {
+            sc_token += 1;      // 让正在运行的流程失效
+            sc_running = false;
+            sc_btnRun.disabled = false;
+            sc_clearVisuals();
+        });
+
+        sc_btnClearLog.addEventListener('click', function () {
+            sc_logsBox.innerHTML = '<li class="sc_empty">点击「开始包饺子」查看每一步的执行过程</li>';
+        });
+    </script>
+</body>
+</html>

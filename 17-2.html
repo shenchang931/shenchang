@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<!-- 姓名：沈畅，日期：2026-11-02，功能名称：fetch 请求 jsonplaceholder 用户列表接口 -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>17-2 fetch 获取用户列表</title>
+    <link rel="preconnect" href="https://jsonplaceholder.typicode.com" crossorigin>
+    <link rel="dns-prefetch" href="https://jsonplaceholder.typicode.com">
+    <link rel="stylesheet" href="font/iconfont.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            background: #eef2f8;
+            color: #1e293b;
+            line-height: 1.7;
+            padding: 36px 20px 60px;
+        }
+
+        .sc_wrap { max-width: 1100px; margin: 0 auto; }
+
+        /* ---------- 头部 ---------- */
+        .sc_head { margin-bottom: 24px; }
+
+        .sc_tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 13px;
+            color: #1d4ed8;
+            background: #dbeafe;
+            border: 1px solid #bfdbfe;
+            border-radius: 999px;
+            padding: 4px 14px;
+            margin-bottom: 12px;
+        }
+
+        .sc_head h1 { font-size: 29px; color: #0f172a; margin-bottom: 8px; letter-spacing: .5px; }
+        .sc_head p { font-size: 14.5px; color: #64748b; max-width: 800px; }
+        .sc_head p code {
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+            color: #1d4ed8;
+            background: #dbeafe;
+            border-radius: 4px;
+            padding: 1px 6px;
+        }
+
+        /* ---------- 展示区 ---------- */
+        .sc_stage {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, .06);
+        }
+
+        .sc_stage_head {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 0 4px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            margin-bottom: 16px;
+        }
+
+        .sc_stage_head h2 { font-size: 16px; color: #0f172a; margin-bottom: 2px; }
+        .sc_status { font-size: 13px; color: #64748b; }
+        .sc_status b { color: #0f172a; }
+        .sc_status_err { color: #dc2626; }
+
+        .sc_btn {
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            color: #ffffff;
+            background: #2563eb;
+            border: none;
+            border-radius: 9px;
+            padding: 9px 20px;
+            cursor: pointer;
+            transition: background .2s, transform .1s;
+        }
+        .sc_btn:hover { background: #1d4ed8; }
+        .sc_btn:active { transform: scale(.97); }
+        .sc_btn:disabled { background: #93b4f4; cursor: not-allowed; }
+
+        /* ---------- 用户卡片 ---------- */
+        .sc_users {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+            gap: 14px;
+        }
+
+        .sc_user {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px 16px;
+            background: #fcfdff;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        .sc_user:hover {
+            border-color: #bfdbfe;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, .1);
+        }
+
+        .sc_user_head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed #e2e8f0;
+            margin-bottom: 10px;
+        }
+
+        .sc_avatar {
+            flex: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: .5px;
+        }
+
+        .sc_user_name { font-size: 15.5px; font-weight: 700; color: #0f172a; line-height: 1.4; }
+        .sc_user_sub { font-size: 12.5px; color: #94a3b8; }
+
+        .sc_user_rows { list-style: none; }
+        .sc_user_rows li {
+            display: flex;
+            gap: 10px;
+            font-size: 13px;
+            padding: 3px 0;
+            word-break: break-all;
+        }
+        .sc_user_k { flex: 0 0 34px; color: #94a3b8; }
+        .sc_user_v { flex: 1; min-width: 0; color: #475569; }
+        .sc_user_v a { color: #2563eb; text-decoration: none; }
+        .sc_user_v a:hover { text-decoration: underline; }
+
+        /* ---------- 骨架屏 ---------- */
+        .sc_sk_user {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px 16px;
+        }
+        .sc_sk_avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #eef2f8;
+            margin-bottom: 12px;
+        }
+        .sc_sk_line {
+            height: 12px;
+            border-radius: 6px;
+            background: #eef2f8;
+            margin-bottom: 9px;
+        }
+        .sc_w40 { width: 40%; }
+        .sc_w60 { width: 60%; }
+        .sc_w80 { width: 80%; }
+        .sc_w100 { width: 100%; }
+
+        .sc_sk_user .sc_sk_avatar,
+        .sc_sk_user .sc_sk_line {
+            animation: sc_shimmer 1.2s ease-in-out infinite;
+        }
+        @keyframes sc_shimmer {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .45; }
+        }
+
+        /* ---------- 错误 ---------- */
+        .sc_error {
+            grid-column: 1 / -1;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 12px;
+            padding: 26px;
+            text-align: center;
+            color: #b91c1c;
+        }
+        .sc_error b { display: block; font-size: 15px; margin-bottom: 6px; }
+        .sc_error span { font-size: 13px; color: #7f1d1d; }
+
+        /* ---------- 信息卡片 ---------- */
+        .sc_grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .sc_card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, .05);
+        }
+
+        .sc_card h2 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            color: #0f172a;
+            margin-bottom: 14px;
+            font-weight: 700;
+        }
+        .sc_card h2 .iconfont { color: #2563eb; font-size: 15px; }
+
+        .sc_info { list-style: none; }
+        .sc_info li {
+            display: flex;
+            gap: 12px;
+            font-size: 13.5px;
+            padding: 9px 0;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+        .sc_info li:last-child { border-bottom: none; }
+        .sc_info_k { flex: 0 0 78px; color: #64748b; }
+        .sc_info_v {
+            flex: 1;
+            min-width: 0;
+            color: #1e293b;
+            word-break: break-all;
+        }
+        .sc_ok { color: #16a34a; font-weight: 700; }
+        .sc_dim { color: #94a3b8; }
+
+        /* ---------- 代码区 ---------- */
+        .sc_code {
+            background: #0f172a;
+            border-radius: 10px;
+            padding: 14px 16px;
+            overflow: auto;
+            font-family: Consolas, Monaco, "Courier New", monospace;
+            font-size: 12.8px;
+            line-height: 1.75;
+            color: #e2e8f0;
+            white-space: pre;
+            max-height: 320px;
+            min-height: 120px;
+        }
+
+        .sc_k { color: #93c5fd; }
+        .sc_s { color: #86efac; }
+        .sc_n { color: #fbbf24; }
+        .sc_b { color: #c4b5fd; }
+        .sc_p { color: #64748b; }
+        .sc_cm { color: #64748b; font-style: italic; }
+
+        .sc_full { grid-column: 1 / -1; }
+        .sc_full .sc_code { max-height: none; }
+
+        .sc_tip { font-size: 12.5px; color: #94a3b8; margin-top: 12px; }
+
+        @media (max-width: 760px) {
+            .sc_grid { grid-template-columns: 1fr; }
+            .sc_head h1 { font-size: 23px; }
+            .sc_users { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sc_wrap">
+        <!-- ========== 头部 ========== -->
+        <header class="sc_head">
+            <span class="sc_tag"><i class="iconfont icon-shoucang"></i> 17-2 网络请求</span>
+            <h1>fetch 获取用户列表</h1>
+            <p>
+                使用原生 <code>fetch()</code> 请求公开接口
+                <code>http://jsonplaceholder.typicode.com/users</code>。
+                该接口允许跨域访问，返回一个包含 10 位用户的 JSON 数组，
+                每个用户对象里有 <code>name</code>、<code>username</code>、<code>email</code>、<code>phone</code>、
+                <code>website</code>，以及嵌套的 <code>address</code>（含 geo 经纬度）和 <code>company</code> 对象。
+            </p>
+        </header>
+
+        <!-- ========== 用户列表 ========== -->
+        <section class="sc_stage">
+            <div class="sc_stage_head">
+                <div>
+                    <h2>用户数据</h2>
+                    <p class="sc_status" id="sc_status">正在加载用户数据…</p>
+                </div>
+                <button class="sc_btn" id="sc_btn_load">
+                    <i class="iconfont icon-fanhui"></i> 重新加载
+                </button>
+            </div>
+            <div class="sc_users" id="sc_users"></div>
+        </section>
+
+        <!-- ========== 接口信息 + JSON ========== -->
+        <section class="sc_grid">
+            <div class="sc_card">
+                <h2><i class="iconfont icon-sousuo"></i> 接口信息</h2>
+                <ul class="sc_info" id="sc_info">
+                    <li><span class="sc_info_k">请求地址</span><span class="sc_info_v">GET http://jsonplaceholder.typicode.com/users</span></li>
+                    <li><span class="sc_info_k">响应状态</span><span class="sc_info_v sc_dim" id="sc_info_status">尚未发起请求</span></li>
+                    <li><span class="sc_info_k">返回条数</span><span class="sc_info_v sc_dim" id="sc_info_count">—</span></li>
+                    <li><span class="sc_info_k">请求耗时</span><span class="sc_info_v sc_dim" id="sc_info_time">—</span></li>
+                </ul>
+                <p class="sc_tip">接口返回的是数组而非对象，因此直接用 <code>data.length</code> 得到条数。</p>
+            </div>
+
+            <div class="sc_card">
+                <h2><i class="iconfont icon-liebiao"></i> 原始 JSON 响应</h2>
+                <pre class="sc_code" id="sc_json">  // 请求成功后显示完整的数组内容</pre>
+            </div>
+
+            <div class="sc_card sc_full">
+                <h2><i class="iconfont icon-yijianfankui"></i> 核心代码</h2>
+                <pre class="sc_code">async function sc_loadUsers() {
+    // 1. 发起请求，拿到响应对象
+    const res = await fetch('http://jsonplaceholder.typicode.com/users');
+
+    // 2. 判断 HTTP 状态码，非 200 直接抛错
+    if (!res.ok) throw new Error('HTTP 状态码 ' + res.status);
+
+    // 3. 响应体解析为数组，共 10 个用户对象
+    const data = await res.json();
+
+    // 4. 遍历数组渲染卡片，嵌套字段用链式访问
+    data.forEach(function (user) {
+        console.log(user.name, user.address.city, user.company.name);
+    });
+}</pre>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        var sc_apiUrl = 'http://jsonplaceholder.typicode.com/users';
+        var sc_cacheKey = 'sc_users_cache_v1';
+
+        var sc_usersBox = document.getElementById('sc_users');
+        var sc_status = document.getElementById('sc_status');
+        var sc_btnLoad = document.getElementById('sc_btn_load');
+        var sc_infoStatus = document.getElementById('sc_info_status');
+        var sc_infoCount = document.getElementById('sc_info_count');
+        var sc_infoTime = document.getElementById('sc_info_time');
+        var sc_jsonBox = document.getElementById('sc_json');
+
+        var sc_avatarColors = ['#2563eb', '#7c3aed', '#db2777', '#ea580c', '#0d9488', '#4f46e5', '#b45309', '#0284c7', '#16a34a', '#be123c'];
+
+        // ---------- JSON 语法高亮 ----------
+        function sc_highlight(sc_text) {
+            var sc_esc = sc_text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return sc_esc.replace(/("[^"\\]*(?:\\.[^"\\]*)*")(\s*:)?|\b(true|false|null)\b|(-?\d+(?:\.\d+)?)|([{}\[\],])/g,
+                function (sc_m, sc_str, sc_colon, sc_kw, sc_num, sc_punc) {
+                    if (sc_str) {
+                        if (sc_colon) { return '<span class="sc_k">' + sc_str + '</span>' + sc_colon; }
+                        return '<span class="sc_s">' + sc_str + '</span>';
+                    }
+                    if (sc_kw) { return '<span class="sc_b">' + sc_kw + '</span>'; }
+                    if (sc_num) { return '<span class="sc_n">' + sc_num + '</span>'; }
+                    if (sc_punc) { return '<span class="sc_p">' + sc_punc + '</span>'; }
+                    return sc_m;
+                });
+        }
+
+        // ---------- 首字母缩写 ----------
+        function sc_initials(sc_name) {
+            var sc_parts = sc_name.split(' ');
+            var sc_short = '';
+            for (var sc_i = 0; sc_i < sc_parts.length && sc_i < 2; sc_i++) {
+                if (sc_parts[sc_i]) { sc_short += sc_parts[sc_i].charAt(0).toUpperCase(); }
+            }
+            return sc_short;
+        }
+
+        // ---------- 骨架屏 ----------
+        function sc_renderSkeleton() {
+            var sc_html = '';
+            for (var sc_i = 0; sc_i < 10; sc_i++) {
+                sc_html += '<div class="sc_sk_user">'
+                    + '<div class="sc_sk_avatar"></div>'
+                    + '<div class="sc_sk_line sc_w60"></div>'
+                    + '<div class="sc_sk_line sc_w100"></div>'
+                    + '<div class="sc_sk_line sc_w80"></div>'
+                    + '<div class="sc_sk_line sc_w40"></div>'
+                    + '</div>';
+            }
+            sc_usersBox.innerHTML = sc_html;
+        }
+
+        // ---------- 用户卡片渲染 ----------
+        function sc_renderUsers(sc_users) {
+            var sc_html = '';
+            for (var sc_i = 0; sc_i < sc_users.length; sc_i++) {
+                var sc_u = sc_users[sc_i];
+                sc_html += '<article class="sc_user">'
+                    + '<div class="sc_user_head">'
+                    + '<span class="sc_avatar" style="background:' + sc_avatarColors[sc_i % sc_avatarColors.length] + '">' + sc_initials(sc_u.name) + '</span>'
+                    + '<div>'
+                    + '<div class="sc_user_name">' + sc_u.name + '</div>'
+                    + '<div class="sc_user_sub">@' + sc_u.username + ' · 第 ' + sc_u.id + ' 号用户</div>'
+                    + '</div>'
+                    + '</div>'
+                    + '<ul class="sc_user_rows">'
+                    + '<li><span class="sc_user_k">邮箱</span><span class="sc_user_v"><a href="mailto:' + sc_u.email + '">' + sc_u.email + '</a></span></li>'
+                    + '<li><span class="sc_user_k">电话</span><span class="sc_user_v">' + sc_u.phone + '</span></li>'
+                    + '<li><span class="sc_user_k">网站</span><span class="sc_user_v">' + sc_u.website + '</span></li>'
+                    + '<li><span class="sc_user_k">城市</span><span class="sc_user_v">' + sc_u.address.city + '（' + sc_u.address.geo.lat + ', ' + sc_u.address.geo.lng + '）</span></li>'
+                    + '<li><span class="sc_user_k">公司</span><span class="sc_user_v">' + sc_u.company.name + '</span></li>'
+                    + '</ul>'
+                    + '</article>';
+            }
+            sc_usersBox.innerHTML = sc_html;
+        }
+
+        // ---------- 错误渲染 ----------
+        function sc_renderError(sc_msg) {
+            sc_usersBox.innerHTML = '<div class="sc_error"><b>用户数据加载失败</b><span>' + sc_msg + '</span></div>';
+            sc_status.textContent = '加载失败，可点击右上角按钮重试';
+            sc_status.className = 'sc_status sc_status_err';
+        }
+
+        // ---------- 本地缓存 ----------
+        function sc_readCache() {
+            try {
+                var sc_raw = sessionStorage.getItem(sc_cacheKey);
+                return sc_raw ? JSON.parse(sc_raw) : null;
+            } catch (sc_e) {
+                return null;
+            }
+        }
+
+        function sc_saveCache(sc_data) {
+            try {
+                sessionStorage.setItem(sc_cacheKey, JSON.stringify(sc_data));
+            } catch (sc_e) { /* 缓存空间不足时忽略 */ }
+        }
+
+        // ---------- 发起请求 ----------
+        async function sc_loadUsers(sc_background, sc_cachedCount) {
+            sc_btnLoad.disabled = true;
+            sc_status.className = 'sc_status';
+
+            if (!sc_background) {
+                sc_status.textContent = '正在加载用户数据…';
+                sc_renderSkeleton();
+            } else {
+                sc_status.innerHTML = '已显示本地缓存（<b>' + (sc_cachedCount || 0) + '</b> 位用户）· 正在后台更新…';
+            }
+
+            var sc_start = performance.now();
+
+            try {
+                var sc_res = await fetch(sc_apiUrl);
+                if (!sc_res.ok) {
+                    throw new Error('HTTP 状态码 ' + sc_res.status);
+                }
+
+                var sc_data = await sc_res.json();
+                var sc_cost = Math.round(performance.now() - sc_start);
+
+                sc_renderUsers(sc_data);
+                sc_saveCache(sc_data);
+
+                sc_status.innerHTML = '共 <b>' + sc_data.length + '</b> 位用户 · 耗时 <b>' + sc_cost + ' ms</b>'
+                    + (sc_background ? ' · 已同步最新数据' : '');
+                sc_infoStatus.textContent = '200 OK';
+                sc_infoStatus.className = 'sc_ok';
+                sc_infoCount.textContent = sc_data.length + ' 条';
+                sc_infoCount.className = '';
+                sc_infoTime.textContent = sc_cost + ' ms';
+                sc_infoTime.className = '';
+                sc_jsonBox.innerHTML = sc_highlight(JSON.stringify(sc_data, null, 2));
+            } catch (sc_err) {
+                if (sc_background && sc_readCache()) {
+                    sc_status.textContent = '网络较慢，继续显示已缓存数据 · 同步失败';
+                    sc_status.className = 'sc_status sc_status_err';
+                } else {
+                    sc_renderError(sc_err.message);
+                }
+            } finally {
+                sc_btnLoad.disabled = false;
+            }
+        }
+
+        // ---------- 事件与初始化 ----------
+        sc_btnLoad.addEventListener('click', function () {
+            var sc_cached = sc_readCache();
+            sc_loadUsers(true, sc_cached ? sc_cached.length : 0);
+        });
+
+        var sc_cacheData = sc_readCache();
+        if (sc_cacheData && sc_cacheData.length) {
+            // 先秒出缓存内容，再后台更新
+            sc_renderUsers(sc_cacheData);
+            sc_loadUsers(true, sc_cacheData.length);
+        } else {
+            sc_loadUsers(false);
+        }
+    </script>
+</body>
+</html>

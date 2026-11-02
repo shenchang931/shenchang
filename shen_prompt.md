@@ -182,3 +182,69 @@
 **模型：** DeepSeek-V4.1-Flash
 **提示词：** 将今天的全部提交到github上将本项目commit提交，并push到``https://github.com/shenchang931/shenchang``，已设置公钥
 ---
+
+---
+## 2026-11-02-15-38
+**模型：** DeepSeek-V4.1-Flash
+**提示词：** 1.完成17-1.html，展示json
+---
+
+---
+## 2026-11-02-15-47
+**模型：** DeepSeek-V4.1-Flash
+**提示词：** 完成17-2.html获取`https://dog.ceo/api/breeds/image/random`的接口数据并展示。接口可以跨域访问。使用fetch和原生代码实现
+---
+
+---
+## 2026-11-02-15-55
+**模型：** DeepSeek-V4.1-Flash
+**提示词：** 图片展示的位置不够大，展示不全
+---
+
+---
+## 2026-11-02-15-57
+**模型：** DeepSeek-V4.1-Flash
+**提示词：** 完成17-3.html 和17-3-detail.html,显示列表和列表详情，数据来源于接口，使用fetch。列表：`https://dummyjson.com/products?limit=8`，默认商品列表。详情：`https://dummyjson.com/products/1`，根据ID 获取单个商品
+---
+
+---
+## 2026-11-02-16-08
+**模型：** DeepSeek-V4.1-Flash
+**提示词：** 为什么我加载那么慢
+---
+
+---
+## 2026-11-02-16-11
+**模型：** DeepSeek-V4.1-Flash
+**提示词：** 快一点
+---
+
+---
+## 2026-11-02-16-18
+**模型：** DeepSeek-V4.1-Flash
+**提示词：** （上传图片，无文字）VS Code「问题」面板截图：17-3.html 第 151 行 -webkit-line-clamp: 2 提示 css(vendorPrefix) Also define the standard property 'line-clamp' for compatibility
+---
+
+---
+## 2026-11-02-16-20
+**模型：** DeepSeek-V4.1-Flash
+**提示词：** 将17-2.html接口修改为`http://jsonplaceholder.typicode.com/users`
+---
+
+---
+## 2026-11-02-16-28
+**模型：** DeepSeek-V4.1-Flash
+**提示词：** 1.完成17-4.html，对远程数据接口进行测试，支持get、post等，显示返回的数据和错误提示信息，示例post接口：`https://jsonplaceholder.typicode.com/posts`。2.完成17-5.html，展示JavaScript的两种定时器
+---
+
+---
+## 2026-11-02-16-36
+**模型：** DeepSeek-V4.1-Flash
+**提示词：** 完成17-6.html，使用promise和async完成一部操作的演示包饺子的流程。先买原料（线上线下同时购买，完成任何一个即可进行下一步），取原料，买完原料之后同时和面，和陷，两个活动都完成之后包饺子，包完饺子煮饺子，然后吃饺子。使用settimeout模拟每一个流程，如买原料6s，在页面上显示流程
+---
+
+---
+## 2026-11-02-16-42
+**模型：** DeepSeek-V4.1-Flash
+**提示词：** 将今天的全部提交到github上将本项目commit提交，并push到```https://github.com/shenchang931/shenchang```，已设置公钥
+---

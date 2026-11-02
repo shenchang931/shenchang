@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<!-- 姓名：沈畅，日期：2026-11-02，功能名称：fetch 商品列表页 -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>17-3 商品列表</title>
+    <link rel="preconnect" href="https://dummyjson.com" crossorigin>
+    <link rel="dns-prefetch" href="https://dummyjson.com">
+    <link rel="preconnect" href="https://cdn.dummyjson.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.dummyjson.com">
+    <link rel="stylesheet" href="font/iconfont.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            background: #eef2f8;
+            color: #1e293b;
+            line-height: 1.7;
+            padding: 34px 20px 60px;
+        }
+
+        .sc_wrap { max-width: 1120px; margin: 0 auto; }
+
+        /* ---------- 头部 ---------- */
+        .sc_head { margin-bottom: 22px; }
+
+        .sc_tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 13px;
+            color: #1d4ed8;
+            background: #dbeafe;
+            border: 1px solid #bfdbfe;
+            border-radius: 999px;
+            padding: 4px 14px;
+            margin-bottom: 12px;
+        }
+
+        .sc_head h1 { font-size: 28px; color: #0f172a; margin-bottom: 8px; letter-spacing: .5px; }
+        .sc_head p { font-size: 14.5px; color: #64748b; max-width: 780px; }
+        .sc_head code {
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+            color: #1d4ed8;
+            background: #dbeafe;
+            border-radius: 4px;
+            padding: 1px 6px;
+        }
+
+        /* ---------- 操作栏 ---------- */
+        .sc_bar {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 18px;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, .05);
+        }
+
+        .sc_btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: inherit;
+            font-size: 13.5px;
+            color: #ffffff;
+            background: #2563eb;
+            border: none;
+            border-radius: 8px;
+            padding: 9px 18px;
+            cursor: pointer;
+            transition: background .2s, transform .1s;
+        }
+        .sc_btn:hover { background: #1d4ed8; }
+        .sc_btn:active { transform: scale(.97); }
+        .sc_btn:disabled { background: #93b4f4; cursor: not-allowed; }
+
+        .sc_status { font-size: 13.5px; color: #475569; }
+        .sc_status b { color: #0f172a; }
+        .sc_status_err { color: #dc2626; }
+
+        /* ---------- 商品网格 ---------- */
+        .sc_grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
+            gap: 18px;
+        }
+
+        .sc_pcard {
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, .05);
+            transition: transform .2s, box-shadow .2s, border-color .2s;
+        }
+        .sc_pcard:hover {
+            transform: translateY(-4px);
+            border-color: #bfdbfe;
+            box-shadow: 0 14px 30px rgba(37, 99, 235, .13);
+        }
+
+        .sc_pimg_wrap {
+            position: relative;
+            background: #f1f5f9;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .sc_pimg_wrap.sc_img_loading {
+            animation: sc_shimmer 1.2s ease-in-out infinite;
+        }
+        .sc_pimg {
+            display: block;
+            width: 100%;
+            height: 180px;
+            object-fit: contain;
+            opacity: 0;
+            transition: opacity .35s;
+        }
+        .sc_pimg.sc_show { opacity: 1; }
+
+        .sc_pbody { padding: 12px 14px 14px; display: flex; flex-direction: column; flex: 1; }
+
+        .sc_pcat {
+            align-self: flex-start;
+            font-size: 11.5px;
+            color: #2563eb;
+            background: #eff6ff;
+            border-radius: 5px;
+            padding: 1px 8px;
+            margin-bottom: 8px;
+            text-transform: capitalize;
+        }
+
+        .sc_ptitle {
+            font-size: 14.5px;
+            color: #0f172a;
+            font-weight: 700;
+            line-height: 1.45;
+            height: 42px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+
+        .sc_pmeta { font-size: 12.5px; color: #94a3b8; margin-bottom: 10px; }
+        .sc_pmeta .sc_star { color: #f59e0b; font-weight: 700; }
+
+        .sc_prow { display: flex; align-items: center; gap: 8px; margin-top: auto; }
+
+        .sc_price {
+            font-family: Arial, "Microsoft YaHei", sans-serif;
+            font-size: 19px;
+            font-weight: 700;
+            color: #dc2626;
+        }
+
+        .sc_disc {
+            font-size: 11.5px;
+            color: #b45309;
+            background: #fef3c7;
+            border-radius: 4px;
+            padding: 1px 6px;
+        }
+
+        .sc_go {
+            margin-left: auto;
+            font-size: 12.5px;
+            color: #2563eb;
+        }
+
+        /* ---------- 骨架屏 ---------- */
+        .sc_sk_card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        .sc_sk_img { height: 180px; background: #eef2f8; }
+        .sc_sk_body { padding: 14px; }
+        .sc_sk_line {
+            height: 12px;
+            border-radius: 6px;
+            background: #eef2f8;
+            margin-bottom: 10px;
+        }
+        .sc_sk_line.sc_w60 { width: 60%; }
+        .sc_sk_line.sc_w80 { width: 80%; }
+        .sc_sk_line.sc_w40 { width: 40%; }
+
+        .sc_sk_card .sc_sk_img,
+        .sc_sk_card .sc_sk_line {
+            animation: sc_shimmer 1.2s ease-in-out infinite;
+        }
+        @keyframes sc_shimmer {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .45; }
+        }
+
+        /* ---------- 错误提示 ---------- */
+        .sc_error {
+            grid-column: 1 / -1;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            color: #b91c1c;
+        }
+        .sc_error b { display: block; font-size: 15px; margin-bottom: 6px; }
+        .sc_error span { font-size: 13px; color: #7f1d1d; }
+
+        @media (max-width: 560px) {
+            .sc_head h1 { font-size: 22px; }
+            .sc_grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+            .sc_pimg { height: 130px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sc_wrap">
+        <!-- ========== 头部 ========== -->
+        <header class="sc_head">
+            <span class="sc_tag"><i class="iconfont icon-shangcheng"></i> 17-3 商品列表</span>
+            <h1>商品列表 · fetch 接口数据</h1>
+            <p>
+                使用原生 <code>fetch()</code> 请求
+                <code>https://dummyjson.com/products?limit=8</code>，
+                接口返回 <code>{ products, total, skip, limit }</code>，
+                本页取前 8 件商品渲染成卡片；点击任意商品会跳转到详情页
+                <code>17-3-detail.html?id=商品ID</code>。
+            </p>
+        </header>
+
+        <!-- ========== 操作栏 ========== -->
+        <section class="sc_bar">
+            <button class="sc_btn" id="sc_btn_reload">
+                <i class="iconfont icon-fanhui"></i> 重新加载
+            </button>
+            <span class="sc_status" id="sc_status">正在加载商品数据…</span>
+        </section>
+
+        <!-- ========== 商品网格 ========== -->
+        <section class="sc_grid" id="sc_grid"></section>
+    </div>
+
+    <script>
+        var sc_apiUrl = 'https://dummyjson.com/products?limit=8';
+
+        var sc_grid = document.getElementById('sc_grid');
+        var sc_status = document.getElementById('sc_status');
+        var sc_btnReload = document.getElementById('sc_btn_reload');
+
+        // ---------- 骨架屏 ----------
+        function sc_renderSkeleton() {
+            var sc_html = '';
+            for (var sc_i = 0; sc_i < 8; sc_i++) {
+                sc_html += '<div class="sc_sk_card">'
+                    + '<div class="sc_sk_img"></div>'
+                    + '<div class="sc_sk_body">'
+                    + '<div class="sc_sk_line sc_w40"></div>'
+                    + '<div class="sc_sk_line sc_w80"></div>'
+                    + '<div class="sc_sk_line sc_w60"></div>'
+                    + '</div></div>';
+            }
+            sc_grid.innerHTML = sc_html;
+        }
+
+        // ---------- 卡片渲染 ----------
+        function sc_renderProducts(sc_products) {
+            var sc_html = '';
+            for (var sc_i = 0; sc_i < sc_products.length; sc_i++) {
+                var sc_p = sc_products[sc_i];
+                sc_html += '<a class="sc_pcard" href="17-3-detail.html?id=' + sc_p.id + '">'
+                    + '<div class="sc_pimg_wrap sc_img_loading">'
+                    + '<img class="sc_pimg" src="' + sc_p.thumbnail + '" alt="' + sc_p.title + '" loading="lazy" decoding="async"'
+                    + (sc_i === 0 ? ' fetchpriority="high"' : '') + '>'
+                    + '</div>'
+                    + '<div class="sc_pbody">'
+                    + '<span class="sc_pcat">' + sc_p.category + '</span>'
+                    + '<h3 class="sc_ptitle">' + sc_p.title + '</h3>'
+                    + '<div class="sc_pmeta"><span class="sc_star">★ ' + sc_p.rating + '</span> · 库存 ' + sc_p.stock + '</div>'
+                    + '<div class="sc_prow">'
+                    + '<span class="sc_price">$' + sc_p.price.toFixed(2) + '</span>'
+                    + '<span class="sc_disc">-' + sc_p.discountPercentage.toFixed(1) + '%</span>'
+                    + '<span class="sc_go">查看详情 →</span>'
+                    + '</div>'
+                    + '</div></a>';
+            }
+            sc_grid.innerHTML = sc_html;
+            sc_watchImages();
+        }
+
+        // ---------- 图片加载占位与渐显 ----------
+        function sc_watchImages() {
+            var sc_imgs = sc_grid.querySelectorAll('.sc_pimg');
+            for (var sc_i = 0; sc_i < sc_imgs.length; sc_i++) {
+                sc_bindImage(sc_imgs[sc_i]);
+            }
+        }
+
+        function sc_bindImage(sc_img) {
+            var sc_wrap = sc_img.parentNode;
+            function sc_done() {
+                sc_img.classList.add('sc_show');
+                if (sc_wrap) { sc_wrap.classList.remove('sc_img_loading'); }
+            }
+            if (sc_img.complete && sc_img.naturalWidth > 0) { sc_done(); return; }
+            sc_img.addEventListener('load', sc_done);
+            sc_img.addEventListener('error', function () {
+                if (sc_wrap) { sc_wrap.classList.remove('sc_img_loading'); }
+            });
+        }
+
+        // ---------- 本地缓存（sessionStorage） ----------
+        var sc_cacheKey = 'sc_products_cache_v1';
+        var sc_cacheData = sc_readCache();
+
+        function sc_readCache() {
+            try {
+                var sc_raw = sessionStorage.getItem('sc_products_cache_v1');
+                return sc_raw ? JSON.parse(sc_raw) : null;
+            } catch (sc_e) {
+                return null;
+            }
+        }
+
+        function sc_saveCache(sc_data) {
+            try {
+                sessionStorage.setItem(sc_cacheKey, JSON.stringify(sc_data));
+            } catch (sc_e) { /* 缓存空间不足时忽略 */ }
+        }
+
+        // ---------- 错误渲染 ----------
+        function sc_renderError(sc_msg) {
+            sc_grid.innerHTML = '<div class="sc_error"><b>商品数据加载失败</b><span>' + sc_msg + '</span></div>';
+            sc_status.textContent = '加载失败，可点击左侧按钮重试';
+            sc_status.className = 'sc_status sc_status_err';
+        }
+
+        // ---------- 发起请求 ----------
+        async function sc_loadProducts(sc_background) {
+            sc_btnReload.disabled = true;
+            sc_status.className = 'sc_status';
+
+            if (!sc_background) {
+                sc_status.textContent = '正在加载商品数据…';
+                sc_renderSkeleton();
+            } else {
+                sc_status.innerHTML = '正在后台同步最新数据…';
+            }
+
+            var sc_start = performance.now();
+
+            try {
+                var sc_res = await fetch(sc_apiUrl);
+                if (!sc_res.ok) {
+                    throw new Error('HTTP 状态码 ' + sc_res.status);
+                }
+
+                var sc_data = await sc_res.json();
+                var sc_cost = Math.round(performance.now() - sc_start);
+
+                sc_renderProducts(sc_data.products);
+                sc_saveCache(sc_data);
+
+                sc_status.innerHTML = '共 <b>' + sc_data.total + '</b> 件商品 · 本次展示 <b>'
+                    + sc_data.products.length + '</b> 件 · 耗时 <b>' + sc_cost + ' ms</b>'
+                    + (sc_background ? ' · 已同步最新数据' : '');
+            } catch (sc_err) {
+                if (sc_background && sc_cacheData) {
+                    sc_status.innerHTML = '网络较慢，继续显示已缓存数据 · <b>同步失败</b>';
+                    sc_status.className = 'sc_status sc_status_err';
+                } else {
+                    sc_renderError(sc_err.message);
+                }
+            } finally {
+                sc_btnReload.disabled = false;
+            }
+        }
+
+        // ---------- 事件与初始化 ----------
+        sc_btnReload.addEventListener('click', function () {
+            sc_loadProducts(true);
+        });
+
+        if (sc_cacheData && sc_cacheData.products && sc_cacheData.products.length) {
+            // 先秒出缓存内容，再后台更新
+            sc_renderProducts(sc_cacheData.products);
+            sc_status.innerHTML = '已显示本地缓存（<b>' + sc_cacheData.products.length + '</b> 件）· 正在后台更新…';
+            sc_loadProducts(true);
+        } else {
+            sc_loadProducts(false);
+        }
+    </script>
+</body>
+</html>
