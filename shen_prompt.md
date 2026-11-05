@@ -242,9 +242,50 @@
 **模型：** DeepSeek-V4.1-Flash
 **提示词：** 完成17-6.html，使用promise和async完成一部操作的演示包饺子的流程。先买原料（线上线下同时购买，完成任何一个即可进行下一步），取原料，买完原料之后同时和面，和陷，两个活动都完成之后包饺子，包完饺子煮饺子，然后吃饺子。使用settimeout模拟每一个流程，如买原料6s，在页面上显示流程
 ---
-
 ---
 ## 2026-11-02-16-42
+**模型：** DeepSeek-V4.1-Flash
+**提示词：** 将今天的全部提交到github上将本项目commit提交，并push到```https://github.com/shenchang931/shenchang```，已设置公钥
+---
+
+---
+## 2026-11-05-15-34
+**模型：** DeepSeek-V4.1-Flash
+**提示词：** 完成18-1.html和18-2.html，第一个显示canvas动画，包括文字沈畅，第二个显示基于canvas的全站系统的系统架构图（电商系统）
+---
+
+---
+## 2026-11-05-15-49
+**模型：** DeepSeek-V4.1-Flash
+**提示词：** 完成18-3.html，其中包括基于知识库智能客服的系统的系统架构图，图的格式为svg，科研方向。给我做好看一点
+---
+
+---
+## 2026-11-05-15-57
+**模型：** DeepSeek-V4.1-Flash
+**提示词：** 实现18-4.html，其中包括echarts的两个图：`https://echarts.apache.org/examples/zh/editor.html?c=bump-chart``https://echarts.apache.org/examples/zh/editor.html?c=metal-bar3d&gl=1`，cdn文件下载到cdn目录下。
+---
+
+---
+## 2026-11-05-16-18
+**模型：** DeepSeek-V4.1-Flash
+**提示词：** 实现18-6.html，实现基于mermaid的智能客服系统的流程图和er图，cdn文件下载到cdn目录下
+---
+
+---
+## 2026-11-05-16-24
+**模型：** DeepSeek-V4.1-Flash
+**提示词：** 实现18-7.html，实现基于three.js的四个图表，cdn文件下载到cdn目录下
+---
+
+---
+## 2026-11-05-16-32
+**模型：** DeepSeek-V4.1-Flash
+**提示词：** 实现18-8.html，实现基于three.js或echarts的数据大屏，大屏要求：三列，中间那列的上面是某种地理信息的图，cdn文件下载到cdn目录下
+---
+
+---
+## 2026-11-05-16-42
 **模型：** DeepSeek-V4.1-Flash
 **提示词：** 将今天的全部提交到github上将本项目commit提交，并push到```https://github.com/shenchang931/shenchang```，已设置公钥
 ---

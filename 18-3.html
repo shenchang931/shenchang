@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<!-- 姓名：沈畅，日期：2026-11-05，功能名称：基于知识库的智能客服系统架构图（SVG） -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18-3 SVG 知识库智能客服系统架构图</title>
+    <link rel="stylesheet" href="font/iconfont.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            background: #eef2f8;
+            color: #1e293b;
+            line-height: 1.7;
+            padding: 34px 20px 60px;
+        }
+
+        .sc_wrap { max-width: 1200px; margin: 0 auto; }
+
+        /* ---------- 头部 ---------- */
+        .sc_head { margin-bottom: 20px; }
+        .sc_tag {
+            display: inline-flex; align-items: center; gap: 7px;
+            font-size: 13px; color: #1d4ed8; background: #dbeafe;
+            border: 1px solid #bfdbfe; border-radius: 999px;
+            padding: 4px 14px; margin-bottom: 12px;
+        }
+        .sc_head h1 { font-size: 28px; color: #0f172a; margin-bottom: 8px; letter-spacing: .5px; }
+        .sc_head p { font-size: 14.5px; color: #64748b; max-width: 940px; }
+        .sc_head code {
+            font-family: Consolas, Monaco, monospace; font-size: 13px;
+            color: #1d4ed8; background: #dbeafe; border-radius: 4px; padding: 1px 6px;
+        }
+
+        /* ---------- 画布 ---------- */
+        .sc_stage {
+            background: #0a1220;
+            border-radius: 16px;
+            padding: 10px;
+            box-shadow: 0 18px 50px rgba(15, 23, 42, .25);
+        }
+        .sc_stage_inner { overflow-x: auto; border-radius: 10px; }
+
+        #sc_arch_svg { display: block; width: 100%; min-width: 960px; height: auto; }
+
+        /* ---------- 图例 ---------- */
+        .sc_legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-top: 14px;
+            font-size: 12.5px;
+            color: #64748b;
+        }
+        .sc_legend span { display: inline-flex; align-items: center; gap: 6px; }
+        .sc_dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+        /* ---------- 信息条 ---------- */
+        .sc_info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 14px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #2563eb;
+            border-radius: 12px;
+            padding: 12px 18px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, .05);
+            min-height: 58px;
+        }
+        .sc_info_name { font-size: 15px; font-weight: 700; color: #0f172a; white-space: nowrap; }
+        .sc_info_layer {
+            font-size: 12px; color: #1d4ed8; background: #eff6ff;
+            border-radius: 5px; padding: 1px 8px; white-space: nowrap;
+        }
+        .sc_info_desc { font-size: 13.5px; color: #64748b; }
+
+        /* ---------- 卡片 ---------- */
+        .sc_grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1.05fr;
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .sc_card {
+            background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px;
+            padding: 18px; box-shadow: 0 8px 24px rgba(15, 23, 42, .05);
+        }
+        .sc_card h2 {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 15px; color: #0f172a; margin-bottom: 12px; font-weight: 700;
+        }
+        .sc_card h2 .iconfont { color: #2563eb; font-size: 15px; }
+
+        .sc_notes { list-style: none; font-size: 13.5px; }
+        .sc_notes li { position: relative; padding: 5px 0 5px 18px; color: #475569; }
+        .sc_notes li::before { content: "•"; position: absolute; left: 4px; color: #2563eb; }
+        .sc_notes code {
+            font-family: Consolas, Monaco, monospace; font-size: 12.5px;
+            color: #1d4ed8; background: #eff6ff; border-radius: 4px; padding: 1px 5px;
+        }
+
+        .sc_code {
+            background: #0f172a; border-radius: 10px; padding: 14px 16px; overflow: auto;
+            font-family: Consolas, Monaco, "Courier New", monospace; font-size: 12.4px;
+            line-height: 1.75; color: #e2e8f0; white-space: pre; max-height: 330px;
+        }
+        .sc_c_kw { color: #93c5fd; }
+        .sc_c_fn { color: #fde68a; }
+        .sc_c_str { color: #86efac; }
+        .sc_c_attr { color: #c4b5fd; }
+        .sc_c_cm { color: #64748b; font-style: italic; }
+
+        /* ---------- SVG 内部样式 ---------- */
+        .sc_band { fill: rgba(148, 163, 184, 0.045); stroke: rgba(148, 163, 184, 0.10); stroke-width: 1; }
+        .sc_band_name { font-weight: 700; font-size: 13px; fill: currentColor; }
+        .sc_band_sub { font-size: 9px; fill: rgba(148, 163, 184, 0.55); letter-spacing: 1.6px; }
+
+        .sc_node { cursor: pointer; }
+        .sc_nbox { fill: rgba(19, 28, 46, 0.94); stroke: rgba(148, 163, 184, 0.22); stroke-width: 1; transition: stroke .2s, fill .2s; }
+        .sc_nbar { fill: currentColor; opacity: .9; }
+        .sc_ntitle { font-size: 12.5px; font-weight: 700; fill: #e8eefc; text-anchor: middle; }
+        .sc_nsub { font-size: 9.5px; fill: rgba(148, 163, 184, 0.92); text-anchor: middle; }
+
+        .sc_node.sc_hot .sc_nbox {
+            fill: rgba(30, 41, 59, 0.98);
+            stroke: currentColor;
+            stroke-width: 1.6;
+            filter: drop-shadow(0 0 9px rgba(147, 197, 253, 0.45));
+        }
+        .sc_node.sc_hot .sc_nsub { fill: #cbd5e1; }
+        .sc_node.sc_faded { opacity: .28; }
+
+        .sc_edge { fill: none; stroke: rgba(148, 163, 184, 0.32); stroke-width: 1.2; transition: stroke .2s, opacity .2s; }
+        .sc_edge.sc_hot { stroke: rgba(147, 197, 253, 0.95); stroke-width: 1.8; }
+        .sc_edge.sc_faded { opacity: .12; }
+        .sc_loop_edge { fill: none; stroke: rgba(236, 72, 153, 0.45); stroke-width: 1.2; stroke-dasharray: 7 5; }
+        .sc_loop_edge.sc_hot { stroke: rgba(244, 114, 182, 0.95); }
+
+        .sc_flow { fill: #7dd3fc; opacity: .85; }
+
+        .sc_chip { cursor: pointer; }
+        .sc_chip rect { fill: rgba(255, 255, 255, 0.035); stroke: rgba(148, 163, 184, 0.20); stroke-width: 1; transition: stroke .2s, fill .2s; }
+        .sc_chip text { font-size: 11px; fill: #cbd5e1; text-anchor: middle; }
+        .sc_chip.sc_hot rect { fill: rgba(236, 72, 153, 0.14); stroke: rgba(244, 114, 182, 0.9); }
+
+        .sc_title { font-size: 20px; font-weight: 700; fill: #e9edff; text-anchor: middle; letter-spacing: 2px; }
+        .sc_title_sub { font-size: 10.5px; fill: rgba(148, 163, 184, 0.75); text-anchor: middle; letter-spacing: 1.4px; }
+        .sc_label { font-size: 12px; fill: rgba(148, 163, 184, 0.8); }
+        .sc_caption { font-size: 11.5px; fill: rgba(148, 163, 184, 0.65); }
+
+        @media (max-width: 980px) {
+            .sc_grid { grid-template-columns: 1fr; }
+            .sc_head h1 { font-size: 22px; }
+            .sc_info { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sc_wrap">
+        <header class="sc_head">
+            <span class="sc_tag"><i class="iconfont icon-shoucang"></i> 18-3 SVG 架构图</span>
+            <h1>知识库智能客服系统架构 · 沈畅</h1>
+            <p>
+                面向科研的「知识库 + 大模型」智能客服系统：从多渠道接入与意图理解，到知识库构建、混合召回与重排，
+                再交给大模型生成答案并做引用溯源，最后通过评测与反馈闭环持续优化。
+                整张图使用 <code>SVG</code> 手工绘制，支持节点悬停高亮、关联连线联动与研究热点说明。
+            </p>
+        </header>
+
+        <section class="sc_stage">
+            <div class="sc_stage_inner">
+                <svg id="sc_arch_svg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid meet" role="img"
+                     aria-label="基于知识库的智能客服系统架构图">
+                    <defs>
+                        <linearGradient id="sc_bg" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0" stop-color="#0a1220"/>
+                            <stop offset="0.5" stop-color="#0d1930"/>
+                            <stop offset="1" stop-color="#0a1120"/>
+                        </linearGradient>
+                        <pattern id="sc_grid" width="28" height="28" patternUnits="userSpaceOnUse">
+                            <path d="M28,0 L0,0 L0,28" fill="none" stroke="rgba(148,163,184,0.055)" stroke-width="1"/>
+                        </pattern>
+                        <radialGradient id="sc_glow_a" cx="0.14" cy="0.06" r="0.55">
+                            <stop offset="0" stop-color="rgba(59,130,246,0.20)"/>
+                            <stop offset="1" stop-color="rgba(59,130,246,0)"/>
+                        </radialGradient>
+                        <radialGradient id="sc_glow_b" cx="0.86" cy="0.12" r="0.55">
+                            <stop offset="0" stop-color="rgba(139,92,246,0.20)"/>
+                            <stop offset="1" stop-color="rgba(139,92,246,0)"/>
+                        </radialGradient>
+                        <marker id="sc_arrow" viewBox="0 0 6 6" refX="5" refY="3"
+                                markerWidth="6" markerHeight="6" orient="auto">
+                            <path d="M0,0 L6,3 L0,6 Z" fill="rgba(148,163,184,0.62)"/>
+                        </marker>
+                        <marker id="sc_arrow_hot" viewBox="0 0 6 6" refX="5" refY="3"
+                                markerWidth="6" markerHeight="6" orient="auto">
+                            <path d="M0,0 L6,3 L0,6 Z" fill="rgba(147,197,253,0.95)"/>
+                        </marker>
+                        <marker id="sc_arrow_loop" viewBox="0 0 6 6" refX="5" refY="3"
+                                markerWidth="6" markerHeight="6" orient="auto">
+                            <path d="M0,0 L6,3 L0,6 Z" fill="rgba(244,114,182,0.9)"/>
+                        </marker>
+                    </defs>
+
+                    <!-- 背景 -->
+                    <rect width="1200" height="800" fill="url(#sc_bg)"/>
+                    <rect width="1200" height="800" fill="url(#sc_glow_a)"/>
+                    <rect width="1200" height="800" fill="url(#sc_glow_b)"/>
+                    <rect width="1200" height="800" fill="url(#sc_grid)"/>
+
+                    <!-- 标题 -->
+                    <text class="sc_title" x="600" y="45">基于知识库的智能客服系统架构</text>
+                    <text class="sc_title_sub" x="600" y="67">KNOWLEDGE-BASE ENABLED INTELLIGENT CUSTOMER SERVICE · SYSTEM ARCHITECTURE</text>
+                    <line x1="40" y1="82" x2="1160" y2="82" stroke="rgba(148,163,184,0.16)" stroke-width="1"/>
+
+                    <!-- 分层色带 -->
+                    <g style="color:#3b82f6">
+                        <rect class="sc_band" x="28" y="96" width="204" height="524" rx="14"/>
+                        <circle cx="56" cy="118" r="3.5" fill="currentColor"/>
+                        <text class="sc_band_name" x="68" y="123">用户与渠道</text>
+                        <text class="sc_band_sub" x="68" y="139">CHANNEL</text>
+                    </g>
+                    <g style="color:#0ea5e9">
+                        <rect class="sc_band" x="244" y="96" width="204" height="524" rx="14"/>
+                        <circle cx="272" cy="118" r="3.5" fill="currentColor"/>
+                        <text class="sc_band_name" x="284" y="123">接入与理解</text>
+                        <text class="sc_band_sub" x="284" y="139">ACCESS &amp; NLU</text>
+                    </g>
+                    <g style="color:#8b5cf6">
+                        <rect class="sc_band" x="460" y="96" width="234" height="524" rx="14"/>
+                        <circle cx="488" cy="118" r="3.5" fill="currentColor"/>
+                        <text class="sc_band_name" x="500" y="123">知识库与检索</text>
+                        <text class="sc_band_sub" x="500" y="139">KNOWLEDGE &amp; RETRIEVAL</text>
+                    </g>
+                    <g style="color:#14b8a6">
+                        <rect class="sc_band" x="706" y="96" width="214" height="524" rx="14"/>
+                        <circle cx="734" cy="118" r="3.5" fill="currentColor"/>
+                        <text class="sc_band_name" x="746" y="123">生成与对话</text>
+                        <text class="sc_band_sub" x="746" y="139">GENERATION &amp; DIALOGUE</text>
+                    </g>
+                    <g style="color:#f59e0b">
+                        <rect class="sc_band" x="932" y="96" width="224" height="524" rx="14"/>
+                        <circle cx="960" cy="118" r="3.5" fill="currentColor"/>
+                        <text class="sc_band_name" x="972" y="123">评测与科研</text>
+                        <text class="sc_band_sub" x="972" y="139">EVALUATION &amp; RESEARCH</text>
+                    </g>
+
+                    <!-- 模块节点 -->
+                    <!-- 用户与渠道层 -->
+                    <g class="sc_node" data-id="web" data-layer="channel" style="color:#3b82f6" transform="translate(40,156)">
+                        <rect class="sc_nbox" width="180" height="76" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="10" width="3" height="56" rx="1.5"/>
+                        <text class="sc_ntitle" x="90" y="33">Web 在线客服</text>
+                        <text class="sc_nsub" x="90" y="51">网页聊天 / 悬浮组件</text>
+                    </g>
+                    <g class="sc_node" data-id="app" data-layer="channel" style="color:#3b82f6" transform="translate(40,264)">
+                        <rect class="sc_nbox" width="180" height="76" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="10" width="3" height="56" rx="1.5"/>
+                        <text class="sc_ntitle" x="90" y="33">App / 小程序</text>
+                        <text class="sc_nsub" x="90" y="51">移动端 SDK 与 H5</text>
+                    </g>
+                    <g class="sc_node" data-id="wx" data-layer="channel" style="color:#3b82f6" transform="translate(40,372)">
+                        <rect class="sc_nbox" width="180" height="76" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="10" width="3" height="56" rx="1.5"/>
+                        <text class="sc_ntitle" x="90" y="33">微信 / 企业微信</text>
+                        <text class="sc_nsub" x="90" y="51">公众号 · 社交渠道</text>
+                    </g>
+                    <g class="sc_node" data-id="voice" data-layer="channel" style="color:#3b82f6" transform="translate(40,480)">
+                        <rect class="sc_nbox" width="180" height="76" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="10" width="3" height="56" rx="1.5"/>
+                        <text class="sc_ntitle" x="90" y="33">电话语音 / IVR</text>
+                        <text class="sc_nsub" x="90" y="51">呼叫中心 · 语音菜单</text>
+                    </g>
+
+                    <!-- 接入与理解层 -->
+                    <g class="sc_node" data-id="gateway" data-layer="access" style="color:#0ea5e9" transform="translate(256,156)">
+                        <rect class="sc_nbox" width="180" height="64" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="8" width="3" height="48" rx="1.5"/>
+                        <text class="sc_ntitle" x="90" y="27">渠道接入网关</text>
+                        <text class="sc_nsub" x="90" y="45">统一消息协议 · 鉴权限流</text>
+                    </g>
+                    <g class="sc_node" data-id="asr" data-layer="access" style="color:#0ea5e9" transform="translate(256,234)">
+                        <rect class="sc_nbox" width="180" height="64" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="8" width="3" height="48" rx="1.5"/>
+                        <text class="sc_ntitle" x="90" y="27">ASR / TTS</text>
+                        <text class="sc_nsub" x="90" y="45">语音转写与语音合成</text>
+                    </g>
+                    <g class="sc_node" data-id="intent" data-layer="access" style="color:#0ea5e9" transform="translate(256,312)">
+                        <rect class="sc_nbox" width="180" height="64" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="8" width="3" height="48" rx="1.5"/>
+                        <text class="sc_ntitle" x="90" y="27">意图识别</text>
+                        <text class="sc_nsub" x="90" y="45">小样本分类 · 技能路由</text>
+                    </g>
+                    <g class="sc_node" data-id="slot" data-layer="access" style="color:#0ea5e9" transform="translate(256,390)">
+                        <rect class="sc_nbox" width="180" height="64" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="8" width="3" height="48" rx="1.5"/>
+                        <text class="sc_ntitle" x="90" y="27">实体抽取 / 槽位</text>
+                        <text class="sc_nsub" x="90" y="45">NER · 槽位填充</text>
+                    </g>
+                    <g class="sc_node" data-id="rewrite" data-layer="access" style="color:#0ea5e9" transform="translate(256,468)">
+                        <rect class="sc_nbox" width="180" height="64" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="8" width="3" height="48" rx="1.5"/>
+                        <text class="sc_ntitle" x="90" y="27">Query 改写</text>
+                        <text class="sc_nsub" x="90" y="45">纠错 · 补全 · 同义扩展</text>
+                    </g>
+
+                    <!-- 知识库与检索层 -->
+                    <g class="sc_node" data-id="source" data-layer="knowledge" style="color:#8b5cf6" transform="translate(472,150)">
+                        <rect class="sc_nbox" width="210" height="60" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="8" width="3" height="44" rx="1.5"/>
+                        <text class="sc_ntitle" x="105" y="25">知识源</text>
+                        <text class="sc_nsub" x="105" y="43">FAQ · 文档 · 历史工单</text>
+                    </g>
+                    <g class="sc_node" data-id="parse" data-layer="knowledge" style="color:#8b5cf6" transform="translate(472,226)">
+                        <rect class="sc_nbox" width="210" height="60" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="8" width="3" height="44" rx="1.5"/>
+                        <text class="sc_ntitle" x="105" y="25">文档解析与切分</text>
+                        <text class="sc_nsub" x="105" y="43">PDF / Word / HTML → chunk</text>
+                    </g>
+                    <g class="sc_node" data-id="embed" data-layer="knowledge" style="color:#8b5cf6" transform="translate(472,302)">
+                        <rect class="sc_nbox" width="210" height="60" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="8" width="3" height="44" rx="1.5"/>
+                        <text class="sc_ntitle" x="105" y="25">向量化 Embedding</text>
+                        <text class="sc_nsub" x="105" y="43">BGE / m3e 语义编码</text>
+                    </g>
+                    <g class="sc_node" data-id="index" data-layer="knowledge" style="color:#8b5cf6" transform="translate(472,378)">
+                        <rect class="sc_nbox" width="210" height="60" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="8" width="3" height="44" rx="1.5"/>
+                        <text class="sc_ntitle" x="105" y="25">向量索引</text>
+                        <text class="sc_nsub" x="105" y="43">HNSW · IVF 近邻检索</text>
+                    </g>
+                    <g class="sc_node" data-id="recall" data-layer="knowledge" style="color:#8b5cf6" transform="translate(472,454)">
+                        <rect class="sc_nbox" width="210" height="60" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="8" width="3" height="44" rx="1.5"/>
+                        <text class="sc_ntitle" x="105" y="25">混合召回</text>
+                        <text class="sc_nsub" x="105" y="43">BM25 + 稠密向量</text>
+                    </g>
+                    <g class="sc_node" data-id="rerank" data-layer="knowledge" style="color:#8b5cf6" transform="translate(472,530)">
+                        <rect class="sc_nbox" width="210" height="60" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="8" width="3" height="44" rx="1.5"/>
+                        <text class="sc_ntitle" x="105" y="25">重排 Rerank</text>
+                        <text class="sc_nsub" x="105" y="43">Cross-Encoder 精排 Top-K</text>
+                    </g>
+
+                    <!-- 生成与对话层 -->
+                    <g class="sc_node" data-id="prompt" data-layer="gen" style="color:#14b8a6" transform="translate(718,156)">
+                        <rect class="sc_nbox" width="190" height="64" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="8" width="3" height="48" rx="1.5"/>
+                        <text class="sc_ntitle" x="95" y="27">Prompt 编排</text>
+                        <text class="sc_nsub" x="95" y="45">上下文拼装 · 模板约束</text>
+                    </g>
+                    <g class="sc_node" data-id="llm" data-layer="gen" style="color:#14b8a6" transform="translate(718,234)">
+                        <rect class="sc_nbox" width="190" height="64" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="8" width="3" height="48" rx="1.5"/>
+                        <text class="sc_ntitle" x="95" y="27">LLM 大模型</text>
+                        <text class="sc_nsub" x="95" y="45">流式生成 · 多模型热备</text>
+                    </g>
+                    <g class="sc_node" data-id="cite" data-layer="gen" style="color:#14b8a6" transform="translate(718,312)">
+                        <rect class="sc_nbox" width="190" height="64" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="8" width="3" height="48" rx="1.5"/>
+                        <text class="sc_ntitle" x="95" y="27">引用溯源</text>
+                        <text class="sc_nsub" x="95" y="45">幻觉抑制 · 证据标注</text>
+                    </g>
+                    <g class="sc_node" data-id="dst" data-layer="gen" style="color:#14b8a6" transform="translate(718,390)">
+                        <rect class="sc_nbox" width="190" height="64" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="8" width="3" height="48" rx="1.5"/>
+                        <text class="sc_ntitle" x="95" y="27">对话状态跟踪</text>
+                        <text class="sc_nsub" x="95" y="45">多轮记忆 · 上下文压缩</text>
+                    </g>
+                    <g class="sc_node" data-id="human" data-layer="gen" style="color:#14b8a6" transform="translate(718,468)">
+                        <rect class="sc_nbox" width="190" height="64" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="8" width="3" height="48" rx="1.5"/>
+                        <text class="sc_ntitle" x="95" y="27">转人工 / 工单</text>
+                        <text class="sc_nsub" x="95" y="45">坐席协同 · 会话移交</text>
+                    </g>
+
+                    <!-- 评测与科研层 -->
+                    <g class="sc_node" data-id="feedback" data-layer="eval" style="color:#f59e0b" transform="translate(944,156)">
+                        <rect class="sc_nbox" width="200" height="64" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="8" width="3" height="48" rx="1.5"/>
+                        <text class="sc_ntitle" x="100" y="27">用户反馈采集</text>
+                        <text class="sc_nsub" x="100" y="45">点赞 · 纠错 · 满意度</text>
+                    </g>
+                    <g class="sc_node" data-id="evalset" data-layer="eval" style="color:#f59e0b" transform="translate(944,234)">
+                        <rect class="sc_nbox" width="200" height="64" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="8" width="3" height="48" rx="1.5"/>
+                        <text class="sc_ntitle" x="100" y="27">离线评测集</text>
+                        <text class="sc_nsub" x="100" y="45">基准构建 · 标注规范</text>
+                    </g>
+                    <g class="sc_node" data-id="metric" data-layer="eval" style="color:#f59e0b" transform="translate(944,312)">
+                        <rect class="sc_nbox" width="200" height="64" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="8" width="3" height="48" rx="1.5"/>
+                        <text class="sc_ntitle" x="100" y="27">检索指标</text>
+                        <text class="sc_nsub" x="100" y="45">Recall@K · nDCG · MRR</text>
+                    </g>
+                    <g class="sc_node" data-id="abtest" data-layer="eval" style="color:#f59e0b" transform="translate(944,390)">
+                        <rect class="sc_nbox" width="200" height="64" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="8" width="3" height="48" rx="1.5"/>
+                        <text class="sc_ntitle" x="100" y="27">在线 A/B 实验</text>
+                        <text class="sc_nsub" x="100" y="45">灰度发布 · 显著性检验</text>
+                    </g>
+                    <g class="sc_node" data-id="loop" data-layer="eval" style="color:#f59e0b" transform="translate(944,468)">
+                        <rect class="sc_nbox" width="200" height="64" rx="10"/>
+                        <rect class="sc_nbar" x="1" y="8" width="3" height="48" rx="1.5"/>
+                        <text class="sc_ntitle" x="100" y="27">知识闭环更新</text>
+                        <text class="sc_nsub" x="100" y="45">增量索引 · 知识重建</text>
+                    </g>
+
+                    <!-- 连线 -->
+                    <path id="sc_e1" class="sc_edge" data-from="web" data-to="gateway" marker-end="url(#sc_arrow)"
+                          d="M220,194 C246,194 234,188 254,188"/>
+                    <path id="sc_e2" class="sc_edge" data-from="app" data-to="gateway" marker-end="url(#sc_arrow)"
+                          d="M220,302 C242,302 234,188 254,188"/>
+                    <path id="sc_e3" class="sc_edge" data-from="wx" data-to="gateway" marker-end="url(#sc_arrow)"
+                          d="M220,410 C242,410 238,188 254,188"/>
+                    <path id="sc_e4" class="sc_edge" data-from="voice" data-to="asr" marker-end="url(#sc_arrow)"
+                          d="M220,518 C242,518 236,266 254,266"/>
+
+                    <path id="sc_e5" class="sc_edge" data-from="gateway" data-to="intent" marker-end="url(#sc_arrow)"
+                          d="M330,220 L330,310"/>
+                    <path id="sc_e6" class="sc_edge" data-from="asr" data-to="intent" marker-end="url(#sc_arrow)"
+                          d="M362,298 L362,310"/>
+                    <path id="sc_e7" class="sc_edge" data-from="intent" data-to="slot" marker-end="url(#sc_arrow)"
+                          d="M346,376 L346,388"/>
+                    <path id="sc_e8" class="sc_edge" data-from="slot" data-to="rewrite" marker-end="url(#sc_arrow)"
+                          d="M346,454 L346,466"/>
+                    <path id="sc_e9" class="sc_edge" data-from="rewrite" data-to="recall" marker-end="url(#sc_arrow)"
+                          d="M436,500 C456,500 452,484 470,484"/>
+
+                    <path id="sc_e10" class="sc_edge" data-from="source" data-to="parse" marker-end="url(#sc_arrow)"
+                          d="M577,210 L577,224"/>
+                    <path id="sc_e11" class="sc_edge" data-from="parse" data-to="embed" marker-end="url(#sc_arrow)"
+                          d="M577,286 L577,300"/>
+                    <path id="sc_e12" class="sc_edge" data-from="embed" data-to="index" marker-end="url(#sc_arrow)"
+                          d="M577,362 L577,376"/>
+                    <path id="sc_e13" class="sc_edge" data-from="index" data-to="recall" marker-end="url(#sc_arrow)"
+                          d="M577,438 L577,452"/>
+                    <path id="sc_e14" class="sc_edge" data-from="recall" data-to="rerank" marker-end="url(#sc_arrow)"
+                          d="M577,514 L577,528"/>
+
+                    <path id="sc_e15" class="sc_edge" data-from="rerank" data-to="prompt" marker-end="url(#sc_arrow)"
+                          d="M682,560 C702,560 702,188 716,188"/>
+                    <path id="sc_e16" class="sc_edge" data-from="prompt" data-to="llm" marker-end="url(#sc_arrow)"
+                          d="M813,220 L813,232"/>
+                    <path id="sc_e17" class="sc_edge" data-from="llm" data-to="cite" marker-end="url(#sc_arrow)"
+                          d="M813,298 L813,310"/>
+                    <path id="sc_e18" class="sc_edge" data-from="cite" data-to="dst" marker-end="url(#sc_arrow)"
+                          d="M813,376 L813,388"/>
+                    <path id="sc_e19" class="sc_edge" data-from="dst" data-to="human" marker-end="url(#sc_arrow)"
+                          d="M813,454 L813,466"/>
+
+                    <path id="sc_e20" class="sc_edge" data-from="human" data-to="feedback" marker-end="url(#sc_arrow)"
+                          d="M908,500 C930,500 930,188 942,188"/>
+                    <path id="sc_e21" class="sc_edge" data-from="feedback" data-to="evalset" marker-end="url(#sc_arrow)"
+                          d="M1044,220 L1044,232"/>
+                    <path id="sc_e22" class="sc_edge" data-from="evalset" data-to="metric" marker-end="url(#sc_arrow)"
+                          d="M1044,298 L1044,310"/>
+                    <path id="sc_e23" class="sc_edge" data-from="metric" data-to="abtest" marker-end="url(#sc_arrow)"
+                          d="M1044,376 L1044,388"/>
+                    <path id="sc_e24" class="sc_edge" data-from="abtest" data-to="loop" marker-end="url(#sc_arrow)"
+                          d="M1044,454 L1044,466"/>
+
+                    <!-- 反馈闭环（虚线回流） -->
+                    <path id="sc_e25" class="sc_loop_edge" data-from="loop" data-to="source"
+                          marker-end="url(#sc_arrow_loop)"
+                          d="M1044,532 L1044,626 C1044,648 1022,648 1000,648 L582,648"/>
+                    <text class="sc_label" x="812" y="638" text-anchor="middle"
+                          style="fill:rgba(244,114,182,.62);font-size:10.5px">反馈驱动知识闭环 · 知识重建 → 索引更新</text>
+
+                    <!-- 流动光点 -->
+                    <circle class="sc_flow" r="2.4">
+                        <animateMotion dur="3.4s" repeatCount="indefinite"><mpath href="#sc_e1"/></animateMotion>
+                    </circle>
+                    <circle class="sc_flow" r="2.4">
+                        <animateMotion dur="3.8s" begin="0.6s" repeatCount="indefinite"><mpath href="#sc_e4"/></animateMotion>
+                    </circle>
+                    <circle class="sc_flow" r="2.4">
+                        <animateMotion dur="2.4s" repeatCount="indefinite"><mpath href="#sc_e5"/></animateMotion>
+                    </circle>
+                    <circle class="sc_flow" r="2.4">
+                        <animateMotion dur="3.2s" begin="0.4s" repeatCount="indefinite"><mpath href="#sc_e13"/></animateMotion>
+                    </circle>
+                    <circle class="sc_flow" r="2.4">
+                        <animateMotion dur="3.6s" begin="0.9s" repeatCount="indefinite"><mpath href="#sc_e9"/></animateMotion>
+                    </circle>
+                    <circle class="sc_flow" r="2.4">
+                        <animateMotion dur="4.2s" repeatCount="indefinite"><mpath href="#sc_e15"/></animateMotion>
+                    </circle>
+                    <circle class="sc_flow" r="2.4">
+                        <animateMotion dur="3.2s" begin="0.5s" repeatCount="indefinite"><mpath href="#sc_e17"/></animateMotion>
+                    </circle>
+                    <circle class="sc_flow" r="2.4" fill="#f9a8d4">
+                        <animateMotion dur="5s" begin="1.2s" repeatCount="indefinite"><mpath href="#sc_e25"/></animateMotion>
+                    </circle>
+
+                    <!-- 研究热点 -->
+                    <g style="color:#ec4899">
+                        <rect x="28" y="676" width="1144" height="64" rx="14"
+                              fill="rgba(236,72,153,0.045)" stroke="rgba(236,72,153,0.20)" stroke-width="1"/>
+                        <text class="sc_label" x="52" y="714" style="fill:#f472b6;font-weight:700">研究热点</text>
+                    </g>
+                    <g class="sc_chip" data-id="rag" data-layer="research" transform="translate(148,692)">
+                        <rect width="150" height="30" rx="8"/>
+                        <text x="75" y="19">检索增强生成 RAG</text>
+                    </g>
+                    <g class="sc_chip" data-id="fusion" data-layer="research" transform="translate(306,692)">
+                        <rect width="136" height="30" rx="8"/>
+                        <text x="68" y="19">多路召回与重排融合</text>
+                    </g>
+                    <g class="sc_chip" data-id="kg" data-layer="research" transform="translate(450,692)">
+                        <rect width="116" height="30" rx="8"/>
+                        <text x="58" y="19">知识图谱增强</text>
+                    </g>
+                    <g class="sc_chip" data-id="fsl" data-layer="research" transform="translate(574,692)">
+                        <rect width="130" height="30" rx="8"/>
+                        <text x="65" y="19">小样本意图识别</text>
+                    </g>
+                    <g class="sc_chip" data-id="faith" data-layer="research" transform="translate(712,692)">
+                        <rect width="130" height="30" rx="8"/>
+                        <text x="65" y="19">幻觉抑制与溯源</text>
+                    </g>
+                    <g class="sc_chip" data-id="dsttopic" data-layer="research" transform="translate(850,692)">
+                        <rect width="138" height="30" rx="8"/>
+                        <text x="69" y="19">多轮对话状态跟踪</text>
+                    </g>
+                    <g class="sc_chip" data-id="bench" data-layer="research" transform="translate(996,692)">
+                        <rect width="146" height="30" rx="8"/>
+                        <text x="73" y="19">评测基准与可解释性</text>
+                    </g>
+
+                    <!-- 图注 -->
+                    <text class="sc_caption" x="40" y="786">图 1　基于知识库的智能客服系统总体架构（RAG 检索增强范式）</text>
+                    <text class="sc_caption" x="1160" y="786" text-anchor="end">沈畅 · 高级网页设计 · SVG 手工绘制</text>
+                </svg>
+            </div>
+        </section>
+
+        <div class="sc_legend">
+            <span><i class="sc_dot" style="background:#3b82f6"></i> 用户与渠道</span>
+            <span><i class="sc_dot" style="background:#0ea5e9"></i> 接入与理解</span>
+            <span><i class="sc_dot" style="background:#8b5cf6"></i> 知识库与检索</span>
+            <span><i class="sc_dot" style="background:#14b8a6"></i> 生成与对话</span>
+            <span><i class="sc_dot" style="background:#f59e0b"></i> 评测与科研</span>
+            <span><i class="sc_dot" style="background:#ec4899"></i> 研究热点</span>
+        </div>
+
+        <div class="sc_info" id="sc_info">
+            <span class="sc_info_name" id="sc_info_name">—</span>
+            <span class="sc_info_layer" id="sc_info_layer">提示</span>
+            <span class="sc_info_desc" id="sc_info_desc">将鼠标移到任意模块或研究热词上，查看它的职责与关键说明。</span>
+        </div>
+
+        <section class="sc_grid">
+            <div class="sc_card">
+                <h2><i class="iconfont icon-bangzhu"></i> 架构说明</h2>
+                <ul class="sc_notes">
+                    <li>多渠道消息统一进入 <code>接入网关</code>，语音渠道先经 <code>ASR</code> 转写为文本，与文本渠道共用同一条对话链路。</li>
+                    <li>用户问题先做 <code>意图识别</code> 与 <code>实体抽取</code>，再通过 <code>Query 改写</code> 扩展同义词，提升召回覆盖率。</li>
+                    <li>知识库侧由文档解析、语义切分、<code>Embedding</code> 编码与向量索引构成，是整条 RAG 链路的数据底座。</li>
+                    <li>召回采用 <code>BM25 + 稠密向量</code> 双路并行，再经 <code>Cross-Encoder</code> 重排，把高相关证据送入提示词。</li>
+                    <li>大模型基于证据生成答案，输出必须附 <code>引用来源</code> 与置信度，低置信度或高情绪会话转人工并回流工单。</li>
+                </ul>
+            </div>
+
+            <div class="sc_card">
+                <h2><i class="iconfont icon-fenlei"></i> 科研方向与研究点</h2>
+                <ul class="sc_notes">
+                    <li><code>RAG</code>：外挂知识库约束生成，缓解大模型的事实性错误与知识滞后。</li>
+                    <li><code>多路召回融合</code>：稀疏与稠密召回互补，研究加权融合与重排策略。</li>
+                    <li><code>知识图谱增强</code>：用实体关系补足长尾事实，支撑多跳问答与推理。</li>
+                    <li><code>幻觉抑制与可解释性</code>：证据引用、答案校验与置信度估计。</li>
+                    <li><code>评测基准</code>：构建领域评测集，结合自动指标与人工评分综合评估。</li>
+                </ul>
+            </div>
+
+            <div class="sc_card">
+                <h2><i class="iconfont icon-yijianfankui"></i> SVG 绘制要点</h2>
+                <pre class="sc_code"><span class="sc_c_cm">// 每个模块是一个 g，内部用相对坐标</span>
+<span class="sc_c_kw">&lt;g</span> <span class="sc_c_attr">class</span>=<span class="sc_c_str">"sc_node"</span> <span class="sc_c_attr">data-id</span>=<span class="sc_c_str">"recall"</span>
+   <span class="sc_c_attr">data-layer</span>=<span class="sc_c_str">"knowledge"</span>
+   <span class="sc_c_attr">transform</span>=<span class="sc_c_str">"translate(472,454)"</span><span class="sc_c_kw">&gt;</span>
+  <span class="sc_c_kw">&lt;rect</span> <span class="sc_c_attr">class</span>=<span class="sc_c_str">"sc_nbox"</span> <span class="sc_c_attr">width</span>=<span class="sc_c_str">"210"</span> <span class="sc_c_attr">height</span>=<span class="sc_c_str">"60"</span> <span class="sc_c_attr">rx</span>=<span class="sc_c_str">"10"</span><span class="sc_c_kw">/&gt;</span>
+  <span class="sc_c_kw">&lt;text</span> <span class="sc_c_attr">class</span>=<span class="sc_c_str">"sc_ntitle"</span> <span class="sc_c_attr">x</span>=<span class="sc_c_str">"105"</span> <span class="sc_c_attr">y</span>=<span class="sc_c_str">"25"</span><span class="sc_c_kw">&gt;</span>混合召回<span class="sc_c_kw">&lt;/text&gt;</span>
+<span class="sc_c_kw">&lt;/g&gt;</span>
+
+<span class="sc_c_cm">// 悬停时高亮该节点与它的所有连线</span>
+node.<span class="sc_c_fn">addEventListener</span>(<span class="sc_c_str">'mouseenter'</span>, () =&gt; {
+  edges.<span class="sc_c_fn">forEach</span>(e =&gt; {
+    <span class="sc_c_kw">const</span> hit = e.dataset.from === id
+             || e.dataset.to === id;
+    e.classList.<span class="sc_c_fn">toggle</span>(<span class="sc_c_str">'sc_hot'</span>, hit);
+  });
+});</pre>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        var sc_nodes = document.querySelectorAll('.sc_node');
+        var sc_chips = document.querySelectorAll('.sc_chip');
+        var sc_edges = document.querySelectorAll('.sc_edge, .sc_loop_edge');
+        var sc_infoName = document.getElementById('sc_info_name');
+        var sc_infoLayer = document.getElementById('sc_info_layer');
+        var sc_infoDesc = document.getElementById('sc_info_desc');
+
+        var sc_layerNames = {
+            channel: '用户与渠道',
+            access: '接入与理解',
+            knowledge: '知识库与检索',
+            gen: '生成与对话',
+            eval: '评测与科研',
+            research: '研究热点'
+        };
+
+        var sc_colors = {
+            channel: '#3b82f6',
+            access: '#0ea5e9',
+            knowledge: '#8b5cf6',
+            gen: '#14b8a6',
+            eval: '#f59e0b',
+            research: '#ec4899'
+        };
+
+        // 每个模块的职责说明
+        var sc_desc = {
+            web: '网页端在线客服入口，承载售前咨询、订单查询等高频会话。',
+            app: 'App 与小程序内置的客服 SDK，与后端共用同一套会话协议。',
+            wx: '微信公众号与企业微信渠道，支持消息推送、菜单交互与人工接入。',
+            voice: '电话语音与 IVR 菜单，先经语音识别转写后进入文本对话链路。',
+            gateway: '统一接入各渠道消息，完成鉴权、限流、会话路由与协议转换。',
+            asr: '语音转写与语音合成，让语音渠道复用文本客服的全部能力。',
+            intent: '识别用户意图并路由到对应知识域或技能，小样本模型适配长尾意图。',
+            slot: '抽取订单号、商品、时间等实体，补齐任务型对话所需的槽位。',
+            rewrite: '对口语化提问做纠错、补全与同义扩展，提升知识召回覆盖率。',
+            source: '结构化 FAQ、产品文档与历史工单，构成系统的知识底座。',
+            parse: '解析多种格式文档并按语义切分成可检索的知识片段。',
+            embed: '把知识片段与用户问题编码成向量，支撑语义相似度检索。',
+            index: '向量索引支撑毫秒级近邻检索，并支持增量更新与重建。',
+            recall: '关键词 BM25 与稠密向量双路召回，兼顾精确匹配与语义泛化。',
+            rerank: '对召回候选做交叉编码精排，输出高相关证据集合供生成使用。',
+            prompt: '把问题、对话历史与检索证据组织成结构化提示词。',
+            llm: '大模型基于证据生成答案，支持流式输出与多模型兜底切换。',
+            cite: '答案附带引用来源与置信度，抑制幻觉并支持人工复核。',
+            dst: '维护多轮对话状态与用户画像，处理指代、省略与话题切换。',
+            human: '低置信度或高情绪会话转人工，生成工单并把数据回流。',
+            feedback: '收集点赞、纠错与满意度评分，沉淀为可用的标注数据。',
+            evalset: '构建领域评测集与标注规范，为模型和检索策略提供统一标尺。',
+            metric: '用 Recall@K、NDCG、MRR 等指标量化检索与排序效果。',
+            abtest: '线上分流对比新旧策略，用统计显著性决定是否全量发布。',
+            loop: '反馈数据驱动知识重建与索引更新，形成持续优化的闭环。',
+            rag: '外挂知识库约束大模型生成，缓解事实性错误与知识滞后问题。',
+            fusion: '稀疏与稠密召回互补，研究加权融合与重排模型提升相关性。',
+            kg: '用实体关系图谱补足长尾事实，支撑多跳推理与复杂问答。',
+            fsl: '少样本与提示学习降低标注成本，快速适配新增长尾意图。',
+            faith: '证据引用、答案校验与置信度估计，抑制幻觉并提升可解释性。',
+            dsttopic: '对话状态跟踪维护槽位与历史，保证多轮应答的上下文一致。',
+            bench: '构建领域评测基准，结合自动指标与人工评分做综合评估。'
+        };
+
+        function sc_hexA(sc_hex, sc_a) {
+            var sc_r = parseInt(sc_hex.slice(1, 3), 16);
+            var sc_g = parseInt(sc_hex.slice(3, 5), 16);
+            var sc_b = parseInt(sc_hex.slice(5, 7), 16);
+            return 'rgba(' + sc_r + ',' + sc_g + ',' + sc_b + ',' + sc_a + ')';
+        }
+
+        function sc_setInfo(sc_el, sc_isChip) {
+            var sc_id = sc_el.dataset.id;
+            var sc_text = sc_isChip
+                ? sc_el.querySelector('text').textContent
+                : sc_el.querySelector('.sc_ntitle').textContent;
+
+            sc_infoName.textContent = sc_text;
+            sc_infoLayer.textContent = sc_layerNames[sc_el.dataset.layer];
+            sc_infoLayer.style.color = sc_colors[sc_el.dataset.layer];
+            sc_infoLayer.style.background = sc_hexA(sc_colors[sc_el.dataset.layer], 0.13);
+            sc_infoDesc.textContent = sc_desc[sc_id] || '';
+        }
+
+        function sc_highlight(sc_id) {
+            sc_nodes.forEach(function (sc_n) {
+                var sc_hit = sc_n.dataset.id === sc_id;
+                sc_n.classList.toggle('sc_hot', sc_hit);
+                sc_n.classList.toggle('sc_faded', !sc_hit);
+            });
+
+            sc_chips.forEach(function (sc_c) {
+                sc_c.classList.toggle('sc_hot', sc_c.dataset.id === sc_id);
+            });
+
+            sc_edges.forEach(function (sc_e) {
+                var sc_hit = sc_e.dataset.from === sc_id || sc_e.dataset.to === sc_id;
+                sc_e.classList.toggle('sc_hot', sc_hit);
+                sc_e.classList.toggle('sc_faded', !sc_hit);
+                if (sc_hit) {
+                    sc_e.setAttribute('marker-end',
+                        sc_e.classList.contains('sc_loop_edge') ? 'url(#sc_arrow_loop)' : 'url(#sc_arrow_hot)');
+                }
+            });
+        }
+
+        function sc_reset() {
+            sc_nodes.forEach(function (sc_n) {
+                sc_n.classList.remove('sc_hot', 'sc_faded');
+            });
+            sc_chips.forEach(function (sc_c) {
+                sc_c.classList.remove('sc_hot');
+            });
+            sc_edges.forEach(function (sc_e) {
+                sc_e.classList.remove('sc_hot', 'sc_faded');
+                sc_e.setAttribute('marker-end',
+                    sc_e.classList.contains('sc_loop_edge') ? 'url(#sc_arrow_loop)' : 'url(#sc_arrow)');
+            });
+
+            sc_infoName.textContent = '—';
+            sc_infoLayer.textContent = '提示';
+            sc_infoLayer.style.color = '#1d4ed8';
+            sc_infoLayer.style.background = '#eff6ff';
+            sc_infoDesc.textContent = '将鼠标移到任意模块或研究热词上，查看它的职责与关键说明。';
+        }
+
+        sc_nodes.forEach(function (sc_n) {
+            sc_n.addEventListener('mouseenter', function () {
+                sc_setInfo(sc_n, false);
+                sc_highlight(sc_n.dataset.id);
+            });
+            sc_n.addEventListener('mouseleave', sc_reset);
+        });
+
+        sc_chips.forEach(function (sc_c) {
+            sc_c.addEventListener('mouseenter', function () {
+                sc_setInfo(sc_c, true);
+                sc_highlight(sc_c.dataset.id);
+            });
+            sc_c.addEventListener('mouseleave', sc_reset);
+        });
+    </script>
+</body>
+</html>

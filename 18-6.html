@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<!-- 姓名：沈畅，日期：2026-11-05，功能名称：Mermaid 智能客服系统流程图与 ER 图 -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18-6 Mermaid 智能客服流程图与 ER 图</title>
+    <link rel="stylesheet" href="font/iconfont.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            background: #eef2f8;
+            color: #1e293b;
+            line-height: 1.7;
+            padding: 34px 20px 60px;
+        }
+
+        .sc_wrap { max-width: 1120px; margin: 0 auto; }
+
+        /* ---------- 头部 ---------- */
+        .sc_head { margin-bottom: 22px; }
+        .sc_tag {
+            display: inline-flex; align-items: center; gap: 7px;
+            font-size: 13px; color: #1d4ed8; background: #dbeafe;
+            border: 1px solid #bfdbfe; border-radius: 999px;
+            padding: 4px 14px; margin-bottom: 12px;
+        }
+        .sc_head h1 { font-size: 28px; color: #0f172a; margin-bottom: 8px; letter-spacing: .5px; }
+        .sc_head p { font-size: 14.5px; color: #64748b; max-width: 900px; }
+        .sc_head code {
+            font-family: Consolas, Monaco, monospace; font-size: 13px;
+            color: #1d4ed8; background: #dbeafe; border-radius: 4px; padding: 1px 6px;
+        }
+
+        /* ---------- 图表卡片 ---------- */
+        .sc_stage {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, .06);
+            margin-bottom: 18px;
+        }
+        .sc_stage_head {
+            display: flex; align-items: center; gap: 12px;
+            padding: 0 2px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            margin-bottom: 14px;
+        }
+        .sc_stage_head h2 { font-size: 16px; color: #0f172a; }
+        .sc_stage_head p { font-size: 12.5px; color: #64748b; }
+        .sc_badge {
+            margin-left: auto; font-size: 12px; color: #0e7490;
+            background: #ecfeff; border: 1px solid #a5f3fc;
+            border-radius: 6px; padding: 3px 10px; white-space: nowrap;
+        }
+
+        .sc_diagram {
+            overflow-x: auto;
+            padding: 6px 2px 2px;
+        }
+        .sc_diagram svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+
+        /* ---------- 底部卡片 ---------- */
+        .sc_grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: 16px; }
+        .sc_card {
+            background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px;
+            padding: 18px; box-shadow: 0 8px 24px rgba(15, 23, 42, .05);
+        }
+        .sc_card h2 {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 15px; color: #0f172a; margin-bottom: 12px; font-weight: 700;
+        }
+        .sc_card h2 .iconfont { color: #2563eb; font-size: 15px; }
+
+        .sc_notes { list-style: none; font-size: 13.5px; }
+        .sc_notes li { position: relative; padding: 5px 0 5px 18px; color: #475569; }
+        .sc_notes li::before { content: "•"; position: absolute; left: 4px; color: #2563eb; }
+        .sc_notes code {
+            font-family: Consolas, Monaco, monospace; font-size: 12.5px;
+            color: #1d4ed8; background: #eff6ff; border-radius: 4px; padding: 1px 5px;
+        }
+
+        .sc_code {
+            background: #0f172a; border-radius: 10px; padding: 14px 16px; overflow: auto;
+            font-family: Consolas, Monaco, "Courier New", monospace; font-size: 12.4px;
+            line-height: 1.75; color: #e2e8f0; white-space: pre; max-height: 340px;
+        }
+        .sc_c_cm { color: #64748b; font-style: italic; }
+        .sc_c_kw { color: #93c5fd; }
+        .sc_c_str { color: #86efac; }
+
+        @media (max-width: 860px) {
+            .sc_grid { grid-template-columns: 1fr; }
+            .sc_head h1 { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sc_wrap">
+        <header class="sc_head">
+            <span class="sc_tag"><i class="iconfont icon-tongzhi"></i> 18-6 Mermaid</span>
+            <h1>Mermaid 智能客服系统流程图与 ER 图 · 沈畅</h1>
+            <p>
+                用 Mermaid 文本语法描述「基于知识库的智能客服系统」：上半部分是端到端的业务流程图，
+                覆盖接入、语义理解、RAG 检索、答案生成与运营闭环；下半部分是支撑这些流程的数据库
+                <code>ER 图</code>，包含客户、会话、消息、意图、知识文档、片段、工单、坐席与反馈九张表。
+                脚本已下载到本地 <code>cdn/mermaid/mermaid.min.js</code>，不依赖远程 CDN。
+            </p>
+        </header>
+
+        <section class="sc_stage">
+            <div class="sc_stage_head">
+                <div>
+                    <h2>一、智能客服业务流程</h2>
+                    <p>从用户提问到答案返回，再到反馈驱动的知识闭环</p>
+                </div>
+                <span class="sc_badge">flowchart TD</span>
+            </div>
+            <div class="sc_diagram" id="sc_flow_wrap">
+                <pre class="sc_mermaid" id="sc_mermaid_flow">flowchart TD
+    subgraph S1["① 用户接入层"]
+        A1["用户提问<br/>文本 · 语音 · 图片"] --> A2["渠道接入网关<br/>Web / App / 微信 / 电话"]
+        A2 --> A3["会话预处理<br/>去噪 · 纠错 · 语音转写"]
+    end
+
+    subgraph S2["② 语义理解层"]
+        B1["意图识别<br/>小样本分类"] --> B2["实体抽取<br/>槽位填充"]
+        B2 --> B3{"意图置信度 &ge; 阈值?"}
+    end
+
+    subgraph S3["③ 知识检索层 · RAG"]
+        C1["Query 改写"] --> C2["混合召回<br/>BM25 + 向量"]
+        C2 --> C3["重排 Rerank"] --> C4["证据片段 Top-K"]
+    end
+
+    subgraph S4["④ 答案生成层"]
+        D1["Prompt 编排"] --> D2["LLM 生成"] --> D3["引用溯源<br/>幻觉校验"]
+    end
+
+    subgraph S5["⑤ 运营与优化"]
+        E1["人工坐席<br/>工单流转"] --> E2["反馈采集<br/>点赞 · 纠错"]
+        E2 --> E3["知识库更新<br/>索引重建"]
+    end
+
+    A3 --> B1
+    B3 -- 否 --> E1
+    B3 -- 是 --> C1
+    C4 --> D1
+    D3 --> F1(["答案返回用户"])
+    F1 --> E2
+    D3 -- 校验不通过 --> E1
+    E3 -. 反馈闭环 .-> C2</pre>
+            </div>
+        </section>
+
+        <section class="sc_stage">
+            <div class="sc_stage_head">
+                <div>
+                    <h2>二、客服系统数据库 ER 图</h2>
+                    <p>九张核心数据表及其一对多 / 一对零或一关系</p>
+                </div>
+                <span class="sc_badge">erDiagram</span>
+            </div>
+            <div class="sc_diagram" id="sc_er_wrap">
+                <pre class="sc_mermaid" id="sc_mermaid_er">erDiagram
+    CUSTOMER ||--o{ CONVERSATION : "发起"
+    CONVERSATION ||--o{ MESSAGE : "包含"
+    CONVERSATION ||--o{ FEEDBACK : "产生"
+    CONVERSATION ||--o| TICKET : "转接"
+    AGENT ||--o{ TICKET : "处理"
+    INTENT ||--o{ MESSAGE : "命中"
+    KNOWLEDGE_DOC ||--o{ CHUNK : "切分"
+    CHUNK ||--o{ MESSAGE : "召回引用"
+
+    CUSTOMER {
+        int id PK "客户ID"
+        string nickname "昵称"
+        string phone "手机号"
+        string channel "来源渠道"
+        datetime created_at "注册时间"
+    }
+    CONVERSATION {
+        int id PK "会话ID"
+        int customer_id FK "客户ID"
+        string channel "渠道"
+        string status "会话状态"
+        datetime start_at "开始时间"
+    }
+    MESSAGE {
+        int id PK "消息ID"
+        int conversation_id FK "会话ID"
+        int intent_id FK "意图ID"
+        string role "用户 / 机器人 / 坐席"
+        text content "消息内容"
+        decimal confidence "置信度"
+    }
+    INTENT {
+        int id PK "意图ID"
+        string name "意图名称"
+        string domain "知识域"
+        string train_type "训练方式"
+    }
+    TICKET {
+        int id PK "工单号"
+        int conversation_id FK "会话ID"
+        int agent_id FK "坐席ID"
+        string priority "优先级"
+        string status "处理状态"
+    }
+    AGENT {
+        int id PK "坐席ID"
+        string name "姓名"
+        string group_name "技能组"
+        boolean online "在线状态"
+    }
+    FEEDBACK {
+        int id PK "反馈ID"
+        int conversation_id FK "会话ID"
+        int message_id FK "消息ID"
+        string type "点赞 / 纠错 / 差评"
+        string comment "反馈内容"
+    }
+    KNOWLEDGE_DOC {
+        int id PK "文档ID"
+        string title "标题"
+        string doc_type "FAQ / PDF / 工单"
+        datetime updated_at "更新时间"
+    }
+    CHUNK {
+        int id PK "片段ID"
+        int doc_id FK "文档ID"
+        text content "片段内容"
+        string embedding_ref "向量索引主键"
+    }</pre>
+            </div>
+        </section>
+
+        <section class="sc_grid">
+            <div class="sc_card">
+                <h2><i class="iconfont icon-bangzhu"></i> 实现说明</h2>
+                <ul class="sc_notes">
+                    <li>Mermaid 脚本已下载到本地：<code>cdn/mermaid/mermaid.min.js</code>（约 2.57 MB），页面直接以 <code>&lt;script src&gt;</code> 引入。</li>
+                    <li>使用 <code>mermaid.initialize({ startOnLoad: false })</code> 关闭自动渲染，再调用 <code>mermaid.run()</code> 手动渲染两个图，方便统一主题。</li>
+                    <li>流程图用 <code>subgraph</code> 划分五个层级，<code>B3</code> 用菱形表示判断节点，虚线 <code>-.</code> 表示反馈闭环。</li>
+                    <li>ER 图使用 Mermaid 的鸦爪（crow's foot）语法：<code>||--o{</code> 表示一对多，<code>||--o|</code> 表示一对零或一。</li>
+                    <li>主题通过 <code>theme: 'base'</code> 与 <code>themeVariables</code> 定制，与页面配色保持一致。</li>
+                </ul>
+            </div>
+
+            <div class="sc_card">
+                <h2><i class="iconfont icon-yijianfankui"></i> 核心代码</h2>
+                <pre class="sc_code"><span class="sc_c_cm">// 1. 本地引入</span>
+<span class="sc_c_kw">&lt;script</span> src=<span class="sc_c_str">"cdn/mermaid/mermaid.min.js"</span><span class="sc_c_kw">&gt;&lt;/script&gt;</span>
+
+<span class="sc_c_cm">// 2. 关闭自动渲染并定制主题</span>
+mermaid.<span class="sc_c_str">initialize</span>({
+  startOnLoad: <span class="sc_c_str">false</span>,
+  theme: <span class="sc_c_str">'base'</span>,
+  themeVariables: {
+    primaryColor: <span class="sc_c_str">'#dbeafe'</span>,
+    primaryBorderColor: <span class="sc_c_str">'#93c5fd'</span>,
+    lineColor: <span class="sc_c_str">'#94a3b8'</span>,
+    edgeLabelBackground: <span class="sc_c_str">'#ffffff'</span>
+  },
+  flowchart: { curve: <span class="sc_c_str">'basis'</span>, nodeSpacing: 42 }
+});
+
+<span class="sc_c_cm">// 3. 手动渲染页面里的 .sc_mermaid</span>
+mermaid.<span class="sc_c_str">run</span>({ nodes: document.<span class="sc_c_str">querySelectorAll</span>(<span class="sc_c_str">'.sc_mermaid'</span>) });
+
+<span class="sc_c_cm">// 流程图语法片段</span>
+flowchart TD
+  B3{"置信度 &ge; 阈值?"}
+  B3 -- 是 --&gt; C1["Query 改写"]
+  B3 -- 否 --&gt; E1["转人工"]
+
+<span class="sc_c_cm">// ER 图语法片段</span>
+erDiagram
+  CUSTOMER ||--o{ CONVERSATION : "发起"
+  CONVERSATION ||--o{ MESSAGE : "包含"</pre>
+            </div>
+        </section>
+    </div>
+
+    <script src="cdn/mermaid/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'base',
+            securityLevel: 'loose',
+            fontFamily: '"Microsoft YaHei", "PingFang SC", sans-serif',
+            themeVariables: {
+                primaryColor: '#dbeafe',
+                primaryTextColor: '#0f172a',
+                primaryBorderColor: '#93c5fd',
+                secondaryColor: '#ede9fe',
+                tertiaryColor: '#f8fafc',
+                lineColor: '#94a3b8',
+                edgeLabelBackground: '#ffffff',
+                clusterBkg: '#f8fafc',
+                clusterBorder: '#e2e8f0',
+                fontSize: '14px'
+            },
+            flowchart: {
+                curve: 'basis',
+                htmlLabels: true,
+                nodeSpacing: 42,
+                rankSpacing: 54,
+                padding: 14
+            },
+            er: {
+                useMaxWidth: true,
+                entityPadding: 14,
+                minEntityWidth: 120,
+                fontSize: 13
+            }
+        });
+
+        mermaid.run({
+            nodes: Array.from(document.querySelectorAll('.sc_mermaid'))
+        }).catch(function (sc_err) {
+            console.error('Mermaid 渲染失败：', sc_err);
+        });
+    </script>
+</body>
+</html>

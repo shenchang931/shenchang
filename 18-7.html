@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<!-- 姓名：沈畅，日期：2026-11-05，功能名称：three.js 四种 3D 图表 -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18-7 three.js 四种 3D 图表</title>
+    <link rel="stylesheet" href="font/iconfont.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            background: #eef2f8;
+            color: #1e293b;
+            line-height: 1.7;
+            padding: 34px 20px 60px;
+        }
+
+        .sc_wrap { max-width: 1140px; margin: 0 auto; }
+
+        /* ---------- 头部 ---------- */
+        .sc_head { margin-bottom: 22px; }
+        .sc_tag {
+            display: inline-flex; align-items: center; gap: 7px;
+            font-size: 13px; color: #1d4ed8; background: #dbeafe;
+            border: 1px solid #bfdbfe; border-radius: 999px;
+            padding: 4px 14px; margin-bottom: 12px;
+        }
+        .sc_head h1 { font-size: 28px; color: #0f172a; margin-bottom: 8px; letter-spacing: .5px; }
+        .sc_head p { font-size: 14.5px; color: #64748b; max-width: 940px; }
+        .sc_head code {
+            font-family: Consolas, Monaco, monospace; font-size: 13px;
+            color: #1d4ed8; background: #dbeafe; border-radius: 4px; padding: 1px 6px;
+        }
+
+        /* ---------- 图表卡片 ---------- */
+        .sc_charts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .sc_chart_card {
+            background: #0a1220;
+            border: 1px solid rgba(148, 163, 184, .14);
+            border-radius: 16px;
+            padding: 14px;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, .18);
+        }
+
+        .sc_chart_head {
+            display: flex; align-items: center; gap: 10px;
+            padding: 0 4px 10px;
+        }
+        .sc_chart_head h2 { font-size: 15px; color: #e9edff; }
+        .sc_chart_head .sc_badge {
+            margin-left: auto;
+            font-size: 11.5px; color: #7dd3fc;
+            background: rgba(56, 189, 248, .10);
+            border: 1px solid rgba(56, 189, 248, .28);
+            border-radius: 6px; padding: 2px 9px; white-space: nowrap;
+        }
+
+        .sc_canvas_box {
+            position: relative;
+            border-radius: 11px;
+            overflow: hidden;
+            background:
+                radial-gradient(120% 90% at 50% 0%, #16233c 0%, #0b1526 60%, #080f1c 100%);
+            border: 1px solid rgba(148, 163, 184, .10);
+        }
+        .sc_canvas_box canvas {
+            display: block;
+            width: 100%;
+            height: 320px;
+            touch-action: none;
+            cursor: grab;
+        }
+        .sc_canvas_box canvas:active { cursor: grabbing; }
+
+        .sc_chart_foot {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+            padding: 10px 4px 0;
+        }
+        .sc_chart_foot p { font-size: 12px; color: #93a4c4; }
+        .sc_chip {
+            font-size: 11px; color: #bdd7ff;
+            border: 1px solid rgba(148, 163, 184, .24);
+            background: rgba(255, 255, 255, .04);
+            border-radius: 6px; padding: 1px 8px;
+        }
+
+        /* ---------- 底部卡片 ---------- */
+        .sc_grid { display: grid; grid-template-columns: 1fr 1.12fr; gap: 16px; }
+        .sc_card {
+            background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px;
+            padding: 18px; box-shadow: 0 8px 24px rgba(15, 23, 42, .05);
+        }
+        .sc_card h2 {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 15px; color: #0f172a; margin-bottom: 12px; font-weight: 700;
+        }
+        .sc_card h2 .iconfont { color: #2563eb; font-size: 15px; }
+
+        .sc_notes { list-style: none; font-size: 13.5px; }
+        .sc_notes li { position: relative; padding: 5px 0 5px 18px; color: #475569; }
+        .sc_notes li::before { content: "•"; position: absolute; left: 4px; color: #2563eb; }
+        .sc_notes code {
+            font-family: Consolas, Monaco, monospace; font-size: 12.5px;
+            color: #1d4ed8; background: #eff6ff; border-radius: 4px; padding: 1px 5px;
+        }
+
+        .sc_code {
+            background: #0f172a; border-radius: 10px; padding: 14px 16px; overflow: auto;
+            font-family: Consolas, Monaco, "Courier New", monospace; font-size: 12.4px;
+            line-height: 1.75; color: #e2e8f0; white-space: pre; max-height: 330px;
+        }
+        .sc_c_cm { color: #64748b; font-style: italic; }
+        .sc_c_kw { color: #93c5fd; }
+        .sc_c_str { color: #86efac; }
+
+        @media (max-width: 900px) {
+            .sc_charts { grid-template-columns: 1fr; }
+            .sc_grid { grid-template-columns: 1fr; }
+            .sc_head h1 { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sc_wrap">
+        <header class="sc_head">
+            <span class="sc_tag"><i class="iconfont icon-shangcheng"></i> 18-7 three.js</span>
+            <h1>three.js 四种 3D 图表 · 沈畅</h1>
+            <p>
+                不借助图表库，直接用 <code>three.js</code> 搭建四个三维数据图表：柱状图、散点图、环形饼图与曲面图。
+                每个图表都有独立的场景、相机、光照与 <code>OrbitControls</code>，可拖动旋转、滚轮缩放。
+                脚本已下载到本地 <code>cdn/three/</code>，页面不依赖远程 CDN。
+            </p>
+        </header>
+
+        <div class="sc_charts">
+            <section class="sc_chart_card">
+                <div class="sc_chart_head">
+                    <h2>3D 柱状图</h2>
+                    <span class="sc_badge">BoxGeometry</span>
+                </div>
+                <div class="sc_canvas_box">
+                    <canvas id="sc_bar_canvas"></canvas>
+                </div>
+                <div class="sc_chart_foot">
+                    <p>6 品类 × 4 季度，共 24 根柱体</p>
+                    <span class="sc_chip">按高度着色</span>
+                    <span class="sc_chip">Standard 材质</span>
+                </div>
+            </section>
+
+            <section class="sc_chart_card">
+                <div class="sc_chart_head">
+                    <h2>3D 散点图</h2>
+                    <span class="sc_badge">Points</span>
+                </div>
+                <div class="sc_canvas_box">
+                    <canvas id="sc_scatter_canvas"></canvas>
+                </div>
+                <div class="sc_chart_foot">
+                    <p>220 个样本点在三维空间中分布</p>
+                    <span class="sc_chip">顶点颜色</span>
+                    <span class="sc_chip">加色混合</span>
+                </div>
+            </section>
+
+            <section class="sc_chart_card">
+                <div class="sc_chart_head">
+                    <h2>3D 环形饼图</h2>
+                    <span class="sc_badge">ExtrudeGeometry</span>
+                </div>
+                <div class="sc_canvas_box">
+                    <canvas id="sc_donut_canvas"></canvas>
+                </div>
+                <div class="sc_chart_foot">
+                    <p>6 个业务占比扇形，带厚度与倒角</p>
+                    <span class="sc_chip">Shape 路径</span>
+                    <span class="sc_chip">拉伸挤出</span>
+                </div>
+            </section>
+
+            <section class="sc_chart_card">
+                <div class="sc_chart_head">
+                    <h2>3D 曲面图</h2>
+                    <span class="sc_badge">PlaneGeometry</span>
+                </div>
+                <div class="sc_canvas_box">
+                    <canvas id="sc_surface_canvas"></canvas>
+                </div>
+                <div class="sc_chart_foot">
+                    <p>44×44 网格的正弦叠加曲面</p>
+                    <span class="sc_chip">顶点位移</span>
+                    <span class="sc_chip">法线重算</span>
+                </div>
+            </section>
+        </div>
+
+        <section class="sc_grid">
+            <div class="sc_card">
+                <h2><i class="iconfont icon-bangzhu"></i> 实现说明</h2>
+                <ul class="sc_notes">
+                    <li>three.js 脚本已下载到本地：<code>cdn/three/three.min.js</code> 与 <code>cdn/three/OrbitControls.js</code>（r128，非模块版本，可直接用 <code>&lt;script src&gt;</code> 引入）。</li>
+                    <li>每个图表用独立的 <code>WebGLRenderer</code>、<code>Scene</code>、<code>PerspectiveCamera</code>，四个画布互不影响。</li>
+                    <li>柱状图用 <code>BoxGeometry</code> 按数据缩放 <code>scale.y</code>，柱体高度决定颜色深浅。</li>
+                    <li>散点图用 <code>BufferGeometry</code> 写入位置与颜色属性，<code>PointsMaterial</code> 开启 <code>vertexColors</code>。</li>
+                    <li>环形饼图用 <code>Shape</code> 绘制扇环路径，再由 <code>ExtrudeGeometry</code> 拉伸并加倒角。</li>
+                    <li>曲面图逐顶点改写 <code>position.y</code> 后调用 <code>computeVertexNormals()</code>，光照才正确。</li>
+                    <li>四张图共享一个 <code>requestAnimationFrame</code> 循环，窗口尺寸变化时统一重新计算画布与相机比例。</li>
+                </ul>
+            </div>
+
+            <div class="sc_card">
+                <h2><i class="iconfont icon-yijianfankui"></i> 核心代码</h2>
+                <pre class="sc_code"><span class="sc_c_cm">// 1. 本地引入</span>
+<span class="sc_c_kw">&lt;script</span> src=<span class="sc_c_str">"cdn/three/three.min.js"</span><span class="sc_c_kw">&gt;&lt;/script&gt;</span>
+<span class="sc_c_kw">&lt;script</span> src=<span class="sc_c_str">"cdn/three/OrbitControls.js"</span><span class="sc_c_kw">&gt;&lt;/script&gt;</span>
+
+<span class="sc_c_cm">// 2. 场景 / 相机 / 控制器</span>
+<span class="sc_c_kw">var</span> renderer = <span class="sc_c_kw">new</span> THREE.<span class="sc_c_str">WebGLRenderer</span>({
+  canvas: canvas, antialias: <span class="sc_c_str">true</span>, alpha: <span class="sc_c_str">true</span>
+});
+<span class="sc_c_kw">var</span> scene = <span class="sc_c_kw">new</span> THREE.<span class="sc_c_str">Scene</span>();
+<span class="sc_c_kw">var</span> camera = <span class="sc_c_kw">new</span> THREE.<span class="sc_c_str">PerspectiveCamera</span>(45, 1, 0.1, 200);
+camera.position.<span class="sc_c_str">set</span>(9, 8, 11);
+<span class="sc_c_kw">var</span> controls = <span class="sc_c_kw">new</span> THREE.<span class="sc_c_str">OrbitControls</span>(camera, canvas);
+controls.autoRotate = <span class="sc_c_str">true</span>;
+
+<span class="sc_c_cm">// 3. 柱状图：按数据拉伸盒体</span>
+<span class="sc_c_kw">var</span> bar = <span class="sc_c_kw">new</span> THREE.<span class="sc_c_str">Mesh</span>(
+  <span class="sc_c_kw">new</span> THREE.<span class="sc_c_str">BoxGeometry</span>(0.8, 1, 0.8),
+  <span class="sc_c_kw">new</span> THREE.<span class="sc_c_str">MeshStandardMaterial</span>({
+    color: <span class="sc_c_str">'#38bdf8'</span>, roughness: 0.4, metalness: 0.25
+  })
+);
+bar.scale.y = value;        <span class="sc_c_cm">// 数据映射高度</span>
+bar.position.y = value / 2; <span class="sc_c_cm">// 底部贴地</span>
+
+<span class="sc_c_cm">// 4. 环形饼图：扇环路径 + 挤出</span>
+<span class="sc_c_kw">var</span> shape = <span class="sc_c_kw">new</span> THREE.<span class="sc_c_str">Shape</span>();
+shape.<span class="sc_c_str">absarc</span>(0, 0, 3, start, end, <span class="sc_c_str">false</span>);
+shape.<span class="sc_c_str">absarc</span>(0, 0, 1.6, end, start, <span class="sc_c_str">true</span>);
+<span class="sc_c_kw">var</span> geo = <span class="sc_c_kw">new</span> THREE.<span class="sc_c_str">ExtrudeGeometry</span>(shape, {
+  depth: 0.6, bevelEnabled: <span class="sc_c_str">true</span>, bevelSize: 0.05
+});
+mesh.rotation.x = -Math.PI / 2;
+
+<span class="sc_c_cm">// 5. 统一渲染循环</span>
+<span class="sc_c_kw">function</span> <span class="sc_c_str">animate</span>() {
+  <span class="sc_c_str">requestAnimationFrame</span>(animate);
+  charts.<span class="sc_c_str">forEach</span>(c =&gt; {
+    c.controls.<span class="sc_c_str">update</span>();
+    c.renderer.<span class="sc_c_str">render</span>(c.scene, c.camera);
+  });
+}</pre>
+            </div>
+        </section>
+    </div>
+
+    <script src="cdn/three/three.min.js"></script>
+    <script src="cdn/three/OrbitControls.js"></script>
+    <script>
+        var sc_palette = ['#38bdf8', '#a78bfa', '#34d399', '#fbbf24', '#fb7185', '#f97316'];
+        var sc_charts = [];
+
+        // 统一的场景初始化：渲染器 + 相机 + 控制器 + 光照
+        function sc_setup(sc_id, sc_camPos, sc_target, sc_speed) {
+            var sc_canvas = document.getElementById(sc_id);
+            var sc_renderer = new THREE.WebGLRenderer({ canvas: sc_canvas, antialias: true, alpha: true });
+            sc_renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.8));
+            sc_renderer.setClearColor(0x000000, 0);
+            sc_renderer.outputEncoding = THREE.sRGBEncoding;
+
+            var sc_scene = new THREE.Scene();
+            var sc_camera = new THREE.PerspectiveCamera(45, 1, 0.1, 200);
+            sc_camera.position.set(sc_camPos[0], sc_camPos[1], sc_camPos[2]);
+
+            var sc_controls = new THREE.OrbitControls(sc_camera, sc_canvas);
+            sc_controls.target.set(sc_target[0], sc_target[1], sc_target[2]);
+            sc_controls.enableDamping = true;
+            sc_controls.dampingFactor = 0.08;
+            sc_controls.enablePan = false;
+            sc_controls.autoRotate = true;
+            sc_controls.autoRotateSpeed = sc_speed;
+            sc_controls.minDistance = 6;
+            sc_controls.maxDistance = 28;
+            sc_controls.maxPolarAngle = Math.PI * 0.52;
+
+            sc_scene.add(new THREE.HemisphereLight(0xffffff, 0x1b2740, 0.95));
+
+            var sc_dir = new THREE.DirectionalLight(0xffffff, 0.9);
+            sc_dir.position.set(8, 14, 9);
+            sc_scene.add(sc_dir);
+
+            var sc_fill = new THREE.DirectionalLight(0x7dd3fc, 0.4);
+            sc_fill.position.set(-9, 5, -7);
+            sc_scene.add(sc_fill);
+
+            var sc_item = {
+                renderer: sc_renderer,
+                scene: sc_scene,
+                camera: sc_camera,
+                controls: sc_controls,
+                canvas: sc_canvas
+            };
+            sc_charts.push(sc_item);
+            return sc_item;
+        }
+
+        function sc_addGrid(sc_scene, sc_size, sc_div, sc_y) {
+            var sc_grid = new THREE.GridHelper(sc_size, sc_div, 0x2a3b58, 0x1a2740);
+            sc_grid.position.y = sc_y;
+            sc_grid.material.transparent = true;
+            sc_grid.material.opacity = 0.85;
+            sc_scene.add(sc_grid);
+        }
+
+        // ---------- 图 1：3D 柱状图 ----------
+        function sc_buildBars() {
+            var sc_item = sc_setup('sc_bar_canvas', [9, 8.5, 11.5], [0, 2, 0], 0.9);
+            sc_addGrid(sc_item.scene, 12, 12, 0);
+
+            // 6 品类 × 4 季度的销量
+            var sc_data = [
+                [2.4, 3.1, 2.8, 3.6, 1.9, 2.6],
+                [3.2, 2.7, 3.5, 3.0, 2.4, 3.3],
+                [2.9, 3.6, 2.2, 3.9, 2.1, 3.1],
+                [3.8, 2.9, 3.3, 4.2, 2.7, 3.6]
+            ];
+            var sc_boxGeo = new THREE.BoxGeometry(0.82, 1, 0.82);
+
+            for (var sc_r = 0; sc_r < sc_data.length; sc_r++) {
+                for (var sc_c = 0; sc_c < sc_data[sc_r].length; sc_c++) {
+                    var sc_h = sc_data[sc_r][sc_c];
+                    var sc_color = new THREE.Color(sc_palette[sc_c]);
+                    sc_color.offsetHSL(0, 0, (sc_h - 3) * 0.055);
+
+                    var sc_mat = new THREE.MeshStandardMaterial({
+                        color: sc_color,
+                        roughness: 0.42,
+                        metalness: 0.28
+                    });
+                    var sc_bar = new THREE.Mesh(sc_boxGeo, sc_mat);
+                    sc_bar.scale.y = sc_h;
+                    sc_bar.position.set((sc_c - 2.5) * 1.15, sc_h / 2, (sc_r - 1.5) * 1.15);
+                    sc_item.scene.add(sc_bar);
+                }
+            }
+        }
+
+        // ---------- 图 2：3D 散点图 ----------
+        function sc_buildScatter() {
+            var sc_item = sc_setup('sc_scatter_canvas', [9.5, 8, 10.5], [0, 2.6, 0], 0.7);
+            sc_addGrid(sc_item.scene, 11, 11, 0);
+
+            var sc_pos = [];
+            var sc_col = [];
+
+            for (var sc_i = 0; sc_i < 220; sc_i++) {
+                var sc_x = (Math.random() - 0.5) * 9.6;
+                var sc_z = (Math.random() - 0.5) * 9.6;
+                var sc_y = Math.random() * 5.4 + 0.2;
+                sc_pos.push(sc_x, sc_y, sc_z);
+
+                var sc_t = sc_y / 5.8;
+                var sc_pc = new THREE.Color().setHSL(0.58 - sc_t * 0.42, 0.8, 0.62);
+                sc_col.push(sc_pc.r, sc_pc.g, sc_pc.b);
+            }
+
+            var sc_ptsGeo = new THREE.BufferGeometry();
+            sc_ptsGeo.setAttribute('position', new THREE.Float32BufferAttribute(sc_pos, 3));
+            sc_ptsGeo.setAttribute('color', new THREE.Float32BufferAttribute(sc_col, 3));
+
+            var sc_ptsMat = new THREE.PointsMaterial({
+                size: 0.24,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.95,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending
+            });
+            sc_item.scene.add(new THREE.Points(sc_ptsGeo, sc_ptsMat));
+
+            var sc_frame = new THREE.LineSegments(
+                new THREE.EdgesGeometry(new THREE.BoxGeometry(10, 6, 10)),
+                new THREE.LineBasicMaterial({ color: 0x27405f, transparent: true, opacity: 0.8 })
+            );
+            sc_frame.position.y = 3;
+            sc_item.scene.add(sc_frame);
+        }
+
+        // ---------- 图 3：3D 环形饼图 ----------
+        function sc_buildDonut() {
+            var sc_item = sc_setup('sc_donut_canvas', [0, 9.5, 11.5], [0, 0.2, 0], 0.75);
+
+            var sc_values = [34, 26, 18, 12, 6, 4];
+            var sc_total = 0;
+            for (var sc_i = 0; sc_i < sc_values.length; sc_i++) {
+                sc_total += sc_values[sc_i];
+            }
+
+            var sc_start = 0;
+            sc_values.forEach(function (sc_v, sc_idx) {
+                var sc_end = sc_start + (sc_v / sc_total) * Math.PI * 2;
+
+                var sc_shape = new THREE.Shape();
+                sc_shape.absarc(0, 0, 3.1, sc_start, sc_end, false);
+                sc_shape.absarc(0, 0, 1.55, sc_end, sc_start, true);
+
+                var sc_geo = new THREE.ExtrudeGeometry(sc_shape, {
+                    depth: 0.62,
+                    bevelEnabled: true,
+                    bevelSize: 0.045,
+                    bevelThickness: 0.045,
+                    bevelSegments: 2,
+                    curveSegments: 40
+                });
+
+                var sc_mat = new THREE.MeshStandardMaterial({
+                    color: new THREE.Color(sc_palette[sc_idx]),
+                    roughness: 0.38,
+                    metalness: 0.3
+                });
+                var sc_mesh = new THREE.Mesh(sc_geo, sc_mat);
+                sc_mesh.rotation.x = -Math.PI / 2;
+                sc_item.scene.add(sc_mesh);
+
+                sc_start = sc_end;
+            });
+
+            // 外圈装饰光环
+            var sc_ring = new THREE.Mesh(
+                new THREE.TorusGeometry(3.16, 0.035, 8, 96),
+                new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.4 })
+            );
+            sc_ring.rotation.x = -Math.PI / 2;
+            sc_item.scene.add(sc_ring);
+        }
+
+        // ---------- 图 4：3D 曲面图 ----------
+        function sc_buildSurface() {
+            var sc_item = sc_setup('sc_surface_canvas', [10, 9, 12], [0, 1.5, 0], 0.6);
+            sc_addGrid(sc_item.scene, 12, 12, 0);
+
+            var sc_geo = new THREE.PlaneGeometry(10, 10, 44, 44);
+            sc_geo.rotateX(-Math.PI / 2);
+
+            var sc_posAttr = sc_geo.attributes.position;
+            var sc_colors = [];
+
+            for (var sc_i = 0; sc_i < sc_posAttr.count; sc_i++) {
+                var sc_x = sc_posAttr.getX(sc_i);
+                var sc_z = sc_posAttr.getZ(sc_i);
+                var sc_h = Math.sin(sc_x * 0.85) * Math.cos(sc_z * 0.85) * 1.5
+                    + Math.sin((sc_x + sc_z) * 0.4) * 0.5 + 2.2;
+                sc_posAttr.setY(sc_i, sc_h);
+
+                var sc_t = Math.max(0, Math.min(1, (sc_h - 0.2) / 4));
+                var sc_vc = new THREE.Color().setHSL(0.58 - sc_t * 0.4, 0.78, 0.52 + sc_t * 0.1);
+                sc_colors.push(sc_vc.r, sc_vc.g, sc_vc.b);
+            }
+
+            sc_geo.setAttribute('color', new THREE.Float32BufferAttribute(sc_colors, 3));
+            sc_geo.computeVertexNormals();
+
+            var sc_mat = new THREE.MeshPhongMaterial({
+                vertexColors: true,
+                shininess: 60,
+                side: THREE.DoubleSide,
+                flatShading: false
+            });
+            sc_item.scene.add(new THREE.Mesh(sc_geo, sc_mat));
+        }
+
+        // ---------- 统一尺寸与渲染循环 ----------
+        function sc_resizeAll() {
+            sc_charts.forEach(function (sc_c) {
+                var sc_w = sc_c.canvas.clientWidth;
+                var sc_h = sc_c.canvas.clientHeight;
+                if (!sc_w || !sc_h) { return; }
+                sc_c.renderer.setSize(sc_w, sc_h, false);
+                sc_c.camera.aspect = sc_w / sc_h;
+                sc_c.camera.updateProjectionMatrix();
+            });
+        }
+
+        function sc_animate() {
+            requestAnimationFrame(sc_animate);
+            sc_charts.forEach(function (sc_c) {
+                sc_c.controls.update();
+                sc_c.renderer.render(sc_c.scene, sc_c.camera);
+            });
+        }
+
+        sc_buildBars();
+        sc_buildScatter();
+        sc_buildDonut();
+        sc_buildSurface();
+        sc_resizeAll();
+        sc_animate();
+
+        window.addEventListener('resize', sc_resizeAll);
+    </script>
+</body>
+</html>

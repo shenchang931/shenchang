@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<!-- 姓名：沈畅，日期：2026-11-05，功能名称：基于 ECharts 的电商数据可视化大屏（三列布局，中列顶部为中国地理信息图） -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18-8 ECharts 电商数据大屏</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body { height: 100%; }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            color: #cfe3f7;
+            background-color: #050b16;
+            overflow: auto;
+            background-image:
+                radial-gradient(70% 55% at 50% -12%, rgba(35, 110, 190, .40), transparent 68%),
+                radial-gradient(50% 42% at 6% 100%, rgba(16, 148, 150, .14), transparent 70%),
+                radial-gradient(45% 40% at 96% 96%, rgba(30, 90, 190, .16), transparent 70%),
+                linear-gradient(rgba(56, 189, 248, .035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56, 189, 248, .035) 1px, transparent 1px);
+            background-size: auto, auto, auto, 48px 48px, 48px 48px;
+        }
+
+        .sc_app {
+            height: 100%;
+            min-height: 780px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 10px 16px 14px;
+        }
+
+        /* ---------- 顶部标题栏 ---------- */
+        .sc_top {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 12px;
+            padding: 4px 4px 10px;
+            border-bottom: 1px solid rgba(56, 189, 248, .22);
+            position: relative;
+        }
+        .sc_top::after {
+            content: "";
+            position: absolute;
+            left: 30%;
+            right: 30%;
+            bottom: -1px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(34, 211, 238, .85), transparent);
+            box-shadow: 0 0 12px rgba(34, 211, 238, .7);
+        }
+        .sc_top_center { text-align: center; }
+        .sc_top_center h1 {
+            font-size: clamp(20px, 2.05vw, 30px);
+            font-weight: 700;
+            letter-spacing: 4px;
+            color: #eaf8ff;
+            text-shadow: 0 0 18px rgba(34, 211, 238, .65);
+        }
+        .sc_top_center p {
+            font-size: 10.5px;
+            letter-spacing: 3.4px;
+            color: #5b89b5;
+            margin-top: 3px;
+        }
+        .sc_top_left, .sc_top_right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            color: #6f9bc4;
+        }
+        .sc_top_right { justify-content: flex-end; }
+        .sc_live {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11.5px;
+            color: #22d3ee;
+            background: rgba(34, 211, 238, .08);
+            border: 1px solid rgba(34, 211, 238, .3);
+            border-radius: 999px;
+            padding: 2px 11px;
+            white-space: nowrap;
+        }
+        .sc_live i {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #22d3ee;
+            box-shadow: 0 0 8px #22d3ee;
+            animation: sc_pulse 1.6s ease-in-out infinite;
+        }
+        @keyframes sc_pulse { 50% { opacity: .22; } }
+        .sc_clock {
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+            letter-spacing: 1px;
+            color: #9fd7ff;
+            white-space: nowrap;
+        }
+
+        /* ---------- 三列主体 ---------- */
+        .sc_screen {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 1fr 1.62fr 1fr;
+            gap: 12px;
+        }
+        .sc_col {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-height: 0;
+        }
+
+        /* ---------- 面板 ---------- */
+        .sc_panel {
+            position: relative;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            padding: 10px 12px 8px;
+            border: 1px solid rgba(56, 189, 248, .18);
+            border-radius: 10px;
+            overflow: hidden;
+            background: linear-gradient(180deg, rgba(11, 28, 52, .92), rgba(6, 16, 32, .88));
+            box-shadow: inset 0 0 26px rgba(34, 211, 238, .05), 0 10px 26px rgba(0, 0, 0, .35);
+        }
+        .sc_panel::before, .sc_panel::after {
+            content: "";
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            pointer-events: none;
+        }
+        .sc_panel::before {
+            left: 7px; top: 7px;
+            border-left: 1px solid rgba(34, 211, 238, .55);
+            border-top: 1px solid rgba(34, 211, 238, .55);
+        }
+        .sc_panel::after {
+            right: 7px; bottom: 7px;
+            border-right: 1px solid rgba(34, 211, 238, .55);
+            border-bottom: 1px solid rgba(34, 211, 238, .55);
+        }
+        .sc_panel_kpi { flex: 0 0 auto; }
+        .sc_panel_trend { flex: 1.15; }
+        .sc_panel_map { flex: 1.8; }
+        .sc_panel_radar { flex: 1.12; }
+
+        .sc_panel_head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 0 0 auto;
+            padding: 2px 2px 8px;
+            margin-bottom: 4px;
+            border-bottom: 1px solid rgba(56, 189, 248, .10);
+        }
+        .sc_panel_head h2 {
+            position: relative;
+            padding-left: 10px;
+            font-size: 13.5px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            color: #dcefff;
+        }
+        .sc_panel_head h2::before {
+            content: "";
+            position: absolute;
+            left: 0; top: 50%;
+            transform: translateY(-50%);
+            width: 3px; height: 13px;
+            border-radius: 2px;
+            background: linear-gradient(180deg, #22d3ee, #3b82f6);
+            box-shadow: 0 0 8px rgba(34, 211, 238, .8);
+        }
+        .sc_panel_tag {
+            margin-left: auto;
+            font-size: 9.5px;
+            letter-spacing: 1.5px;
+            color: #4f86b3;
+            border: 1px solid rgba(56, 189, 248, .18);
+            border-radius: 4px;
+            padding: 1px 6px;
+            white-space: nowrap;
+        }
+
+        .sc_chart { flex: 1; width: 100%; min-height: 0; }
+        .sc_map_err { font-size: 12px; color: #fca5a5; padding: 10px; }
+
+        /* ---------- KPI ---------- */
+        .sc_kpis {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            padding: 4px 2px 6px;
+        }
+        .sc_kpi {
+            position: relative;
+            padding: 7px 10px;
+            border: 1px solid rgba(56, 189, 248, .12);
+            border-radius: 7px;
+            background: rgba(56, 189, 248, .05);
+            overflow: hidden;
+        }
+        .sc_kpi::after {
+            content: "";
+            position: absolute;
+            left: 0; top: 0;
+            width: 2px; height: 100%;
+            background: linear-gradient(180deg, #22d3ee, transparent);
+        }
+        .sc_kpi strong {
+            display: block;
+            font-family: Consolas, Monaco, monospace;
+            font-size: clamp(17px, 1.5vw, 22px);
+            font-weight: 700;
+            letter-spacing: .5px;
+            color: #4bdcff;
+            text-shadow: 0 0 12px rgba(34, 211, 238, .55);
+        }
+        .sc_kpi strong small { font-size: 11px; font-weight: 400; color: #7fd8ea; margin-left: 2px; }
+        .sc_kpi span { font-size: 11px; color: #7ba3c8; }
+
+        /* ---------- 城市排行 ---------- */
+        .sc_rank {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 4px;
+            padding: 2px 2px 4px;
+        }
+        .sc_rank_row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+        .sc_rank_no {
+            flex: none;
+            width: 20px; height: 20px;
+            display: grid;
+            place-items: center;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 11px;
+            color: #8fb4d8;
+            background: rgba(88, 140, 190, .14);
+            border: 1px solid rgba(88, 140, 190, .25);
+            border-radius: 5px;
+        }
+        .sc_rank_row:nth-child(1) .sc_rank_no { color: #ffe38a; background: rgba(251, 191, 36, .16); border-color: rgba(251, 191, 36, .6); }
+        .sc_rank_row:nth-child(2) .sc_rank_no { color: #d7ecff; background: rgba(148, 197, 255, .14); border-color: rgba(148, 197, 255, .5); }
+        .sc_rank_row:nth-child(3) .sc_rank_no { color: #ffb59b; background: rgba(251, 113, 133, .14); border-color: rgba(251, 113, 133, .5); }
+        .sc_rank_name { flex: none; width: 48px; color: #cfe4f8; }
+        .sc_rank_track {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(56, 189, 248, .09);
+            overflow: hidden;
+        }
+        .sc_rank_fill {
+            display: block;
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #2563eb, #22d3ee);
+            box-shadow: 0 0 8px rgba(34, 211, 238, .6);
+            transition: width .6s ease;
+        }
+        .sc_rank_val {
+            flex: none;
+            width: 52px;
+            text-align: right;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 11.5px;
+            color: #7fe3ff;
+        }
+
+        /* ---------- 自适应 ---------- */
+        @media (max-width: 1180px) {
+            .sc_app { height: auto; min-height: 0; }
+            .sc_screen { grid-template-columns: 1fr; }
+            .sc_col_mid { order: -1; }
+            .sc_chart { min-height: 270px; }
+            .sc_rank { gap: 8px; }
+            .sc_top { grid-template-columns: 1fr; gap: 6px; text-align: center; }
+            .sc_top_left, .sc_top_right { justify-content: center; flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sc_app">
+        <header class="sc_top">
+            <div class="sc_top_left">
+                <span class="sc_live"><i></i>实时数据流</span>
+                <span>数据刷新 · 每 3 秒</span>
+            </div>
+            <div class="sc_top_center">
+                <h1>全国电商运营实时监控大屏</h1>
+                <p>NATIONAL E-COMMERCE OPERATION MONITOR · SHEN CHANG</p>
+            </div>
+            <div class="sc_top_right">
+                <span class="sc_clock" id="sc_clock">--</span>
+                <span>沈畅 · 18-8</span>
+            </div>
+        </header>
+
+        <main class="sc_screen">
+            <!-- 左列 -->
+            <section class="sc_col">
+                <div class="sc_panel sc_panel_kpi">
+                    <div class="sc_panel_head">
+                        <h2>核心运营指标</h2>
+                        <span class="sc_panel_tag">REAL-TIME</span>
+                    </div>
+                    <div class="sc_kpis">
+                        <div class="sc_kpi">
+                            <strong id="sc_kpi_order">1,286,430</strong>
+                            <span>今日订单量</span>
+                        </div>
+                        <div class="sc_kpi">
+                            <strong id="sc_kpi_gmv">4.32<small>亿</small></strong>
+                            <span>成交总额</span>
+                        </div>
+                        <div class="sc_kpi">
+                            <strong id="sc_kpi_user">862,110</strong>
+                            <span>活跃用户</span>
+                        </div>
+                        <div class="sc_kpi">
+                            <strong id="sc_kpi_rate">6.84<small>%</small></strong>
+                            <span>下单转化率</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sc_panel sc_panel_trend">
+                    <div class="sc_panel_head">
+                        <h2>24 小时订单趋势</h2>
+                        <span class="sc_panel_tag">ORDERS</span>
+                    </div>
+                    <div id="sc_trend_chart" class="sc_chart"></div>
+                </div>
+
+                <div class="sc_panel sc_panel_pie">
+                    <div class="sc_panel_head">
+                        <h2>品类销售占比</h2>
+                        <span class="sc_panel_tag">CATEGORY</span>
+                    </div>
+                    <div id="sc_pie_chart" class="sc_chart"></div>
+                </div>
+            </section>
+
+            <!-- 中列：顶部地理信息图 -->
+            <section class="sc_col sc_col_mid">
+                <div class="sc_panel sc_panel_map">
+                    <div class="sc_panel_head">
+                        <h2>全国区域销售热力地图</h2>
+                        <span class="sc_panel_tag">GEO · CHINA</span>
+                    </div>
+                    <div id="sc_map_chart" class="sc_chart"></div>
+                </div>
+
+                <div class="sc_panel sc_panel_bar">
+                    <div class="sc_panel_head">
+                        <h2>重点省份订单与退货率</h2>
+                        <span class="sc_panel_tag">PROVINCE</span>
+                    </div>
+                    <div id="sc_bar_chart" class="sc_chart"></div>
+                </div>
+            </section>
+
+            <!-- 右列 -->
+            <section class="sc_col">
+                <div class="sc_panel sc_panel_gauge">
+                    <div class="sc_panel_head">
+                        <h2>今日销售目标完成度</h2>
+                        <span class="sc_panel_tag">TARGET</span>
+                    </div>
+                    <div id="sc_gauge_chart" class="sc_chart"></div>
+                </div>
+
+                <div class="sc_panel sc_panel_rank">
+                    <div class="sc_panel_head">
+                        <h2>城市销售排行 TOP 8</h2>
+                        <span class="sc_panel_tag">RANKING</span>
+                    </div>
+                    <div class="sc_rank" id="sc_rank_list"></div>
+                </div>
+
+                <div class="sc_panel sc_panel_radar">
+                    <div class="sc_panel_head">
+                        <h2>服务质量雷达</h2>
+                        <span class="sc_panel_tag">QUALITY</span>
+                    </div>
+                    <div id="sc_radar_chart" class="sc_chart"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="cdn/echarts/echarts.min.js"></script>
+    <script>
+        // ---------- 公共配置 ----------
+        var sc_tip = {
+            backgroundColor: 'rgba(5, 17, 33, .94)',
+            borderColor: 'rgba(56, 189, 248, .4)',
+            borderWidth: 1,
+            textStyle: { color: '#dceeff', fontSize: 12 }
+        };
+        var sc_axis_color = '#7398bd';
+        var sc_split_color = 'rgba(56, 189, 248, .10)';
+        var sc_chart_list = [];
+
+        function sc_initChart(sc_id, sc_option) {
+            var sc_chart = echarts.init(document.getElementById(sc_id));
+            if (sc_option) { sc_chart.setOption(sc_option); }
+            sc_chart_list.push(sc_chart);
+            return sc_chart;
+        }
+
+        // ---------- 左列：24 小时订单趋势 ----------
+        var sc_hours = [];
+        var sc_trend_data = [];
+        for (var sc_i = 0; sc_i < 24; sc_i++) {
+            sc_hours.push((sc_i < 10 ? '0' + sc_i : sc_i) + ':00');
+            sc_trend_data.push(30000 + Math.round(Math.sin(sc_i / 3.6) * 11000) + sc_i * 1350 + Math.round(Math.random() * 3500));
+        }
+
+        var sc_trend_chart = sc_initChart('sc_trend_chart', {
+            tooltip: {
+                trigger: 'axis',
+                backgroundColor: sc_tip.backgroundColor,
+                borderColor: sc_tip.borderColor,
+                borderWidth: 1,
+                textStyle: sc_tip.textStyle,
+                axisPointer: { type: 'line', lineStyle: { color: 'rgba(34, 211, 238, .45)' } }
+            },
+            grid: { left: 4, right: 12, top: 16, bottom: 2, containLabel: true },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: sc_hours,
+                axisLine: { lineStyle: { color: 'rgba(56, 189, 248, .28)' } },
+                axisTick: { show: false },
+                axisLabel: { color: sc_axis_color, fontSize: 9.5, interval: 3 }
+            },
+            yAxis: {
+                type: 'value',
+                splitLine: { lineStyle: { color: sc_split_color } },
+                axisLabel: {
+                    color: sc_axis_color,
+                    fontSize: 9.5,
+                    formatter: function (sc_v) { return (sc_v / 1000) + 'k'; }
+                },
+                axisLine: { show: false },
+                axisTick: { show: false }
+            },
+            series: [{
+                name: '订单量',
+                type: 'line',
+                smooth: true,
+                showSymbol: false,
+                lineStyle: { color: '#22d3ee', width: 2, shadowBlur: 12, shadowColor: 'rgba(34, 211, 238, .6)' },
+                itemStyle: { color: '#22d3ee' },
+                areaStyle: {
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        { offset: 0, color: 'rgba(34, 211, 238, .42)' },
+                        { offset: 1, color: 'rgba(34, 211, 238, 0)' }
+                    ])
+                },
+                data: sc_trend_data
+            }]
+        });
+
+        // ---------- 左列：品类销售占比 ----------
+        var sc_pie_chart = sc_initChart('sc_pie_chart', {
+            color: ['#22d3ee', '#3b82f6', '#34d399', '#fbbf24', '#f472b6', '#a78bfa'],
+            tooltip: {
+                trigger: 'item',
+                backgroundColor: sc_tip.backgroundColor,
+                borderColor: sc_tip.borderColor,
+                borderWidth: 1,
+                textStyle: sc_tip.textStyle,
+                formatter: function (sc_p) { return sc_p.name + '：' + sc_p.value + '%'; }
+            },
+            legend: {
+                orient: 'vertical',
+                right: 2,
+                top: 'middle',
+                icon: 'circle',
+                itemWidth: 8,
+                itemHeight: 8,
+                itemGap: 8,
+                textStyle: { color: '#8fb4d8', fontSize: 10.5 }
+            },
+            series: [{
+                type: 'pie',
+                radius: ['46%', '70%'],
+                center: ['34%', '50%'],
+                avoidLabelOverlap: true,
+                itemStyle: { borderColor: 'rgba(5, 11, 22, .85)', borderWidth: 2 },
+                label: { show: false },
+                emphasis: {
+                    scale: true,
+                    scaleSize: 6,
+                    itemStyle: { shadowBlur: 16, shadowColor: 'rgba(34, 211, 238, .7)' }
+                },
+                data: [
+                    { name: '数码家电', value: 28.6 },
+                    { name: '服饰鞋包', value: 22.4 },
+                    { name: '美妆个护', value: 16.8 },
+                    { name: '食品生鲜', value: 13.2 },
+                    { name: '家居百货', value: 11.5 },
+                    { name: '运动户外', value: 7.5 }
+                ]
+            }]
+        });
+
+        // ---------- 中列：重点省份订单与退货率 ----------
+        var sc_provinces = ['浙江', '广东', '江苏', '上海', '北京', '山东', '四川', '湖北'];
+
+        var sc_bar_chart = sc_initChart('sc_bar_chart', {
+            tooltip: {
+                trigger: 'axis',
+                backgroundColor: sc_tip.backgroundColor,
+                borderColor: sc_tip.borderColor,
+                borderWidth: 1,
+                textStyle: sc_tip.textStyle,
+                axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(56, 189, 248, .08)' } }
+            },
+            legend: {
+                right: 4,
+                top: 0,
+                itemWidth: 9,
+                itemHeight: 9,
+                itemGap: 12,
+                textStyle: { color: '#8fb4d8', fontSize: 10 }
+            },
+            grid: { left: 4, right: 6, top: 30, bottom: 2, containLabel: true },
+            xAxis: {
+                type: 'category',
+                data: sc_provinces,
+                axisLine: { lineStyle: { color: 'rgba(56, 189, 248, .28)' } },
+                axisTick: { show: false },
+                axisLabel: { color: sc_axis_color, fontSize: 10, interval: 0 }
+            },
+            yAxis: [
+                {
+                    type: 'value',
+                    splitLine: { lineStyle: { color: sc_split_color } },
+                    axisLabel: {
+                        color: sc_axis_color,
+                        fontSize: 9.5,
+                        formatter: function (sc_v) { return (sc_v / 1000) + 'k'; }
+                    },
+                    axisLine: { show: false },
+                    axisTick: { show: false }
+                },
+                {
+                    type: 'value',
+                    max: 6,
+                    splitLine: { show: false },
+                    axisLabel: { color: '#5f8cb5', fontSize: 9.5, formatter: '{value}%' },
+                    axisLine: { show: false },
+                    axisTick: { show: false }
+                }
+            ],
+            series: [
+                {
+                    name: '订单量',
+                    type: 'bar',
+                    barWidth: 14,
+                    itemStyle: {
+                        borderRadius: [3, 3, 0, 0],
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: '#22d3ee' },
+                            { offset: 1, color: 'rgba(37, 99, 235, .22)' }
+                        ])
+                    },
+                    data: [48200, 46800, 42100, 39600, 37200, 29800, 26500, 24300]
+                },
+                {
+                    name: '退货率',
+                    type: 'line',
+                    yAxisIndex: 1,
+                    smooth: true,
+                    symbol: 'circle',
+                    symbolSize: 5,
+                    lineStyle: { color: '#fbbf24', width: 2 },
+                    itemStyle: { color: '#fbbf24' },
+                    data: [2.4, 3.1, 2.8, 2.2, 2.6, 3.5, 3.9, 3.2]
+                }
+            ]
+        });
+
+        // ---------- 右列：目标完成度仪表盘 ----------
+        var sc_gauge_value = 78.6;
+
+        var sc_gauge_chart = sc_initChart('sc_gauge_chart', {
+            series: [{
+                type: 'gauge',
+                center: ['50%', '58%'],
+                radius: '86%',
+                startAngle: 210,
+                endAngle: -30,
+                min: 0,
+                max: 100,
+                splitNumber: 5,
+                progress: {
+                    show: true,
+                    width: 12,
+                    roundCap: true,
+                    itemStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                            { offset: 0, color: '#2563eb' },
+                            { offset: 1, color: '#22d3ee' }
+                        ])
+                    }
+                },
+                axisLine: { lineStyle: { width: 12, color: [[1, 'rgba(56, 189, 248, .12)']] } },
+                axisTick: { distance: -18, length: 4, lineStyle: { color: 'rgba(56, 189, 248, .35)', width: 1 } },
+                splitLine: { distance: -22, length: 8, lineStyle: { color: 'rgba(56, 189, 248, .45)', width: 1 } },
+                axisLabel: { distance: 14, color: '#5f8cb5', fontSize: 9 },
+                pointer: { show: false },
+                anchor: { show: false },
+                title: { show: true, offsetCenter: [0, '34%'], color: '#7ba3c8', fontSize: 11 },
+                detail: {
+                    offsetCenter: [0, '10%'],
+                    fontSize: 22,
+                    fontWeight: 'bold',
+                    color: '#4bdcff',
+                    formatter: '{value}%'
+                },
+                data: [{ value: sc_gauge_value, name: '目标完成率' }]
+            }]
+        });
+
+        // ---------- 右列：服务质量雷达 ----------
+        var sc_radar_chart = sc_initChart('sc_radar_chart', {
+            tooltip: {
+                backgroundColor: sc_tip.backgroundColor,
+                borderColor: sc_tip.borderColor,
+                borderWidth: 1,
+                textStyle: sc_tip.textStyle
+            },
+            legend: {
+                bottom: 0,
+                itemWidth: 9,
+                itemHeight: 9,
+                itemGap: 12,
+                textStyle: { color: '#8fb4d8', fontSize: 10 }
+            },
+            radar: {
+                center: ['50%', '46%'],
+                radius: '62%',
+                splitNumber: 4,
+                shape: 'polygon',
+                axisName: { color: '#8fb4d8', fontSize: 10 },
+                splitLine: { lineStyle: { color: 'rgba(56, 189, 248, .16)' } },
+                splitArea: { areaStyle: { color: ['rgba(56, 189, 248, .03)', 'rgba(56, 189, 248, .07)'] } },
+                axisLine: { lineStyle: { color: 'rgba(56, 189, 248, .2)' } },
+                indicator: [
+                    { name: '响应速度', max: 100 },
+                    { name: '履约时效', max: 100 },
+                    { name: '售后服务', max: 100 },
+                    { name: '商品质量', max: 100 },
+                    { name: '复购率', max: 100 },
+                    { name: '满意度', max: 100 }
+                ]
+            },
+            series: [{
+                type: 'radar',
+                symbol: 'circle',
+                symbolSize: 4,
+                data: [
+                    {
+                        name: '本月',
+                        value: [92, 84, 88, 90, 76, 89],
+                        lineStyle: { color: '#22d3ee', width: 2 },
+                        itemStyle: { color: '#22d3ee' },
+                        areaStyle: { color: 'rgba(34, 211, 238, .22)' }
+                    },
+                    {
+                        name: '上月',
+                        value: [86, 79, 82, 85, 71, 83],
+                        lineStyle: { color: '#fbbf24', width: 1.5, type: 'dashed' },
+                        itemStyle: { color: '#fbbf24' },
+                        areaStyle: { color: 'rgba(251, 191, 36, .10)' }
+                    }
+                ]
+            }]
+        });
+
+        // ---------- 中列顶部：中国地理信息图 ----------
+        function sc_initMap() {
+            var sc_map_data = [
+                { name: '浙江', value: 1480 }, { name: '广东', value: 1420 }, { name: '江苏', value: 1260 },
+                { name: '上海', value: 1180 }, { name: '北京', value: 1090 }, { name: '山东', value: 860 },
+                { name: '四川', value: 780 }, { name: '湖北', value: 690 }, { name: '福建', value: 650 },
+                { name: '湖南', value: 580 }, { name: '河南', value: 540 }, { name: '安徽', value: 490 },
+                { name: '河北', value: 430 }, { name: '陕西', value: 380 }, { name: '辽宁', value: 360 },
+                { name: '重庆', value: 350 }, { name: '江西', value: 320 }, { name: '广西', value: 290 },
+                { name: '天津', value: 260 }, { name: '山西', value: 240 }, { name: '云南', value: 230 },
+                { name: '台湾', value: 210 }, { name: '贵州', value: 200 }, { name: '香港', value: 190 },
+                { name: '黑龙江', value: 180 }, { name: '吉林', value: 150 }, { name: '内蒙古', value: 140 },
+                { name: '新疆', value: 120 }, { name: '甘肃', value: 100 }, { name: '海南', value: 90 },
+                { name: '宁夏', value: 70 }, { name: '澳门', value: 60 }, { name: '青海', value: 50 },
+                { name: '西藏', value: 30 }
+            ];
+
+            var sc_city_data = [
+                { name: '杭州', value: [120.15, 30.28, 1480] },
+                { name: '上海', value: [121.47, 31.23, 1180] },
+                { name: '北京', value: [116.40, 39.90, 1090] },
+                { name: '深圳', value: [114.06, 22.55, 1120] },
+                { name: '广州', value: [113.26, 23.13, 980] },
+                { name: '成都', value: [104.06, 30.67, 690] },
+                { name: '武汉', value: [114.31, 30.52, 640] },
+                { name: '西安', value: [108.95, 34.27, 520] },
+                { name: '沈阳', value: [123.43, 41.80, 380] },
+                { name: '乌鲁木齐', value: [87.62, 43.82, 160] }
+            ];
+
+            // 以杭州总仓为起点，连接其余重点城市
+            var sc_routes = [];
+            for (var sc_i = 1; sc_i < sc_city_data.length; sc_i++) {
+                sc_routes.push({
+                    coords: [
+                        [120.15, 30.28],
+                        [sc_city_data[sc_i].value[0], sc_city_data[sc_i].value[1]]
+                    ],
+                    value: sc_city_data[sc_i].value[2]
+                });
+            }
+
+            sc_initChart('sc_map_chart', {
+                tooltip: {
+                    backgroundColor: 'rgba(5, 17, 33, .95)',
+                    borderColor: 'rgba(56, 189, 248, .4)',
+                    borderWidth: 1,
+                    textStyle: { color: '#dceeff', fontSize: 12 },
+                    formatter: function (sc_p) {
+                        if (sc_p.seriesType === 'map') {
+                            return sc_p.name + '<br/>销售额：' + (sc_p.value || 0) + ' 万元';
+                        }
+                        if (sc_p.seriesType === 'effectScatter') {
+                            return sc_p.name + '<br/>销售额：' + sc_p.value[2] + ' 万元';
+                        }
+                        return '';
+                    }
+                },
+                visualMap: {
+                    type: 'continuous',
+                    seriesIndex: 0,
+                    min: 0,
+                    max: 1500,
+                    left: 14,
+                    bottom: 16,
+                    itemWidth: 8,
+                    itemHeight: 76,
+                    text: ['高', '低'],
+                    textStyle: { color: '#8fb4d8', fontSize: 10 },
+                    inRange: { color: ['#0a2740', '#0f4f6e', '#1a8fa8', '#34d3d8'] },
+                    outOfRange: { color: '#08243a' }
+                },
+                geo: {
+                    map: 'china',
+                    roam: false,
+                    zoom: 1.02,
+                    layoutCenter: ['50%', '52%'],
+                    layoutSize: '98%',
+                    itemStyle: {
+                        areaColor: 'rgba(10, 38, 64, .9)',
+                        borderColor: 'rgba(56, 189, 248, .35)',
+                        borderWidth: 1,
+                        shadowColor: 'rgba(0, 0, 0, .5)',
+                        shadowBlur: 10
+                    },
+                    emphasis: {
+                        label: { show: true, color: '#eaf8ff', fontSize: 11 },
+                        itemStyle: { areaColor: 'rgba(34, 211, 238, .30)' }
+                    },
+                    select: { disabled: true }
+                },
+                series: [
+                    { name: '区域销售额', type: 'map', geoIndex: 0, data: sc_map_data },
+                    {
+                        name: '重点城市',
+                        type: 'effectScatter',
+                        coordinateSystem: 'geo',
+                        geoIndex: 0,
+                        zlevel: 2,
+                        symbolSize: function (sc_val) { return 5 + sc_val[2] / 260; },
+                        rippleEffect: { brushType: 'stroke', scale: 3.4 },
+                        itemStyle: { color: '#7dd3fc', shadowBlur: 14, shadowColor: 'rgba(34, 211, 238, .9)' },
+                        label: {
+                            show: true,
+                            position: 'right',
+                            formatter: '{b}',
+                            color: '#cfe9ff',
+                            fontSize: 10,
+                            textShadowBlur: 6,
+                            textShadowColor: 'rgba(0, 0, 0, .8)'
+                        },
+                        data: sc_city_data
+                    },
+                    {
+                        name: '干线流向',
+                        type: 'lines',
+                        coordinateSystem: 'geo',
+                        geoIndex: 0,
+                        zlevel: 3,
+                        silent: true,
+                        effect: {
+                            show: true,
+                            period: 4,
+                            trailLength: .3,
+                            color: '#7dd3fc',
+                            symbol: 'arrow',
+                            symbolSize: 5
+                        },
+                        lineStyle: { color: 'rgba(56, 189, 248, .5)', width: 1.2, curveness: .2, opacity: .85 },
+                        data: sc_routes
+                    }
+                ]
+            });
+        }
+
+        fetch('cdn/echarts/map/china.json')
+            .then(function (sc_res) { return sc_res.json(); })
+            .then(function (sc_json) {
+                echarts.registerMap('china', sc_json);
+                sc_initMap();
+            })
+            .catch(function () {
+                var sc_el = document.getElementById('sc_map_chart');
+                sc_el.innerHTML = '<p class="sc_map_err">地图数据加载失败，请通过本地服务器打开本页面。</p>';
+            });
+
+        // ---------- 城市销售排行 ----------
+        var sc_rank_data = [
+            { name: '上海', value: 1462 },
+            { name: '北京', value: 1280 },
+            { name: '深圳', value: 1120 },
+            { name: '广州', value: 980 },
+            { name: '杭州', value: 760 },
+            { name: '成都', value: 690 },
+            { name: '武汉', value: 640 },
+            { name: '西安', value: 520 }
+        ];
+
+        function sc_renderRank() {
+            var sc_max = sc_rank_data[0].value;
+            var sc_html = '';
+            for (var sc_i = 0; sc_i < sc_rank_data.length; sc_i++) {
+                var sc_row_value = sc_rank_data[sc_i];
+                sc_html += '<div class="sc_rank_row">'
+                    + '<span class="sc_rank_no">' + (sc_i + 1) + '</span>'
+                    + '<span class="sc_rank_name">' + sc_row_value.name + '</span>'
+                    + '<span class="sc_rank_track"><i class="sc_rank_fill" style="width:' + Math.round(sc_row_value.value / sc_max * 100) + '%"></i></span>'
+                    + '<span class="sc_rank_val">' + sc_row_value.value.toLocaleString() + '</span>'
+                    + '</div>';
+            }
+            document.getElementById('sc_rank_list').innerHTML = sc_html;
+        }
+
+        sc_renderRank();
+
+        // ---------- 时钟 ----------
+        function sc_pad(sc_n) { return sc_n < 10 ? '0' + sc_n : '' + sc_n; }
+
+        function sc_updateClock() {
+            var sc_now = new Date();
+            document.getElementById('sc_clock').textContent =
+                sc_now.getFullYear() + '-' + sc_pad(sc_now.getMonth() + 1) + '-' + sc_pad(sc_now.getDate())
+                + ' ' + sc_pad(sc_now.getHours()) + ':' + sc_pad(sc_now.getMinutes()) + ':' + sc_pad(sc_now.getSeconds());
+        }
+
+        sc_updateClock();
+        setInterval(sc_updateClock, 1000);
+
+        // ---------- 模拟实时数据刷新 ----------
+        var sc_order_total = 1286430;
+        var sc_user_total = 862110;
+        var sc_gmv_value = 4.32;
+
+        function sc_formatNum(sc_n) {
+            return sc_n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        setInterval(function () {
+            // 趋势曲线滚动更新
+            sc_trend_data.shift();
+            var sc_last = sc_trend_data[sc_trend_data.length - 1];
+            sc_trend_data.push(Math.max(18000, Math.round(sc_last + (Math.random() - .45) * 7000)));
+
+            var sc_now = new Date();
+            sc_hours.shift();
+            sc_hours.push(sc_pad(sc_now.getHours()) + ':00');
+            sc_trend_chart.setOption({ xAxis: { data: sc_hours }, series: [{ data: sc_trend_data }] });
+
+            // 仪表盘摆动
+            sc_gauge_value = Math.min(99.9, Math.max(58, sc_gauge_value + (Math.random() - .4) * 1.8));
+            sc_gauge_chart.setOption({
+                series: [{ data: [{ value: Number(sc_gauge_value.toFixed(1)), name: '目标完成率' }] }]
+            });
+
+            // KPI
+            sc_order_total += Math.round(Math.random() * 2200 + 800);
+            sc_user_total += Math.round(Math.random() * 800 + 300);
+            sc_gmv_value += Math.random() * .02 + .01;
+            document.getElementById('sc_kpi_order').textContent = sc_formatNum(sc_order_total);
+            document.getElementById('sc_kpi_gmv').innerHTML = sc_gmv_value.toFixed(2) + '<small>亿</small>';
+            document.getElementById('sc_kpi_user').textContent = sc_formatNum(sc_user_total);
+            document.getElementById('sc_kpi_rate').innerHTML = (6.7 + Math.random() * .3).toFixed(2) + '<small>%</small>';
+
+            // 城市排行小幅波动
+            for (var sc_i = 0; sc_i < sc_rank_data.length; sc_i++) {
+                sc_rank_data[sc_i].value += Math.round(Math.random() * 26 - 5);
+            }
+            sc_renderRank();
+        }, 3000);
+
+        // ---------- 尺寸自适应 ----------
+        window.addEventListener('resize', function () {
+            for (var sc_i = 0; sc_i < sc_chart_list.length; sc_i++) {
+                sc_chart_list[sc_i].resize();
+            }
+        });
+    </script>
+</body>
+</html>

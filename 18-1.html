@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<!-- 姓名：沈畅，日期：2026-11-05，功能名称：Canvas 粒子文字动画（沈畅） -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18-1 Canvas 粒子文字动画</title>
+    <link rel="stylesheet" href="font/iconfont.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            background: #eef2f8;
+            color: #1e293b;
+            line-height: 1.7;
+            padding: 34px 20px 60px;
+        }
+
+        .sc_wrap { max-width: 1060px; margin: 0 auto; }
+
+        .sc_head { margin-bottom: 20px; }
+        .sc_tag {
+            display: inline-flex; align-items: center; gap: 7px;
+            font-size: 13px; color: #1d4ed8; background: #dbeafe;
+            border: 1px solid #bfdbfe; border-radius: 999px;
+            padding: 4px 14px; margin-bottom: 12px;
+        }
+        .sc_head h1 { font-size: 28px; color: #0f172a; margin-bottom: 8px; letter-spacing: .5px; }
+        .sc_head p { font-size: 14.5px; color: #64748b; max-width: 860px; }
+        .sc_head code {
+            font-family: Consolas, Monaco, monospace; font-size: 13px;
+            color: #1d4ed8; background: #dbeafe; border-radius: 4px; padding: 1px 6px;
+        }
+
+        /* 画布舞台 */
+        .sc_stage {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 18px 50px rgba(15, 23, 42, .22);
+            background: #0b1220;
+        }
+
+        #sc_canvas {
+            display: block;
+            width: 100%;
+            height: 470px;
+            cursor: crosshair;
+        }
+
+        .sc_frame {
+            position: absolute;
+            inset: 0;
+            border: 1px solid rgba(148, 163, 184, .22);
+            border-radius: 16px;
+            pointer-events: none;
+        }
+
+        .sc_stage_ctrl {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .sc_btn {
+            font-family: inherit;
+            font-size: 13px;
+            color: #e2e8f0;
+            background: rgba(37, 99, 235, .85);
+            border: 1px solid rgba(147, 197, 253, .45);
+            border-radius: 8px;
+            padding: 7px 14px;
+            cursor: pointer;
+            backdrop-filter: blur(6px);
+            transition: background .2s;
+        }
+        .sc_btn:hover { background: rgba(59, 130, 246, .95); }
+        .sc_btn_ghost {
+            background: rgba(15, 23, 42, .55);
+            border-color: rgba(148, 163, 184, .4);
+            color: #cbd5e1;
+        }
+        .sc_btn_ghost:hover { background: rgba(30, 41, 59, .85); }
+
+        .sc_stage_tip {
+            position: absolute;
+            left: 16px;
+            bottom: 14px;
+            font-size: 12px;
+            color: rgba(203, 213, 225, .75);
+            pointer-events: none;
+        }
+
+        .sc_stage_stats {
+            position: absolute;
+            right: 16px;
+            bottom: 14px;
+            display: flex;
+            gap: 14px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 12px;
+            color: rgba(148, 197, 253, .9);
+            pointer-events: none;
+        }
+
+        /* 卡片 */
+        .sc_grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: 16px; margin-top: 16px; }
+
+        .sc_card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, .05);
+        }
+
+        .sc_card h2 {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 15px; color: #0f172a; margin-bottom: 12px; font-weight: 700;
+        }
+        .sc_card h2 .iconfont { color: #2563eb; font-size: 15px; }
+
+        .sc_steps { list-style: none; counter-reset: sc_step; }
+        .sc_steps li {
+            position: relative;
+            font-size: 13.5px;
+            color: #475569;
+            padding: 7px 0 7px 30px;
+            counter-increment: sc_step;
+        }
+        .sc_steps li::before {
+            content: counter(sc_step);
+            position: absolute;
+            left: 0;
+            top: 8px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #eff6ff;
+            color: #2563eb;
+            font-size: 11.5px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .sc_steps code {
+            font-family: Consolas, Monaco, monospace; font-size: 12.5px;
+            color: #1d4ed8; background: #eff6ff; border-radius: 4px; padding: 1px 5px;
+        }
+
+        .sc_code {
+            background: #0f172a;
+            border-radius: 10px;
+            padding: 14px 16px;
+            overflow: auto;
+            font-family: Consolas, Monaco, "Courier New", monospace;
+            font-size: 12.6px;
+            line-height: 1.8;
+            color: #e2e8f0;
+            white-space: pre;
+            max-height: 330px;
+        }
+        .sc_c_kw { color: #93c5fd; }
+        .sc_c_fn { color: #fde68a; }
+        .sc_c_num { color: #fbbf24; }
+        .sc_c_str { color: #86efac; }
+        .sc_c_cm { color: #64748b; font-style: italic; }
+
+        @media (max-width: 820px) {
+            .sc_grid { grid-template-columns: 1fr; }
+            #sc_canvas { height: 380px; }
+            .sc_head h1 { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sc_wrap">
+        <header class="sc_head">
+            <span class="sc_tag"><i class="iconfont icon-shoucang"></i> 18-1 Canvas 动画</span>
+            <h1>Canvas 粒子文字动画 · 沈畅</h1>
+            <p>
+                先用离屏 canvas 把「沈畅」两个字画出来，逐像素采样得到文字轮廓的点阵，
+                再让几千个小粒子用弹性缓动飞向各自的目标点，聚合成文字。
+                整个动画由 <code>requestAnimationFrame</code> 驱动，鼠标移入画布会把粒子吹散，松开后它们会重新聚拢。
+            </p>
+        </header>
+
+        <section class="sc_stage">
+            <canvas id="sc_canvas"></canvas>
+            <div class="sc_frame"></div>
+            <div class="sc_stage_ctrl">
+                <button class="sc_btn" id="sc_btn_gather">重新聚合</button>
+                <button class="sc_btn sc_btn_ghost" id="sc_btn_scatter">吹散粒子</button>
+            </div>
+            <div class="sc_stage_tip">鼠标移入画布：粒子会被推开，移开后重新聚合</div>
+            <div class="sc_stage_stats">
+                <span>粒子 <b id="sc_particle_count">0</b></span>
+                <span><b id="sc_fps">0</b> FPS</span>
+            </div>
+        </section>
+
+        <section class="sc_grid">
+            <div class="sc_card">
+                <h2><i class="iconfont icon-bangzhu"></i> 实现步骤</h2>
+                <ul class="sc_steps">
+                    <li>创建离屏 canvas，用 <code>fillText('沈畅')</code> 在中心绘制大字。</li>
+                    <li>用 <code>getImageData</code> 扫描像素，透明度大于 128 的坐标记为文字轮廓点。</li>
+                    <li>点数过多时按步长抽稀，控制在 3000~4000 个粒子，保证 60 FPS。</li>
+                    <li>每个粒子从画布边缘随机出发，用弹簧模型 <code>v += (target - pos) * k</code> 收拢。</li>
+                    <li><code>requestAnimationFrame</code> 每帧先清屏，再画背景星点与粒子，最后统计帧率。</li>
+                    <li>鼠标坐标与粒子距离小于 90px 时施加反向推力，形成被吹散的效果。</li>
+                </ul>
+            </div>
+
+            <div class="sc_card">
+                <h2><i class="iconfont icon-yijianfankui"></i> 核心代码</h2>
+                <pre class="sc_code"><span class="sc_c_cm">// 1. 采样文字像素，得到目标点</span>
+<span class="sc_c_kw">const</span> off = document.<span class="sc_c_fn">createElement</span>(<span class="sc_c_str">'canvas'</span>);
+off.width = W; off.height = H;
+<span class="sc_c_kw">const</span> octx = off.<span class="sc_c_fn">getContext</span>(<span class="sc_c_str">'2d'</span>);
+octx.font = <span class="sc_c_str">'bold ' + size + 'px "Microsoft YaHei"'</span>;
+octx.textAlign = <span class="sc_c_str">'center'</span>;
+octx.<span class="sc_c_fn">fillText</span>(<span class="sc_c_str">'沈畅'</span>, W / 2, H / 2);
+<span class="sc_c_kw">const</span> data = octx.<span class="sc_c_fn">getImageData</span>(0, 0, W, H).data;
+<span class="sc_c_cm">// 每隔 5px 取一个不透明像素作为粒子目标</span>
+
+<span class="sc_c_cm">// 2. 每帧弹性逼近目标</span>
+<span class="sc_c_kw">function</span> <span class="sc_c_fn">update</span>() {
+    particles.<span class="sc_c_fn">forEach</span>(p =&gt; {
+        p.vx += (p.tx - p.x) * <span class="sc_c_num">0.05</span>;
+        p.vy += (p.ty - p.y) * <span class="sc_c_num">0.05</span>;
+        p.vx *= <span class="sc_c_num">0.86</span>; p.vy *= <span class="sc_c_num">0.86</span>;
+        p.x += p.vx; p.y += p.vy;
+    });
+}
+
+<span class="sc_c_cm">// 3. 循环绘制</span>
+<span class="sc_c_kw">function</span> <span class="sc_c_fn">loop</span>() {
+    <span class="sc_c_fn">update</span>();
+    <span class="sc_c_fn">draw</span>();
+    <span class="sc_c_fn">requestAnimationFrame</span>(loop);
+}
+<span class="sc_c_fn">loop</span>();</pre>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        var sc_canvas = document.getElementById('sc_canvas');
+        var sc_ctx = sc_canvas.getContext('2d');
+        var sc_countEl = document.getElementById('sc_particle_count');
+        var sc_fpsEl = document.getElementById('sc_fps');
+
+        var sc_W = 0, sc_H = 0;
+        var sc_dpr = 1;
+        var sc_particles = [];
+        var sc_stars = [];
+        var sc_mouse = { x: -9999, y: -9999, active: false };
+        var sc_lastTS = performance.now();
+        var sc_frames = 0;
+        var sc_fpsWindowStart = performance.now();
+        var sc_colors = ['#67e8f9', '#38bdf8', '#818cf8', '#c4b5fd', '#e2e8f0'];
+
+        // ---------- 尺寸与采样 ----------
+        function sc_resize() {
+            sc_dpr = Math.min(window.devicePixelRatio || 1, 2);
+            var sc_rect = sc_canvas.getBoundingClientRect();
+            sc_W = Math.max(320, Math.round(sc_rect.width));
+            sc_H = Math.max(240, Math.round(sc_rect.height));
+
+            sc_canvas.width = Math.round(sc_W * sc_dpr);
+            sc_canvas.height = Math.round(sc_H * sc_dpr);
+            sc_ctx.setTransform(sc_dpr, 0, 0, sc_dpr, 0, 0);
+
+            sc_buildParticles();
+        }
+
+        function sc_buildParticles() {
+            var sc_off = document.createElement('canvas');
+            sc_off.width = sc_W;
+            sc_off.height = sc_H;
+            var sc_octx = sc_off.getContext('2d');
+
+            var sc_size = Math.min(sc_W * 0.34, sc_H * 0.58);
+            sc_octx.font = 'bold ' + sc_size + 'px "Microsoft YaHei", "PingFang SC", sans-serif';
+            sc_octx.textAlign = 'center';
+            sc_octx.textBaseline = 'middle';
+            sc_octx.fillStyle = '#ffffff';
+            sc_octx.fillText('沈畅', sc_W / 2, sc_H / 2);
+
+            var sc_data = sc_octx.getImageData(0, 0, sc_W, sc_H).data;
+            var sc_points = [];
+            var sc_step = 4;
+
+            for (var sc_y = 0; sc_y < sc_H; sc_y += sc_step) {
+                for (var sc_x = 0; sc_x < sc_W; sc_x += sc_step) {
+                    var sc_alpha = sc_data[(sc_y * sc_W + sc_x) * 4 + 3];
+                    if (sc_alpha > 128) {
+                        sc_points.push({ x: sc_x, y: sc_y });
+                    }
+                }
+            }
+
+            // 点数过多时抽稀，保证流畅
+            var sc_limit = 3800;
+            if (sc_points.length > sc_limit) {
+                var sc_stride = Math.ceil(sc_points.length / sc_limit);
+                var sc_kept = [];
+                for (var sc_i = 0; sc_i < sc_points.length; sc_i += sc_stride) {
+                    sc_kept.push(sc_points[sc_i]);
+                }
+                sc_points = sc_kept;
+            }
+
+            sc_particles = [];
+            for (var sc_j = 0; sc_j < sc_points.length; sc_j++) {
+                var sc_angle = Math.random() * Math.PI * 2;
+                var sc_radius = Math.max(sc_W, sc_H) * 0.55 * Math.pow(Math.random(), 0.6);
+                sc_particles.push({
+                    x: sc_W / 2 + Math.cos(sc_angle) * sc_radius,
+                    y: sc_H / 2 + Math.sin(sc_angle) * sc_radius,
+                    tx: sc_points[sc_j].x,
+                    ty: sc_points[sc_j].y,
+                    ox: sc_points[sc_j].x,
+                    oy: sc_points[sc_j].y,
+                    vx: 0,
+                    vy: 0,
+                    r: 0.9 + Math.random() * 1.3,
+                    color: sc_colors[Math.floor(Math.random() * sc_colors.length)],
+                    phase: Math.random() * Math.PI * 2
+                });
+            }
+
+            sc_stars = [];
+            for (var sc_k = 0; sc_k < 70; sc_k++) {
+                sc_stars.push({
+                    x: Math.random() * sc_W,
+                    y: Math.random() * sc_H,
+                    r: 0.5 + Math.random() * 1.1,
+                    a: 0.15 + Math.random() * 0.5,
+                    tw: 0.4 + Math.random() * 1.4
+                });
+            }
+
+            sc_countEl.textContent = sc_particles.length;
+        }
+
+        // ---------- 更新 ----------
+        function sc_update(sc_dt) {
+            for (var sc_i = 0; sc_i < sc_particles.length; sc_i++) {
+                var sc_p = sc_particles[sc_i];
+
+                sc_p.vx += (sc_p.tx - sc_p.x) * 0.052 * sc_dt;
+                sc_p.vy += (sc_p.ty - sc_p.y) * 0.052 * sc_dt;
+
+                if (sc_mouse.active) {
+                    var sc_dx = sc_p.x - sc_mouse.x;
+                    var sc_dy = sc_p.y - sc_mouse.y;
+                    var sc_dist = Math.sqrt(sc_dx * sc_dx + sc_dy * sc_dy);
+                    if (sc_dist < 90 && sc_dist > 0.5) {
+                        var sc_force = (90 - sc_dist) / 90 * 2.6;
+                        sc_p.vx += (sc_dx / sc_dist) * sc_force * sc_dt;
+                        sc_p.vy += (sc_dy / sc_dist) * sc_force * sc_dt;
+                    }
+                }
+
+                sc_p.vx *= Math.pow(0.86, sc_dt);
+                sc_p.vy *= Math.pow(0.86, sc_dt);
+                sc_p.x += sc_p.vx * sc_dt;
+                sc_p.y += sc_p.vy * sc_dt;
+            }
+        }
+
+        // ---------- 绘制 ----------
+        function sc_draw(sc_time) {
+            var sc_bg = sc_ctx.createLinearGradient(0, 0, sc_W, sc_H);
+            sc_bg.addColorStop(0, '#0b1220');
+            sc_bg.addColorStop(0.55, '#101a33');
+            sc_bg.addColorStop(1, '#0a1020');
+            sc_ctx.fillStyle = sc_bg;
+            sc_ctx.fillRect(0, 0, sc_W, sc_H);
+
+            // 背景星点
+            for (var sc_s = 0; sc_s < sc_stars.length; sc_s++) {
+                var sc_st = sc_stars[sc_s];
+                var sc_twinkle = sc_st.a + Math.sin(sc_time * 0.001 * sc_st.tw + sc_s) * 0.18;
+                sc_ctx.beginPath();
+                sc_ctx.fillStyle = 'rgba(191, 219, 254, ' + Math.max(0.05, sc_twinkle) + ')';
+                sc_ctx.arc(sc_st.x, sc_st.y, sc_st.r, 0, Math.PI * 2);
+                sc_ctx.fill();
+            }
+
+            // 粒子（叠加发光）
+            sc_ctx.globalCompositeOperation = 'lighter';
+            for (var sc_i = 0; sc_i < sc_particles.length; sc_i++) {
+                var sc_p = sc_particles[sc_i];
+                var sc_dx = sc_p.tx - sc_p.x;
+                var sc_dy = sc_p.ty - sc_p.y;
+                var sc_near = Math.sqrt(sc_dx * sc_dx + sc_dy * sc_dy) < 3;
+                var sc_jitter = sc_near ? Math.sin(sc_time * 0.0016 + sc_p.phase) * 0.7 : 0;
+
+                sc_ctx.beginPath();
+                sc_ctx.fillStyle = sc_p.color;
+                sc_ctx.globalAlpha = sc_near ? 0.92 : 0.55;
+                sc_ctx.arc(sc_p.x + sc_jitter, sc_p.y + sc_jitter * 0.6, sc_p.r, 0, Math.PI * 2);
+                sc_ctx.fill();
+            }
+            sc_ctx.globalAlpha = 1;
+            sc_ctx.globalCompositeOperation = 'source-over';
+        }
+
+        // ---------- 主循环 ----------
+        function sc_loop(sc_now) {
+            var sc_dt = Math.min(3, (sc_now - sc_lastTS) / 16.7);
+            sc_lastTS = sc_now;
+
+            sc_update(sc_dt);
+            sc_draw(sc_now);
+
+            sc_frames += 1;
+            if (sc_now - sc_fpsWindowStart > 600) {
+                sc_fpsEl.textContent = Math.round(sc_frames / ((sc_now - sc_fpsWindowStart) / 1000));
+                sc_frames = 0;
+                sc_fpsWindowStart = sc_now;
+            }
+
+            requestAnimationFrame(sc_loop);
+        }
+
+        // ---------- 交互 ----------
+        function sc_gather() {
+            for (var sc_i = 0; sc_i < sc_particles.length; sc_i++) {
+                sc_particles[sc_i].tx = sc_particles[sc_i].ox;
+                sc_particles[sc_i].ty = sc_particles[sc_i].oy;
+            }
+        }
+
+        function sc_scatter() {
+            for (var sc_i = 0; sc_i < sc_particles.length; sc_i++) {
+                var sc_p = sc_particles[sc_i];
+                sc_p.tx = 20 + Math.random() * (sc_W - 40);
+                sc_p.ty = 20 + Math.random() * (sc_H - 40);
+                sc_p.vx += (Math.random() - 0.5) * 6;
+                sc_p.vy += (Math.random() - 0.5) * 6;
+            }
+        }
+
+        sc_canvas.addEventListener('mousemove', function (sc_e) {
+            var sc_rect = sc_canvas.getBoundingClientRect();
+            sc_mouse.x = sc_e.clientX - sc_rect.left;
+            sc_mouse.y = sc_e.clientY - sc_rect.top;
+            sc_mouse.active = true;
+        });
+
+        sc_canvas.addEventListener('mouseleave', function () {
+            sc_mouse.active = false;
+            sc_mouse.x = -9999;
+            sc_mouse.y = -9999;
+        });
+
+        document.getElementById('sc_btn_gather').addEventListener('click', sc_gather);
+        document.getElementById('sc_btn_scatter').addEventListener('click', sc_scatter);
+
+        var sc_resizeTimer = null;
+        window.addEventListener('resize', function () {
+            clearTimeout(sc_resizeTimer);
+            sc_resizeTimer = setTimeout(sc_resize, 180);
+        });
+
+        sc_resize();
+        requestAnimationFrame(sc_loop);
+    </script>
+</body>
+</html>

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<!-- 姓名：沈畅，日期：2026-11-05，功能名称：基于 Canvas 绘制电商全站系统架构图 -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18-2 Canvas 电商系统架构图</title>
+    <link rel="stylesheet" href="font/iconfont.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            background: #eef2f8;
+            color: #1e293b;
+            line-height: 1.7;
+            padding: 34px 20px 60px;
+        }
+
+        .sc_wrap { max-width: 1080px; margin: 0 auto; }
+
+        .sc_head { margin-bottom: 20px; }
+        .sc_tag {
+            display: inline-flex; align-items: center; gap: 7px;
+            font-size: 13px; color: #1d4ed8; background: #dbeafe;
+            border: 1px solid #bfdbfe; border-radius: 999px;
+            padding: 4px 14px; margin-bottom: 12px;
+        }
+        .sc_head h1 { font-size: 28px; color: #0f172a; margin-bottom: 8px; letter-spacing: .5px; }
+        .sc_head p { font-size: 14.5px; color: #64748b; max-width: 900px; }
+        .sc_head code {
+            font-family: Consolas, Monaco, monospace; font-size: 13px;
+            color: #1d4ed8; background: #dbeafe; border-radius: 4px; padding: 1px 6px;
+        }
+
+        /* 画布 */
+        .sc_stage {
+            background: #0a1220;
+            border-radius: 16px;
+            padding: 12px;
+            box-shadow: 0 18px 50px rgba(15, 23, 42, .25);
+            display: flex;
+            justify-content: center;
+            overflow: hidden;
+        }
+        #sc_arch_canvas { display: block; cursor: default; border-radius: 10px; }
+
+        /* 图例 */
+        .sc_legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-top: 14px;
+            font-size: 12.5px;
+            color: #64748b;
+        }
+        .sc_legend span { display: inline-flex; align-items: center; gap: 6px; }
+        .sc_dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+        /* 信息条 */
+        .sc_info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 14px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #2563eb;
+            border-radius: 12px;
+            padding: 12px 18px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, .05);
+            min-height: 58px;
+        }
+        .sc_info_name { font-size: 15px; font-weight: 700; color: #0f172a; white-space: nowrap; }
+        .sc_info_layer {
+            font-size: 12px; color: #1d4ed8; background: #eff6ff;
+            border-radius: 5px; padding: 1px 8px; white-space: nowrap;
+        }
+        .sc_info_desc { font-size: 13.5px; color: #64748b; }
+
+        /* 卡片 */
+        .sc_grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+        .sc_card {
+            background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px;
+            padding: 18px; box-shadow: 0 8px 24px rgba(15, 23, 42, .05);
+        }
+        .sc_card h2 {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 15px; color: #0f172a; margin-bottom: 12px; font-weight: 700;
+        }
+        .sc_card h2 .iconfont { color: #2563eb; font-size: 15px; }
+
+        .sc_notes { list-style: none; font-size: 13.5px; }
+        .sc_notes li { position: relative; padding: 6px 0 6px 18px; color: #475569; }
+        .sc_notes li::before { content: "•"; position: absolute; left: 4px; color: #2563eb; }
+        .sc_notes code {
+            font-family: Consolas, Monaco, monospace; font-size: 12.5px;
+            color: #1d4ed8; background: #eff6ff; border-radius: 4px; padding: 1px 5px;
+        }
+
+        .sc_code {
+            background: #0f172a; border-radius: 10px; padding: 14px 16px; overflow: auto;
+            font-family: Consolas, Monaco, "Courier New", monospace; font-size: 12.6px;
+            line-height: 1.8; color: #e2e8f0; white-space: pre; max-height: 320px;
+        }
+        .sc_c_kw { color: #93c5fd; }
+        .sc_c_fn { color: #fde68a; }
+        .sc_c_num { color: #fbbf24; }
+        .sc_c_str { color: #86efac; }
+        .sc_c_cm { color: #64748b; font-style: italic; }
+
+        @media (max-width: 900px) {
+            .sc_grid { grid-template-columns: 1fr; }
+            .sc_head h1 { font-size: 22px; }
+            .sc_info { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sc_wrap">
+        <header class="sc_head">
+            <span class="sc_tag"><i class="iconfont icon-shoucang"></i> 18-2 Canvas 架构图</span>
+            <h1>电商全站系统架构图 · 沈畅</h1>
+            <p>
+                整张架构图由 <code>&lt;canvas&gt;</code> 手工绘制：圆角矩形、分层色带、连线箭头、流动光点与文字排版全部用 Canvas 2D API 完成，
+                不依赖任何第三方绘图库。把鼠标移到任意模块上，可以看到它的职责说明与调用关系高亮。
+            </p>
+        </header>
+
+        <section class="sc_stage">
+            <canvas id="sc_arch_canvas"></canvas>
+        </section>
+
+        <div class="sc_legend">
+            <span><i class="sc_dot" style="background:#3b82f6"></i> 用户层</span>
+            <span><i class="sc_dot" style="background:#0ea5e9"></i> 接入层</span>
+            <span><i class="sc_dot" style="background:#8b5cf6"></i> 业务服务层</span>
+            <span><i class="sc_dot" style="background:#14b8a6"></i> 支撑服务层</span>
+            <span><i class="sc_dot" style="background:#f59e0b"></i> 数据层</span>
+            <span><i class="sc_dot" style="background:#ef4444"></i> 运维与安全</span>
+        </div>
+
+        <div class="sc_info" id="sc_info">
+            <span class="sc_info_name" id="sc_info_name">—</span>
+            <span class="sc_info_layer" id="sc_info_layer">提示</span>
+            <span class="sc_info_desc" id="sc_info_desc">将鼠标移到任意模块上，查看该模块的职责与关键说明。</span>
+        </div>
+
+        <section class="sc_grid">
+            <div class="sc_card">
+                <h2><i class="iconfont icon-bangzhu"></i> 架构说明</h2>
+                <ul class="sc_notes">
+                    <li>用户请求先到 <code>CDN</code>（静态资源）与 <code>Nginx</code>（负载均衡），再统一由 <code>API 网关</code> 鉴权、路由。</li>
+                    <li>业务服务保持无状态，可水平扩容；热点数据走 <code>Redis</code>，下单、库存变更通过 <code>Kafka</code> 异步削峰。</li>
+                    <li>商品检索交给 <code>Elasticsearch</code>，数据落在 <code>MySQL 主从集群</code>，图片视频存 <code>OSS</code>，离线报表进数据仓库。</li>
+                    <li>运维与安全层横向支撑全站：监控告警、日志追踪、风控防刷。</li>
+                    <li>图中连线表示调用或数据流向，流动光点表示请求在链路上的移动方向。</li>
+                </ul>
+            </div>
+
+            <div class="sc_card">
+                <h2><i class="iconfont icon-yijianfankui"></i> 核心代码</h2>
+                <pre class="sc_code"><span class="sc_c_cm">// 绘制圆角矩形模块</span>
+<span class="sc_c_kw">function</span> <span class="sc_c_fn">drawBox</span>(box, active) {
+    ctx.<span class="sc_c_fn">beginPath</span>();
+    <span class="sc_c_fn">roundRect</span>(ctx, box.x, box.y, box.w, box.h, <span class="sc_c_num">8</span>);
+    ctx.fillStyle = active ? box.fillHover : box.fill;
+    ctx.<span class="sc_c_fn">fill</span>();
+    ctx.strokeStyle = active ? box.color : box.stroke;
+    ctx.<span class="sc_c_fn">stroke</span>();
+    ctx.fillStyle = <span class="sc_c_str">'#e2e8f0'</span>;
+    ctx.font = <span class="sc_c_str">'bold 14px "Microsoft YaHei"'</span>;
+    ctx.<span class="sc_c_fn">fillText</span>(box.name, box.x + box.w / <span class="sc_c_num">2</span>, box.y + <span class="sc_c_num">20</span>);
+}
+
+<span class="sc_c_cm">// 连接线 + 箭头</span>
+<span class="sc_c_kw">function</span> <span class="sc_c_fn">drawEdge</span>(from, to, t) {
+    <span class="sc_c_kw">const</span> p1 = <span class="sc_c_fn">edgePoint</span>(from, to);
+    <span class="sc_c_kw">const</span> p2 = <span class="sc_fn">edgePoint</span>(to, from);
+    ctx.<span class="sc_c_fn">beginPath</span>();
+    ctx.<span class="sc_c_fn">moveTo</span>(p1.x, p1.y);
+    ctx.<span class="sc_c_fn">lineTo</span>(p2.x, p2.y);
+    ctx.<span class="sc_c_fn">stroke</span>();
+    <span class="sc_c_fn">arrowHead</span>(p1, p2);
+}
+
+<span class="sc_c_cm">// 逐帧绘制，让光点在连线上流动</span>
+<span class="sc_c_kw">function</span> <span class="sc_c_fn">loop</span>(now) {
+    <span class="sc_c_fn">draw</span>(now);
+    <span class="sc_c_fn">requestAnimationFrame</span>(loop);
+}</pre>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        var sc_canvas = document.getElementById('sc_arch_canvas');
+        var sc_ctx = sc_canvas.getContext('2d');
+        var sc_infoName = document.getElementById('sc_info_name');
+        var sc_infoLayer = document.getElementById('sc_info_layer');
+        var sc_infoDesc = document.getElementById('sc_info_desc');
+
+        var sc_DW = 1000, sc_DH = 690;      // 设计稿逻辑尺寸
+        var sc_scale = 1, sc_dpr = 1;
+        var sc_hover = null;
+        var sc_boxes = [];
+        var sc_edges = [];
+        var sc_pointer = { x: -999, y: -999 };
+
+        var sc_colors = {
+            user: '#3b82f6',
+            access: '#0ea5e9',
+            biz: '#8b5cf6',
+            support: '#14b8a6',
+            data: '#f59e0b',
+            ops: '#ef4444'
+        };
+        var sc_layerNames = {
+            user: '用户层',
+            access: '接入层',
+            biz: '业务服务层',
+            support: '支撑服务层',
+            data: '数据层',
+            ops: '运维与安全'
+        };
+
+        var sc_bands = [
+            { key: 'user', y: 24, h: 80 },
+            { key: 'access', y: 130, h: 80 },
+            { key: 'biz', y: 236, h: 96 },
+            { key: 'support', y: 358, h: 80 },
+            { key: 'data', y: 464, h: 80 },
+            { key: 'ops', y: 570, h: 80 }
+        ];
+
+        // ---------- 数据 ----------
+        function sc_addBox(sc_id, sc_name, sc_sub, sc_layer, sc_x, sc_y, sc_w, sc_h, sc_desc) {
+            sc_boxes.push({
+                id: sc_id, name: sc_name, sub: sc_sub, layer: sc_layer,
+                x: sc_x, y: sc_y, w: sc_w, h: sc_h, desc: sc_desc
+            });
+        }
+
+        function sc_build() {
+            sc_boxes = [];
+
+            // 用户层
+            sc_addBox('web', 'Web 商城', 'PC 浏览器', 'user', 143, 44, 250, 46, '面向 PC 用户的商城前端，负责浏览、下单、支付等完整购物流程。');
+            sc_addBox('h5', '移动端 H5', '手机浏览器', 'user', 421, 44, 250, 46, '移动端网页版本，适配手机屏幕，与 Web 商城共用同一套接口。');
+            sc_addBox('mini', '微信小程序', '微信生态', 'user', 699, 44, 250, 46, '依托微信流量入口的小程序商城，支持微信登录与支付。');
+
+            // 接入层
+            sc_addBox('cdn', 'CDN 加速', '静态资源分发', 'access', 143, 150, 250, 46, '就近分发图片、脚本与静态页面，降低源站压力与访问延迟。');
+            sc_addBox('nginx', 'Nginx 负载均衡', '反向代理 / 限流', 'access', 421, 150, 250, 46, '把请求均匀转发给后端服务，并做限流、灰度与 SSL 卸载。');
+            sc_addBox('gateway', 'API 网关', '鉴权 / 路由 / 聚合', 'access', 699, 150, 250, 46, '统一入口：登录校验、权限控制、请求路由与限流熔断都在这里完成。');
+
+            // 业务服务层
+            sc_addBox('user', '用户服务', '注册 · 登录', 'biz', 123, 252, 132, 64, '账号注册登录、会员等级、收货地址等用户相关能力。');
+            sc_addBox('product', '商品服务', '目录 · 价格', 'biz', 266, 252, 132, 64, '商品分类、SKU 与价格管理，为前端与搜索提供数据。');
+            sc_addBox('order', '订单服务', '下单 · 履约', 'biz', 409, 252, 132, 64, '创建订单、拆单、取消与状态流转，是交易链路的核心。');
+            sc_addBox('pay', '支付服务', '支付 · 对账', 'biz', 552, 252, 132, 64, '对接微信、支付宝等渠道，处理支付回调与每日对账。');
+            sc_addBox('cart', '购物车', '加购 · 结算', 'biz', 695, 252, 132, 64, '加购、改数量、选中结算，数据以缓存为主、异步落库。');
+            sc_addBox('promo', '营销服务', '优惠券 · 活动', 'biz', 838, 252, 132, 64, '优惠券、满减、秒杀等营销玩法，与下单流程联动核销。');
+
+            // 支撑服务层
+            sc_addBox('redis', 'Redis 缓存', '热点数据', 'support', 124, 374, 196, 46, '缓存商品详情、购物车与会话，减轻数据库压力。');
+            sc_addBox('mq', 'Kafka 消息队列', '异步解耦', 'support', 340, 374, 196, 46, '下单、库存、通知等事件异步处理，削峰填谷并解耦服务。');
+            sc_addBox('es', 'Elasticsearch', '商品搜索', 'support', 556, 374, 196, 46, '商品检索、筛选与排序，支撑搜索框与类目导航。');
+            sc_addBox('job', '定时任务', '对账 · 清理', 'support', 772, 374, 196, 46, '订单超时关闭、库存回补、报表生成等周期性任务。');
+
+            // 数据层
+            sc_addBox('mysql', 'MySQL 集群', '主从读写分离', 'data', 143, 480, 250, 46, '核心交易数据主库写入，从库承担查询，保证数据一致性。');
+            sc_addBox('oss', '对象存储 OSS', '商品图片 · 视频', 'data', 421, 480, 250, 46, '存放商品图片、详情视频与用户上传素材，配合 CDN 分发。');
+            sc_addBox('dw', '数据仓库', '离线分析 · 报表', 'data', 699, 480, 250, 46, '沉淀订单与行为数据，支撑经营分析、推荐与报表。');
+
+            // 运维与安全
+            sc_addBox('monitor', '监控告警', '指标 · 可用性', 'ops', 143, 590, 250, 46, '采集服务指标与调用链，异常时按规则触发告警。');
+            sc_addBox('log', '日志中心', '链路追踪', 'ops', 421, 590, 250, 46, '集中收集应用日志，支持按请求链路排查线上问题。');
+            sc_addBox('sec', '安全风控', '防刷 · 风控', 'ops', 699, 590, 250, 46, '限流防刷、设备指纹与交易风控，拦截恶意请求。');
+
+            var sc_pairs = [
+                ['web', 'cdn'], ['h5', 'nginx'], ['mini', 'nginx'], ['cdn', 'nginx'], ['nginx', 'gateway'],
+                ['gateway', 'user'], ['gateway', 'product'], ['gateway', 'order'],
+                ['pay', 'order'],
+                ['user', 'mysql'], ['product', 'mysql'], ['product', 'es'], ['product', 'oss'],
+                ['order', 'mysql'], ['order', 'mq'], ['cart', 'redis'], ['promo', 'redis'],
+                ['mq', 'dw'], ['mysql', 'dw'], ['job', 'mysql'],
+                ['monitor', 'gateway'], ['sec', 'gateway'], ['log', 'mq']
+            ];
+
+            sc_edges = [];
+            for (var sc_i = 0; sc_i < sc_pairs.length; sc_i++) {
+                sc_edges.push({ from: sc_pairs[sc_i][0], to: sc_pairs[sc_i][1], phase: sc_i * 0.14 });
+            }
+        }
+
+        function sc_byId(sc_id) {
+            for (var sc_i = 0; sc_i < sc_boxes.length; sc_i++) {
+                if (sc_boxes[sc_i].id === sc_id) { return sc_boxes[sc_i]; }
+            }
+            return null;
+        }
+
+        // ---------- 绘图工具 ----------
+        function sc_roundRect(sc_c, sc_x, sc_y, sc_w, sc_h, sc_r) {
+            sc_c.beginPath();
+            sc_c.moveTo(sc_x + sc_r, sc_y);
+            sc_c.lineTo(sc_x + sc_w - sc_r, sc_y);
+            sc_c.arcTo(sc_x + sc_w, sc_y, sc_x + sc_w, sc_y + sc_r, sc_r);
+            sc_c.lineTo(sc_x + sc_w, sc_y + sc_h - sc_r);
+            sc_c.arcTo(sc_x + sc_w, sc_y + sc_h, sc_x + sc_w - sc_r, sc_y + sc_h, sc_r);
+            sc_c.lineTo(sc_x + sc_r, sc_y + sc_h);
+            sc_c.arcTo(sc_x, sc_y + sc_h, sc_x, sc_y + sc_h - sc_r, sc_r);
+            sc_c.lineTo(sc_x, sc_y + sc_r);
+            sc_c.arcTo(sc_x, sc_y, sc_x + sc_r, sc_y, sc_r);
+            sc_c.closePath();
+        }
+
+        function sc_center(sc_b) {
+            return { x: sc_b.x + sc_b.w / 2, y: sc_b.y + sc_b.h / 2 };
+        }
+
+        function sc_edgePoint(sc_b, sc_dx, sc_dy) {
+            var sc_c = sc_center(sc_b);
+            if (sc_dx === 0 && sc_dy === 0) { return sc_c; }
+            var sc_tx = sc_dx === 0 ? Infinity : (sc_b.w / 2) / Math.abs(sc_dx);
+            var sc_ty = sc_dy === 0 ? Infinity : (sc_b.h / 2) / Math.abs(sc_dy);
+            var sc_t = Math.min(sc_tx, sc_ty);
+            return { x: sc_c.x + sc_dx * sc_t, y: sc_c.y + sc_dy * sc_t };
+        }
+
+        function sc_hexA(sc_hex, sc_a) {
+            var sc_r = parseInt(sc_hex.slice(1, 3), 16);
+            var sc_g = parseInt(sc_hex.slice(3, 5), 16);
+            var sc_b = parseInt(sc_hex.slice(5, 7), 16);
+            return 'rgba(' + sc_r + ',' + sc_g + ',' + sc_b + ',' + sc_a + ')';
+        }
+
+        // ---------- 绘制 ----------
+        function sc_drawBox(sc_b, sc_active, sc_now) {
+            var sc_color = sc_colors[sc_b.layer];
+            sc_ctx.fillStyle = sc_active ? sc_hexA(sc_color, 0.16) : 'rgba(19, 28, 46, 0.92)';
+            if (sc_active) {
+                sc_ctx.shadowColor = sc_color;
+                sc_ctx.shadowBlur = 16;
+            }
+            sc_ctx.strokeStyle = sc_active ? sc_color : sc_hexA(sc_color, 0.32);
+            sc_ctx.lineWidth = sc_active ? 1.6 : 1;
+            sc_roundRect(sc_ctx, sc_b.x, sc_b.y, sc_b.w, sc_b.h, 8);
+            sc_ctx.fill();
+            sc_ctx.stroke();
+            sc_ctx.shadowBlur = 0;
+
+            sc_ctx.textAlign = 'center';
+            sc_ctx.textBaseline = 'middle';
+            var sc_titleY = sc_b.y + (sc_b.h >= 60 ? 24 : 19);
+            var sc_subY = sc_b.y + (sc_b.h >= 60 ? 44 : 36);
+
+            sc_ctx.fillStyle = '#e8eefc';
+            sc_ctx.font = 'bold 14px "Microsoft YaHei", sans-serif';
+            sc_ctx.fillText(sc_b.name, sc_b.x + sc_b.w / 2, sc_titleY);
+
+            sc_ctx.fillStyle = sc_active ? sc_hexA(sc_color, 0.95) : 'rgba(148, 163, 184, 0.9)';
+            sc_ctx.font = '10.5px "Microsoft YaHei", sans-serif';
+            sc_ctx.fillText(sc_b.sub, sc_b.x + sc_b.w / 2, sc_subY);
+        }
+
+        function sc_drawEdge(sc_from, sc_to, sc_now, sc_edge) {
+            var sc_c1 = sc_center(sc_from);
+            var sc_c2 = sc_center(sc_to);
+            var sc_dx = sc_c2.x - sc_c1.x;
+            var sc_dy = sc_c2.y - sc_c1.y;
+            var sc_p1 = sc_edgePoint(sc_from, sc_dx, sc_dy);
+            var sc_p2 = sc_edgePoint(sc_to, -sc_dx, -sc_dy);
+
+            var sc_hot = sc_hover && (sc_from.id === sc_hover.id || sc_to.id === sc_hover.id);
+            sc_ctx.strokeStyle = sc_hot ? 'rgba(147, 197, 253, 0.95)' : 'rgba(148, 163, 184, 0.3)';
+            sc_ctx.lineWidth = sc_hot ? 2 : 1;
+            sc_ctx.beginPath();
+            sc_ctx.moveTo(sc_p1.x, sc_p1.y);
+            sc_ctx.lineTo(sc_p2.x, sc_p2.y);
+            sc_ctx.stroke();
+
+            // 箭头
+            var sc_angle = Math.atan2(sc_p2.y - sc_p1.y, sc_p2.x - sc_p1.x);
+            sc_ctx.fillStyle = sc_hot ? 'rgba(147, 197, 253, 0.95)' : 'rgba(148, 163, 184, 0.55)';
+            sc_ctx.beginPath();
+            sc_ctx.moveTo(sc_p2.x, sc_p2.y);
+            sc_ctx.lineTo(sc_p2.x - 6 * Math.cos(sc_angle - 0.42), sc_p2.y - 6 * Math.sin(sc_angle - 0.42));
+            sc_ctx.lineTo(sc_p2.x - 6 * Math.cos(sc_angle + 0.42), sc_p2.y - 6 * Math.sin(sc_angle + 0.42));
+            sc_ctx.closePath();
+            sc_ctx.fill();
+
+            // 流动光点
+            var sc_frac = ((sc_now / 1000) * 0.45 + sc_edge.phase) % 1;
+            var sc_dotX = sc_p1.x + (sc_p2.x - sc_p1.x) * sc_frac;
+            var sc_dotY = sc_p1.y + (sc_p2.y - sc_p1.y) * sc_frac;
+            sc_ctx.beginPath();
+            sc_ctx.fillStyle = sc_hot ? '#bfdbfe' : 'rgba(125, 211, 252, 0.75)';
+            sc_ctx.arc(sc_dotX, sc_dotY, sc_hot ? 2.6 : 1.8, 0, Math.PI * 2);
+            sc_ctx.fill();
+        }
+
+        function sc_draw(sc_now) {
+            var sc_bg = sc_ctx.createLinearGradient(0, 0, sc_DW, sc_DH);
+            sc_bg.addColorStop(0, '#0a1220');
+            sc_bg.addColorStop(0.5, '#0d1930');
+            sc_bg.addColorStop(1, '#0a1120');
+            sc_ctx.fillStyle = sc_bg;
+            sc_ctx.fillRect(0, 0, sc_DW, sc_DH);
+
+            // 分层色带
+            for (var sc_i = 0; sc_i < sc_bands.length; sc_i++) {
+                var sc_band = sc_bands[sc_i];
+                var sc_color = sc_colors[sc_band.key];
+                sc_ctx.fillStyle = 'rgba(148, 163, 184, 0.045)';
+                sc_roundRect(sc_ctx, 108, sc_band.y, 876, sc_band.h, 10);
+                sc_ctx.fill();
+                sc_ctx.strokeStyle = 'rgba(148, 163, 184, 0.1)';
+                sc_ctx.lineWidth = 1;
+                sc_ctx.stroke();
+
+                sc_ctx.fillStyle = sc_hexA(sc_color, 0.85);
+                sc_ctx.fillRect(108, sc_band.y + 10, 3, sc_band.h - 20);
+
+                sc_ctx.textAlign = 'left';
+                sc_ctx.textBaseline = 'middle';
+                sc_ctx.fillStyle = sc_color;
+                sc_ctx.font = 'bold 14px "Microsoft YaHei", sans-serif';
+                sc_ctx.fillText(sc_layerNames[sc_band.key], 20, sc_band.y + sc_band.h / 2 - 7);
+                sc_ctx.fillStyle = 'rgba(148, 163, 184, 0.55)';
+                sc_ctx.font = '9.5px "Microsoft YaHei", sans-serif';
+                sc_ctx.fillText('LAYER ' + (sc_i + 1), 20, sc_band.y + sc_band.h / 2 + 11);
+            }
+
+            // 连线
+            for (var sc_e = 0; sc_e < sc_edges.length; sc_e++) {
+                var sc_edge = sc_edges[sc_e];
+                var sc_from = sc_byId(sc_edge.from);
+                var sc_to = sc_byId(sc_edge.to);
+                if (sc_from && sc_to) { sc_drawEdge(sc_from, sc_to, sc_now, sc_edge); }
+            }
+
+            // 模块（悬停的最后一个画，保证在最上层）
+            for (var sc_b = 0; sc_b < sc_boxes.length; sc_b++) {
+                var sc_box = sc_boxes[sc_b];
+                if (sc_hover && sc_box.id === sc_hover.id) { continue; }
+                sc_drawBox(sc_box, false, sc_now);
+            }
+            if (sc_hover) { sc_drawBox(sc_hover, true, sc_now); }
+
+            // 水印
+            sc_ctx.textAlign = 'right';
+            sc_ctx.textBaseline = 'bottom';
+            sc_ctx.fillStyle = 'rgba(148, 163, 184, 0.38)';
+            sc_ctx.font = '11px "Microsoft YaHei", sans-serif';
+            sc_ctx.fillText('沈畅 · 电商全站系统架构 · Canvas 2D 绘制', sc_DW - 18, sc_DH - 10);
+        }
+
+        // ---------- 尺寸 ----------
+        function sc_resize() {
+            sc_dpr = Math.min(window.devicePixelRatio || 1, 2);
+            var sc_stage = document.querySelector('.sc_stage');
+            var sc_avail = sc_stage.clientWidth - 24;
+            sc_scale = Math.min(1.15, Math.max(0.5, sc_avail / sc_DW));
+
+            sc_canvas.style.width = Math.round(sc_DW * sc_scale) + 'px';
+            sc_canvas.style.height = Math.round(sc_DH * sc_scale) + 'px';
+            sc_canvas.width = Math.round(sc_DW * sc_scale * sc_dpr);
+            sc_canvas.height = Math.round(sc_DH * sc_scale * sc_dpr);
+            sc_ctx.setTransform(sc_scale * sc_dpr, 0, 0, sc_scale * sc_dpr, 0, 0);
+        }
+
+        // ---------- 交互 ----------
+        function sc_hitTest(sc_x, sc_y) {
+            for (var sc_i = sc_boxes.length - 1; sc_i >= 0; sc_i--) {
+                var sc_b = sc_boxes[sc_i];
+                if (sc_x >= sc_b.x && sc_x <= sc_b.x + sc_b.w && sc_y >= sc_b.y && sc_y <= sc_b.y + sc_b.h) {
+                    return sc_b;
+                }
+            }
+            return null;
+        }
+
+        function sc_setInfo(sc_box) {
+            if (!sc_box) {
+                sc_infoName.textContent = '—';
+                sc_infoLayer.textContent = '提示';
+                sc_infoDesc.textContent = '将鼠标移到任意模块上，查看该模块的职责与关键说明。';
+                sc_canvas.style.cursor = 'default';
+                return;
+            }
+            var sc_color = sc_colors[sc_box.layer];
+            sc_infoName.textContent = sc_box.name;
+            sc_infoLayer.textContent = sc_layerNames[sc_box.layer];
+            sc_infoLayer.style.color = sc_color;
+            sc_infoLayer.style.background = sc_hexA(sc_color, 0.12);
+            sc_infoDesc.textContent = sc_box.desc;
+            sc_canvas.style.cursor = 'pointer';
+        }
+
+        sc_canvas.addEventListener('mousemove', function (sc_e) {
+            var sc_rect = sc_canvas.getBoundingClientRect();
+            sc_pointer.x = (sc_e.clientX - sc_rect.left) / sc_scale;
+            sc_pointer.y = (sc_e.clientY - sc_rect.top) / sc_scale;
+            var sc_box = sc_hitTest(sc_pointer.x, sc_pointer.y);
+            if ((sc_box && (!sc_hover || sc_box.id !== sc_hover.id)) || (!sc_box && sc_hover)) {
+                sc_hover = sc_box;
+                sc_setInfo(sc_box);
+            }
+        });
+
+        sc_canvas.addEventListener('mouseleave', function () {
+            sc_hover = null;
+            sc_setInfo(null);
+        });
+
+        // ---------- 循环 ----------
+        function sc_loop(sc_now) {
+            sc_draw(sc_now);
+            requestAnimationFrame(sc_loop);
+        }
+
+        var sc_resizeTimer = null;
+        window.addEventListener('resize', function () {
+            clearTimeout(sc_resizeTimer);
+            sc_resizeTimer = setTimeout(sc_resize, 160);
+        });
+
+        sc_build();
+        sc_resize();
+        requestAnimationFrame(sc_loop);
+    </script>
+</body>
+</html>
